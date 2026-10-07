@@ -9,6 +9,9 @@ for c in "$(command -v conda || true)" "$HOME/miniconda3/bin/conda" "$HOME/anaco
   if [ -n "$c" ] && [ -x "$c" ]; then CONDA=$c; break; fi
 done
 : "${CONDA:?conda not found}"
-[ -x "$PREFIX/bin/python" ] || "$CONDA" create -y -q -p "$PREFIX" -c conda-forge --override-channels python=3.11 pip
+# Private package cache: the shared ~/miniconda3/pkgs cache can be corrupted by other users.
+export CONDA_PKGS_DIRS=${CONDA_PKGS_DIRS:-$PREFIX.pkgs}
+[ -x "$PREFIX/bin/python" ] || { rm -rf "$PREFIX"; "$CONDA" create -y -q -p "$PREFIX" -c conda-forge --override-channels python=3.11 pip; }
+rm -rf "$CONDA_PKGS_DIRS"
 "$PREFIX/bin/pip" install -q -e ".[dev]"
 "$PREFIX/bin/python" -c "import torch, sopt; print('torch', torch.__version__, 'cuda', torch.cuda.is_available())"
