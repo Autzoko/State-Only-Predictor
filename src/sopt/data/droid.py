@@ -76,6 +76,9 @@ def _part_path(out: Path, rel: str) -> Path:
 def build(out: str | Path, src: str | None = None, workers: int = 16, max_files: int | None = None) -> pd.DataFrame:
     """src=None streams from the HF hub; otherwise a local LeRobot v3.0 copy (<src>/data/chunk-*/file-*.parquet)."""
     out = Path(out)
+    if (out / "states.npy").exists() and (out / "episodes.parquet").exists():
+        print(f"{out} already built; delete states.npy to rebuild", flush=True)
+        return pd.read_parquet(out / "episodes.parquet")
     (out / "parts").mkdir(parents=True, exist_ok=True)
     if src is None:
         from huggingface_hub import HfFileSystem

@@ -5,9 +5,11 @@ output_root: outputs
 
 data:
   root: data/processed/droid
-  split_salt: sopt-v1       # changing this changes the building-level split; keep fixed across a paper
-  val_frac: 0.05
-  test_frac: 0.05
+  # Site-level OOD splits (see sopt/data/splits.py); regexes on `building`, whole connected sites are held out.
+  val_sites: ["^CSE2", "^Smith Hall"]                       # UW (~4%)
+  test_sites: ["^AHG", "^[Bb]ayes", "^Penn"]                # UT Austin, Edinburgh, Penn (~7.5%)
+  id_val_frac: 0.01                                         # in-distribution episodes from training sites
+  split_salt: sopt-v1
   train_fraction: 1.0       # E2 data scaling: 0.01 / 0.1 / 1.0 (nested subsets)
   success_only: false
   stride: 2

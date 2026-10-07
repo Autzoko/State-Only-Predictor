@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
+from omegaconf import OmegaConf
 
 from sopt.data.dataset import WindowDataset
 from sopt.data.normalize import compute_stats
@@ -58,3 +59,19 @@ def test_resolve_duplicate_episodes():
     assert out["episode_index"].tolist() == [0, 1, 2]
     assert out["length"].tolist() == [3, 6, 5]  # 1: merged across files; 2: 1-frame stray segment dropped
     assert keep.sum() == 14 and not keep[9]
+
+
+def test_site_splits_hold_out_whole_sites():
+    from sopt.data.splits import assign_splits
+
+    eps = pd.DataFrame({
+        "episode_index": range(8),
+        "building": ["Glen's office", "glen bureau", "Gates", "Gates", "AHG kitchen", "AHG_lab", "X", "Y"],
+        "collector_id": ["g", "g", "s", "s", "a", "b", "b", "z"],
+    })
+    cfg = OmegaConf.create({"val_sites": ["^Glen"], "test_sites": ["^AHG kitchen"], "id_val_frac": 0.0,
+                            "split_salt": "t"})
+    split = assign_splits(eps, cfg)
+    # "glen bureau" shares collector g with "Glen's office" -> same site; "AHG_lab" (collector b) is not linked
+    # to "AHG kitchen" (collector a), so the pattern only holds out the latter.
+    assert split.tolist() == ["val", "val", "train", "train", "test", "train", "train", "train"]

@@ -23,7 +23,7 @@
 | 预测任务过于平凡 | 短 horizon 下匀速外推已经很准 | horizon 设为 16 步（约 1.07 s）及以上；**每个指标都和 zero-velocity / constant-velocity 基线对比**；按阶段（gripper 事件附近）分别报告 |
 | 多模态被平均掉 | L2 回归的预测迟疑、走中间 | flow-matching 头；评估时报告 minADE@K、样本多样性、gripper 事件时刻误差 |
 | Copycat / 因果混淆（Wen et al., 2020） | 下游策略过度依赖本体历史，闭环时出问题 | 下游消融"历史长度 × 是否预训练"；在先验和视觉之间加 history dropout；**一定要用闭环成功率评估，不能只看离线 loss** |
-| 数据泄露 | 同一场景/同一操作员同时出现在 train 和 test | 按 `building` 整体切分（hash 确定），另外留出整个 lab 做 OOD 测试 |
+| 数据泄露 | 同一场景/同一操作员同时出现在 train 和 test | 按 **site** 整体切分：把规范化后的 building 和 collector 连成二部图，取连通分量作为 site（`building` 是自由文本，同一地点有多种拼写）。val/test 都是整个 OOD 实验室，另设 1% 的 id_val 作为分布内参考 |
 | 遥操作偏置 | DROID 是 VR 遥操作、15 Hz | 跨数据集零样本评估（LIBERO、RoboMimic 为 Franka 脚本/人类示范）；时间缩放增广 |
 | 跨本体 | 不同机器人的关节空间不通用 | v1 只做 Franka（DROID）。v2 再用 EE-only 表示（pos + rot6d + gripper）接入 Bridge/Fractal 等，关节作为可选 token |
 
@@ -35,7 +35,13 @@
 - 状态字段：`observation.state.joint_position` (7)、`observation.state.cartesian_position` (6, xyz + 欧拉角)、`observation.state.gripper_position` (1, 0–1)。
 - **已核实**：`cartesian_position` 的欧拉角是 **extrinsic XYZ**，即 `R = Rz(yaw)·Ry(pitch)·Rx(roll)`，与 scipy `"xyz"` 一致。它**精确等于** Franka FK 算出的 flange 位姿（d=0.107，误差 0）。所以 EE 位姿是关节的确定性函数，roll 在 ±π 附近会跳变，必须转成 rot6d。
 - `action.joint_position` 是指令目标，不是下一帧状态（`|q_{t+1} - a_t|` ≈ 4× 单步状态变化），state-only 主线不使用 action 列，只存下来用于后续分析。
-- **元数据列有错位**：`task_category` 与 `building` 相同、`date` 与 `collector_id` 相同；有些 `language_instruction` 为空。切分只依赖 `building`。`is_episode_successful` 可用于失败检测实验。
+- **元数据列有错位**：`task_category` 与 `building` 相同、`date` 与 `collector_id` 相同；约 22% 的 `language_instruction` 为空。`is_episode_successful` 可用于失败检测实验，成功率为 82.4%。
+- v3.0 版的 `episode_index` 88905 同时标记了两段数据，其中一段是 59 帧的 BAIR 残片。去掉这段之后，帧数正好等于 `info.json` 中的 27,607,757。
+- **切分（固定协议）**：74 个 `building` 字符串合并成 15 个 site。最大的一个 site（Stanford/Berkeley/TRI 集群，共享操作员）约占 73%，只用于训练。
+  - val = UW（CSE2*、Gates G60*、Smith Hall），约 4%；
+  - test = UT Austin AHG* + Edinburgh Bayes* + Penn，约 7.5%；
+  - id_val = 训练 site 中按 hash 取 1%。
+  - 具体数字见 `SOPT_DATA/processed/droid/summary.json`。
 
 ## 4. 表示
 

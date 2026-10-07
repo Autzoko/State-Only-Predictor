@@ -10,12 +10,16 @@ over HTTP, ~1.4 GB); videos and other columns are never downloaded. Resumable.
 import argparse
 import json
 
+import numpy as np
+
 from omegaconf import OmegaConf
 
 from sopt.data.dataset import TrajectoryStore
 from sopt.data.droid import build
-from sopt.data.splits import assign_splits
+from sopt.data.splits import assign_splits, site_ids
 from sopt.utils.config import DEFAULT_CONFIG
+
+SPLITS = ("train", "id_val", "val", "test")
 
 
 def main():
@@ -29,16 +33,18 @@ def main():
     episodes = build(args.out, args.src, args.workers, args.max_files)
     TrajectoryStore(args.out)  # builds and caches features.npy
     d = OmegaConf.load(DEFAULT_CONFIG).data
-    split = assign_splits(episodes, d.val_frac, d.test_frac, d.split_salt)
+    split = assign_splits(episodes, d)
+    sites = site_ids(episodes)
     summary = {
         "episodes": len(episodes),
         "frames": int(episodes["length"].sum()),
         "buildings": int(episodes["building"].nunique()),
         "success_rate": float(episodes["success"].mean()),
-        "split_episodes": {s: int((split == s).sum()) for s in ("train", "val", "test")},
-        "split_frames": {s: int(episodes["length"][split == s].sum()) for s in ("train", "val", "test")},
-        "split_buildings": {s: int(episodes["building"][split == s].nunique()) for s in ("train", "val", "test")},
-        "split_salt": d.split_salt,
+        "sites": int(len(np.unique(sites))),
+        "split_episodes": {s: int((split == s).sum()) for s in SPLITS},
+        "split_frames": {s: int(episodes["length"][split == s].sum()) for s in SPLITS},
+        "split_sites": {s: int(len(np.unique(sites[split == s]))) for s in SPLITS},
+        "split_buildings": {s: sorted(episodes["building"][split == s].unique().tolist()) for s in ("val", "test")},
     }
     print(json.dumps(summary, indent=2))
     with open(f"{args.out}/summary.json", "w") as f:

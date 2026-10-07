@@ -28,7 +28,7 @@ class TrajectoryStore:
 
     def split_episodes(self, data_cfg, split: str) -> pd.DataFrame:
         eps = self.episodes
-        keep = assign_splits(eps, data_cfg.val_frac, data_cfg.test_frac, data_cfg.split_salt) == split
+        keep = assign_splits(eps, data_cfg) == split
         if split == "train":
             keep &= subsample_fraction(eps, data_cfg.train_fraction, data_cfg.split_salt)
         if data_cfg.success_only:

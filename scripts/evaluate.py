@@ -20,7 +20,7 @@ from sopt.train.pretrain import load_checkpoint
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--ckpt", required=True)
-    p.add_argument("--split", default="val", choices=["val", "test"])
+    p.add_argument("--split", default="val", choices=["val", "id_val", "test"])
     p.add_argument("--num-samples", type=int, default=None)
     p.add_argument("--max-batches", type=int, default=None)
     p.add_argument("--data-root", default=None, help="evaluate on another processed dataset (zero-shot)")
