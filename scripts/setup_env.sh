@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Create the conda env `sopt` and install the package in editable mode.
-#   bash scripts/setup_env.sh            # CUDA build of torch picked by pip
+# Create the conda env `sopt` and install this repo in editable mode. Works without conda on PATH.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ENV=${ENV:-sopt}
-if ! conda env list | grep -qE "^$ENV\s"; then
-  conda create -y -n "$ENV" python=3.11
-fi
-conda run -n "$ENV" pip install -e ".[dev]"
-conda run -n "$ENV" python -c "import torch, sopt; print('torch', torch.__version__, 'cuda', torch.cuda.is_available())"
+for c in "$(command -v conda || true)" "$HOME/anaconda3/bin/conda" "$HOME/miniconda3/bin/conda" "$HOME/miniforge3/bin/conda"; do
+  [ -n "$c" ] && [ -x "$c" ] && CONDA=$c && break
+done
+: "${CONDA:?conda not found}"
+"$CONDA" env list | grep -qE "^$ENV\s" || "$CONDA" create -y -q -n "$ENV" python=3.11
+"$CONDA" run -n "$ENV" pip install -q -e ".[dev]"
+"$CONDA" run -n "$ENV" python -c "import torch, sopt; print('torch', torch.__version__, 'cuda', torch.cuda.is_available())"

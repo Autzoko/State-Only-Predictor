@@ -8,8 +8,8 @@
 ```
 configs/           default.yaml + model/{s,b,l}.yaml + experiment/*.yaml（按顺序叠加，可再加 key=value）
 docs/              DESIGN / EXPERIMENTS（实验日志）/ SERVERS
-scripts/           download_droid.py, prepare_droid.py, train.py, evaluate.py, setup_env.sh
-  remote/          sync.sh（rsync 到 127/3090/jubail）, run_bg.sh（tmux 后台训练）
+scripts/           prepare_droid.py（流式只取 state）, train.py, evaluate.py, setup_env.sh
+  remote/          sync.sh（push + 服务器 git pull）, env.sh, run_bg.sh（tmux 后台训练）
   slurm/           train.sbatch（Jubail）
 src/sopt/
   data/            droid.py（parquet→数组）, features.py（17 维特征）, splits.py（按 building 切分）,
@@ -26,8 +26,8 @@ data/, outputs/    不进 git
 
 ```bash
 bash scripts/setup_env.sh && conda activate sopt
-python scripts/download_droid.py --dest data/raw/droid_1.0.1           # 仅 parquet，约 12 GB
-python scripts/prepare_droid.py --src data/raw/droid_1.0.1 --out data/processed/droid --workers 32
+# 逐个 chunk 下载 → 只抽取 state → 立即删除原始 parquet（可断点续传）。最终约 3.5 GB
+python scripts/prepare_droid.py --out data/processed/droid --workers 32
 python scripts/train.py --config configs/model/s.yaml --config configs/experiment/e1_ar_flow.yaml run_name=e1_ar_flow_s
 python scripts/evaluate.py --ckpt outputs/e1_ar_flow_s/best.pt --split val
 pytest
@@ -35,7 +35,6 @@ pytest
 
 本地流水线检查（30 条 episode，CPU，约 1 分钟）：
 ```bash
-python scripts/download_droid.py --dest data/raw/droid_debug --chunks 0 30 60 --max-per-chunk 10
-python scripts/prepare_droid.py --src data/raw/droid_debug --out data/processed/droid_debug --workers 4
+python scripts/prepare_droid.py --out data/processed/droid_debug --chunks 0 30 60 --max-per-chunk 10 --workers 4
 python scripts/train.py --config configs/experiment/debug.yaml
 ```
