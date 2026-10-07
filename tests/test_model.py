@@ -42,3 +42,19 @@ def test_loss_and_forecast_shapes(objective):
     model.eval()
     pred = model.forecast(batch["x"][:, : cfg.model.ctx_len], num_samples=3)
     assert pred.shape == (8, 3, cfg.model.horizon, 17) and torch.isfinite(pred).all()
+
+
+def test_resolve_duplicate_episodes():
+    from sopt.data.droid import _resolve_duplicates
+
+    eps = pd.DataFrame({
+        "episode_index": [0, 1, 1, 2, 2],
+        "building": ["a", "b", "b", "X", "c"],
+        "collector_id": ["u"] * 5,
+        "success": [True] * 5,
+        "length": [3, 2, 4, 1, 5],
+    })
+    out, keep = _resolve_duplicates(eps)
+    assert out["episode_index"].tolist() == [0, 1, 2]
+    assert out["length"].tolist() == [3, 6, 5]  # 1: merged across files; 2: 1-frame stray segment dropped
+    assert keep.sum() == 14 and not keep[9]

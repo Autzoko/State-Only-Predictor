@@ -109,12 +109,45 @@ def build(out: str | Path, src: str | None = None, workers: int = 16, max_files:
     return merge_parts(out, [_part_path(out, r) for r in rels])
 
 
+def _resolve_duplicates(episodes: pd.DataFrame) -> tuple[pd.DataFrame, np.ndarray]:
+    """Rows sharing an episode_index: identical metadata -> one episode split across files (merge);
+    conflicting metadata -> stray segment (keep the longest, drop the others and their frames).
+    Known case @421fe53: index 88905 also labels a 59-frame BAIR fragment (info.json total_frames excludes it).
+    Returns (episodes, per-frame keep mask)."""
+    lengths = episodes["length"].to_numpy()
+    frame_keep = np.ones(lengths.sum(), dtype=bool)
+    starts = np.r_[0, np.cumsum(lengths)[:-1]]
+    drop = np.zeros(len(episodes), dtype=bool)
+    merged_len = lengths.copy()
+    key = ["building", "collector_id", "success"]
+    for ep, rows in episodes.groupby("episode_index").groups.items():
+        rows = np.asarray(rows)
+        if len(rows) == 1:
+            continue
+        same_meta = (episodes.loc[rows, key].nunique() == 1).all() and (np.diff(rows) == 1).all()
+        if same_meta:
+            merged_len[rows[0]] = lengths[rows].sum()
+            drop[rows[1:]] = True
+            print(f"  episode {ep}: merged {len(rows)} segments across files", flush=True)
+        else:
+            keep = rows[np.argmax(lengths[rows])]
+            for r in rows[rows != keep]:
+                drop[r] = True
+                frame_keep[starts[r] : starts[r] + lengths[r]] = False
+            print(f"  WARNING episode {ep}: conflicting metadata, kept the {lengths[keep]}-frame segment, "
+                  f"dropped {(lengths[rows]).sum() - lengths[keep]} frames", flush=True)
+    episodes = episodes.assign(length=merged_len)[~drop].reset_index(drop=True)
+    return episodes, frame_keep
+
+
 def merge_parts(out: Path, parts: list[Path], keep_parts: bool = False) -> pd.DataFrame:
     states = np.concatenate([np.load(p)["states"] for p in parts])
     episodes = pd.concat([pd.read_parquet(p.with_suffix(".parquet")) for p in parts], ignore_index=True)
-    assert episodes["episode_index"].is_unique, "an episode spans two files; merge rows before splitting"
-    episodes["start"] = np.concatenate([[0], np.cumsum(episodes["length"].to_numpy())[:-1]])
     assert episodes["length"].sum() == len(states)
+    episodes, frame_keep = _resolve_duplicates(episodes)
+    states = states[frame_keep]
+    assert episodes["episode_index"].is_unique and episodes["length"].sum() == len(states)
+    episodes["start"] = np.concatenate([[0], np.cumsum(episodes["length"].to_numpy())[:-1]])
     np.save(out / "states.npy", states)
     episodes.to_parquet(out / "episodes.parquet", index=False)
     if not keep_parts:
