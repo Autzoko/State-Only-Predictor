@@ -10,6 +10,7 @@ Objectives (cfg.objective):
 from __future__ import annotations
 
 import torch
+import torch.nn.functional as F
 from torch import nn
 
 from sopt.models.heads import FlowHead, RegressionHead
@@ -90,17 +91,17 @@ class StatePrior(nn.Module):
         return {"loss": (per_token * w).sum() / w.sum().clamp(min=1)}
 
     def _sample_patch_mask(self, B: int, N: int, device) -> torch.Tensor:
-        """True = masked. Either the last H/P patches (forecasting) or random spans to `mask_ratio`."""
+        """True = masked. Either the last H/P patches (forecasting) or ~`mask_ratio` of patches in short spans:
+        max-pooling the noise over a 3-wide window makes neighbours win together, top-k fixes the count."""
         n_fut = self.H // self.P
-        m = torch.zeros(B, N, dtype=torch.bool, device=device)
         future = torch.rand(B, device=device) < self.cfg.future_mask_prob
+        noise = F.max_pool1d(torch.rand(B, 1, N, device=device), 3, stride=1, padding=1)[:, 0]
+        noise[:, 0] = -1.0  # keep one visible anchor
+        n_target = min(max(1, round(self.cfg.mask_ratio * N)), N - 1)
+        m = torch.zeros(B, N, dtype=torch.bool, device=device)
+        m.scatter_(1, noise.topk(n_target, dim=1).indices, True)
+        m[future] = False
         m[future, N - n_fut :] = True
-        n_target = max(1, int(round(self.cfg.mask_ratio * N)))
-        for b in (~future).nonzero().flatten().tolist():
-            while m[b].sum() < n_target:
-                start = int(torch.randint(0, N, (1,)))
-                m[b, start : start + torch.randint(1, 4, (1,)).item()] = True
-        m[:, 0] = False  # keep one visible anchor
         return m
 
     def _masked_targets(self, x: torch.Tensor, pm: torch.Tensor) -> torch.Tensor:
