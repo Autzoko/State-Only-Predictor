@@ -13,7 +13,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--config", action="append", default=[], help="overlay yaml (repeatable)")
     p.add_argument("overrides", nargs="*", help="dotlist overrides, e.g. train.lr=1e-4")
-    args = p.parse_args()
+    args = p.parse_intermixed_args()
 
     cfg = load_config(args.config, args.overrides)
     print(OmegaConf.to_yaml(cfg))
