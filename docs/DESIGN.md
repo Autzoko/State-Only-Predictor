@@ -74,12 +74,12 @@ Transformer (pre-LN, RoPE, causal 或 bidirectional)
 - `ar_flow`（**主方法**）：同上，但预测头是 flow matching，可以采样多条未来。
 - `masked`（MTM 式）：bidirectional，随机 span mask + "未来 mask"（以概率 p 只 mask 最后若干 patch，使其同时具备预测能力），重建被 mask 的 patch（目标同样是相对"其前最近可见帧"的增量，与 AR 目标尺度一致，保证对比公平）。
 
-**模型规模**（训练 token 数：27.6M 帧 / 4 ≈ 6.9M token/epoch，过拟合是主要风险）
+**模型规模**（训练集 23.1M 帧 / 4 ≈ 5.8M token/epoch，过拟合是主要风险）
 
 | 名字 | d_model | layers | heads | 参数量 |
 |---|---|---|---|---|
-| S | 256 | 6 | 4 | ~5M |
-| B | 512 | 12 | 8 | ~38M |
+| S | 256 | 6 | 4 | 9.5M（含 flow 头） |
+| B | 512 | 12 | 8 | 56M（含 flow 头） |
 | L | 768 | 16 | 12 | ~115M |
 
 **后续可做（v2）**：离散 token（FAST DCT+BPE / VQ）+ CE 损失；JEPA 式隐空间预测；跨本体 EE-only stem。
