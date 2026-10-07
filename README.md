@@ -25,7 +25,7 @@ data/, outputs/    不进 git
 ## 快速开始
 
 ```bash
-bash scripts/setup_env.sh && conda activate sopt
+bash scripts/setup_env.sh && source scripts/remote/env.sh   # env 位于 ../SOPT_ENV
 # 逐个 chunk 下载 → 只抽取 state → 立即删除原始 parquet（可断点续传）。最终约 3.5 GB
 python scripts/prepare_droid.py --out data/processed/droid --workers 32
 python scripts/train.py --config configs/model/s.yaml --config configs/experiment/e1_ar_flow.yaml run_name=e1_ar_flow_s

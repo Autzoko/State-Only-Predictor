@@ -9,7 +9,6 @@
 #SBATCH --output=logs/%x-%j.out
 set -euo pipefail
 cd /scratch/ll5582/SOPT
-source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate sopt
+source scripts/remote/env.sh
 nvidia-smi --query-gpu=name,memory.total --format=csv
 python scripts/train.py data.root=/scratch/ll5582/SOPT_DATA/processed/droid train.num_workers=14 "$@"
