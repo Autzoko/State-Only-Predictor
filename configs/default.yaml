@@ -1,0 +1,58 @@
+# Base config. Overlay with `--config configs/model/s.yaml --config configs/experiment/...yaml key=value`.
+seed: 0
+run_name: default
+output_root: outputs
+
+data:
+  root: data/processed/droid
+  split_salt: sopt-v1       # changing this changes the building-level split; keep fixed across a paper
+  val_frac: 0.05
+  test_frac: 0.05
+  train_fraction: 1.0       # E2 data scaling: 0.01 / 0.1 / 1.0 (nested subsets)
+  success_only: false
+  stride: 2
+  speed_aug: [0.8, 1.25]
+  speed_aug_prob: 0.5
+
+model:
+  objective: ar_flow        # ar_regression | ar_flow | masked
+  feature_dim: 17
+  patch: 4                  # frames per token (15 Hz -> 0.27 s)
+  ctx_len: 96               # context frames (6.4 s)
+  horizon: 16               # predicted frames per token (1.07 s)
+  d_model: 512
+  n_layers: 12
+  n_heads: 8
+  mlp_ratio: 4.0
+  dropout: 0.1
+  head_hidden: 1024
+  head_depth: 3
+  flow_steps: 10
+  mask_ratio: 0.5
+  future_mask_prob: 0.5
+
+aug:
+  yaw_deg: 30.0
+  input_noise: 0.01         # in normalized units, inputs only
+
+train:
+  batch_size: 256
+  lr: 3.0e-4
+  weight_decay: 0.05
+  warmup_steps: 2000
+  max_steps: 100000
+  grad_clip: 1.0
+  num_workers: 8
+  precision: bf16
+  log_every: 50
+  eval_every: 2000
+  eval_batches: 50
+  save_every: 10000
+  compile: false
+  wandb: false
+  wandb_project: sopt
+
+eval:
+  num_samples: 10
+  batch_size: 256
+  max_batches: 200

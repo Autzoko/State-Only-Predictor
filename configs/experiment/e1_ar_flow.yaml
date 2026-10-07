@@ -1,0 +1,3 @@
+# E1: objective comparison (pair with configs/model/{s,b}.yaml).
+run_name: e1_ar_flow
+model: {objective: ar_flow}

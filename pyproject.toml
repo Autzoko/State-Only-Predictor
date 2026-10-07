@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sopt"
+version = "0.1.0"
+description = "State-only self-supervised pretraining of robot motion priors"
+requires-python = ">=3.10"
+dependencies = ["numpy", "torch>=2.2", "pandas", "pyarrow", "omegaconf>=2.3", "huggingface_hub"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+wandb = ["wandb"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
