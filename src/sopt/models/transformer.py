@@ -20,17 +20,23 @@ def apply_rope(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.T
 
 
 class Attention(nn.Module):
-    def __init__(self, d_model: int, n_heads: int, dropout: float):
+    """qk_norm: RMSNorm on per-head q/k (Dehghani et al. 2023). Without it, the first layer's qkv weights grew
+    without bound (norm ~590 vs ~18 elsewhere) and gradient norms exploded after ~25k steps (E1, 2026-10-07)."""
+
+    def __init__(self, d_model: int, n_heads: int, dropout: float, qk_norm: bool = True):
         super().__init__()
         self.n_heads = n_heads
         self.qkv = nn.Linear(d_model, 3 * d_model)
+        head_dim = d_model // n_heads
+        self.q_norm = nn.RMSNorm(head_dim) if qk_norm else nn.Identity()
+        self.k_norm = nn.RMSNorm(head_dim) if qk_norm else nn.Identity()
         self.proj = nn.Linear(d_model, d_model)
         self.dropout = dropout
 
     def forward(self, x, cos, sin, attn_mask):
         B, N, C = x.shape
         q, k, v = self.qkv(x).view(B, N, 3, self.n_heads, C // self.n_heads).permute(2, 0, 3, 1, 4)
-        q, k = apply_rope(q, cos, sin), apply_rope(k, cos, sin)
+        q, k = apply_rope(self.q_norm(q), cos, sin), apply_rope(self.k_norm(k), cos, sin)
         y = F.scaled_dot_product_attention(
             q, k, v, attn_mask=attn_mask, dropout_p=self.dropout if self.training else 0.0
         )
@@ -38,10 +44,10 @@ class Attention(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, d_model: int, n_heads: int, mlp_ratio: float, dropout: float):
+    def __init__(self, d_model: int, n_heads: int, mlp_ratio: float, dropout: float, qk_norm: bool = True):
         super().__init__()
         self.ln1 = nn.LayerNorm(d_model)
-        self.attn = Attention(d_model, n_heads, dropout)
+        self.attn = Attention(d_model, n_heads, dropout, qk_norm)
         self.ln2 = nn.LayerNorm(d_model)
         hidden = int(d_model * mlp_ratio)
         self.mlp = nn.Sequential(
@@ -54,10 +60,15 @@ class Block(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, d_model: int, n_layers: int, n_heads: int, mlp_ratio: float = 4.0, dropout: float = 0.0):
+    def __init__(
+        self, d_model: int, n_layers: int, n_heads: int, mlp_ratio: float = 4.0, dropout: float = 0.0,
+        qk_norm: bool = True,
+    ):
         super().__init__()
         self.head_dim = d_model // n_heads
-        self.blocks = nn.ModuleList([Block(d_model, n_heads, mlp_ratio, dropout) for _ in range(n_layers)])
+        self.blocks = nn.ModuleList(
+            [Block(d_model, n_heads, mlp_ratio, dropout, qk_norm) for _ in range(n_layers)]
+        )
         self.ln_f = nn.LayerNorm(d_model)
 
     def forward(self, x: torch.Tensor, valid: torch.Tensor, causal: bool) -> torch.Tensor:

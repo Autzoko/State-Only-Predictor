@@ -41,7 +41,7 @@ def forecast_errors(pred: torch.Tensor, fut: torch.Tensor) -> dict[str, torch.Te
 
 
 class ForecastMeter:
-    """Accumulates mean-over-samples and min-over-samples (minADE@K) errors."""
+    """Per model: mean error over samples, min over samples (minADE@K), and error of the sample mean."""
 
     def __init__(self):
         self.sums = defaultdict(float)
@@ -53,6 +53,12 @@ class ForecastMeter:
             self.sums[f"{name}/{k}"] += v.mean(1).sum().item()
             if pred.shape[1] > 1:
                 self.sums[f"{name}/min{pred.shape[1]}_{k}"] += v.min(1).values.sum().item()
+        if pred.shape[1] > 1 and not torch.equal(pred[:, 0], pred[:, 1]):
+            # Point estimate from samples (averaging rot6d then Gram-Schmidt is fine for nearby rotations);
+            # this is the fair comparison against deterministic models.
+            mean_errs = forecast_errors(pred.float().mean(1, keepdim=True), fut.float())
+            for k, v in mean_errs.items():
+                self.sums[f"{name}/samplemean_{k}"] += v[:, 0].sum().item()
 
     def step(self, batch_size: int) -> None:
         self.n += batch_size

@@ -27,6 +27,7 @@ model:
   n_heads: 8
   mlp_ratio: 4.0
   dropout: 0.1
+  qk_norm: true             # required for stable training (see docs/EXPERIMENTS.md, E1 v1)
   head_hidden: 1024
   head_depth: 3
   flow_steps: 10
