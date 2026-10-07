@@ -26,15 +26,15 @@ data/, outputs/    不进 git
 
 ```bash
 bash scripts/setup_env.sh && source scripts/remote/env.sh   # env 位于 ../SOPT_ENV
-# 逐个 chunk 下载 → 只抽取 state → 立即删除原始 parquet（可断点续传）。最终约 3.5 GB
-python scripts/prepare_droid.py --out data/processed/droid --workers 32
+# 只通过列投影读取 state 列（约 1.4 GB 网络传输，不下载视频，可断点续传）
+python scripts/prepare_droid.py --out data/processed/droid --workers 16
 python scripts/train.py --config configs/model/s.yaml --config configs/experiment/e1_ar_flow.yaml run_name=e1_ar_flow_s
 python scripts/evaluate.py --ckpt outputs/e1_ar_flow_s/best.pt --split val
 pytest
 ```
 
-本地流水线检查（30 条 episode，CPU，约 1 分钟）：
+本地流水线检查（2 个文件，93 条 episode，CPU，约 1 分钟）：
 ```bash
-python scripts/prepare_droid.py --out data/processed/droid_debug --chunks 0 30 60 --max-per-chunk 10 --workers 4
+python scripts/prepare_droid.py --out data/processed/droid_debug --max-files 2 --workers 2
 python scripts/train.py --config configs/experiment/debug.yaml
 ```

@@ -4,7 +4,7 @@
 
 ## 1. 核心问题与假设
 
-**问题**：大规模机器人数据集（DROID 等）里，本体状态序列只占数据量的约 0.5%（DROID：状态 parquet 约 12 GB，视频约 400 GB），却记录了全部"动作是怎么做出来的"信息。只用这部分数据能学到什么？学到的东西对下游策略有没有用？
+**问题**：大规模机器人数据集（DROID 等）里，本体状态序列只占数据量的约 0.5%（DROID：state 列约 1.4 GB，视频约 400 GB），却记录了全部"动作是怎么做出来的"信息。只用这部分数据能学到什么？学到的东西对下游策略有没有用？
 
 **假设**
 - **H1（可学性）**：state-only 模型在长时域（≥1 s）上的未来轨迹预测，明显好于运动学外推（保持静止 / 匀速外推），说明它学到的不只是平滑性，还有操作的时序结构（reach → grasp → lift → transport → release）。
@@ -29,7 +29,7 @@
 
 ## 3. 数据：DROID（已核实）
 
-来源：`cadene/droid_1.0.1`（LeRobot v2.1 格式）。**只下载 `data/*.parquet` 和元数据，不下载视频。**
+来源：`cadene/droid_1.0.1_v30`（LeRobot v3.0，固定在 421fe53；共 95,584 条 episode、997 个数据文件）。**只读取 state 列和元数据列**：通过 parquet 列投影（HTTP range 请求）只拉取每个文件约 21% 的字节，总共约 1.4 GB，视频和其他列都不下载，原始文件也不落盘。下面的 schema 是在 v2.1 版（`cadene/droid_1.0.1`）上核实的，两版 episode 0 的数值完全一致。
 
 - 95,600 条 episode，27,612,581 帧，15 Hz；长度均值 289，中位数 222，p5/p95 = 89/737。
 - 状态字段：`observation.state.joint_position` (7)、`observation.state.cartesian_position` (6, xyz + 欧拉角)、`observation.state.gripper_position` (1, 0–1)。

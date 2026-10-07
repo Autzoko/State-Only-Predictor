@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-"""Build the DROID state dataset: only state columns + episode metadata are stored, videos are never fetched.
+"""Build the DROID state dataset. Only state + episode-metadata columns are fetched (parquet column projection
+over HTTP, ~1.4 GB); videos and other columns are never downloaded. Resumable.
 
-  # stream from the HF hub chunk by chunk (raw parquet is deleted right after each chunk; resumable)
-  python scripts/prepare_droid.py --out ~/langtian/SOPT_DATA/processed/droid --workers 32
-  # local pipeline check: 3 chunks x 10 episodes
-  python scripts/prepare_droid.py --out data/processed/droid_debug --chunks 0 30 60 --max-per-chunk 10
-  # from an existing local copy
-  python scripts/prepare_droid.py --src /path/to/droid_1.0.1 --out data/processed/droid
+  python scripts/prepare_droid.py --out ~/langtian/SOPT_DATA/processed/droid --workers 16
+  python scripts/prepare_droid.py --out data/processed/droid_debug --max-files 2      # local pipeline check
+  python scripts/prepare_droid.py --src /path/to/droid_1.0.1_v30 --out data/processed/droid   # local copy
 """
 
 import argparse
@@ -15,7 +13,7 @@ import json
 from omegaconf import OmegaConf
 
 from sopt.data.dataset import TrajectoryStore
-from sopt.data.droid import build_from_hub, build_from_local
+from sopt.data.droid import build
 from sopt.data.splits import assign_splits
 from sopt.utils.config import DEFAULT_CONFIG
 
@@ -23,16 +21,12 @@ from sopt.utils.config import DEFAULT_CONFIG
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--out", required=True)
-    p.add_argument("--src", default=None, help="local LeRobot copy; default: stream from the HF hub")
-    p.add_argument("--chunks", type=int, nargs="*", default=None)
-    p.add_argument("--max-per-chunk", type=int, default=None)
+    p.add_argument("--src", default=None, help="local LeRobot v3.0 copy; default: read from the HF hub")
+    p.add_argument("--max-files", type=int, default=None, help="debug: only the first N data files")
     p.add_argument("--workers", type=int, default=16)
     args = p.parse_args()
 
-    if args.src:
-        episodes = build_from_local(args.src, args.out, args.workers)
-    else:
-        episodes = build_from_hub(args.out, args.chunks, args.workers, args.max_per_chunk)
+    episodes = build(args.out, args.src, args.workers, args.max_files)
     TrajectoryStore(args.out)  # builds and caches features.npy
     d = OmegaConf.load(DEFAULT_CONFIG).data
     split = assign_splits(episodes, d.val_frac, d.test_frac, d.split_salt)

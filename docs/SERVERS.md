@@ -26,5 +26,5 @@
 ## 流程
 1. 本地提交后运行 `scripts/remote/sync.sh 127|3090|jubail|all`：先 push 到 GitHub，再在服务器上 `git pull --ff-only`。服务器只拉代码，不在服务器上直接改代码。
 2. 首次部署：`git clone https://github.com/Autzoko/State-Only-Predictor.git SOPT && bash SOPT/scripts/setup_env.sh`（环境装在同级目录 `SOPT_ENV`，不进共享的 conda env 列表）。
-3. 数据只在 127 上构建（`prepare_droid.py` 流式只取 state，原始 parquet 用完即删），然后把 `processed/droid/` rsync 到其他机器。
+3. 数据只在 127 上构建（`prepare_droid.py` 只读取 state 列，不下载视频，原始文件不落盘），然后把 `processed/droid/` rsync 到其他机器。
 4. 训练：`source scripts/remote/env.sh`，然后运行 `GPU=0 scripts/remote/run_bg.sh <run_name> --config ...`（tmux 后台）。
