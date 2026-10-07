@@ -27,7 +27,6 @@ import pyarrow.parquet as pq
 
 HF_REPO = "cadene/droid_1.0.1"
 HF_REVISION = "56b622ac23335c2bb5909e1e3c72416033c65acf"  # pinned 2025-03-20
-NUM_CHUNKS = 96  # 95,600 episodes, 1000 per chunk
 
 STATE_COLUMNS = [
     "observation.state.joint_position",
@@ -74,24 +73,34 @@ def convert_files(files: list[Path], part: Path, workers: int) -> None:
     tmp.rename(part)  # the .npz marks the part as complete
 
 
-def fetch_chunk(chunk: int, out: Path, workers: int, max_episodes: int | None = None) -> None:
-    from huggingface_hub import hf_hub_download, snapshot_download
+def episode_ids_by_chunk(out: Path) -> dict[int, list[int]]:
+    """Episode ids per chunk from meta/episodes.jsonl (listing the repo tree is slow: ~380k files incl. videos)."""
+    from huggingface_hub import hf_hub_download
+
+    path = hf_hub_download(HF_REPO, "meta/episodes.jsonl", repo_type="dataset", revision=HF_REVISION,
+                           local_dir=out / "meta")
+    ids = pd.read_json(path, lines=True)["episode_index"].to_numpy()
+    return {int(c): [int(i) for i in ids[ids // 1000 == c]] for c in np.unique(ids // 1000)}
+
+
+def fetch_chunk(chunk: int, episode_ids: list[int], out: Path, workers: int) -> None:
+    from concurrent.futures import ThreadPoolExecutor
+
+    from huggingface_hub import hf_hub_download
 
     part = out / "parts" / f"chunk_{chunk:03d}.npz"
     if part.exists():
         return
     part.parent.mkdir(parents=True, exist_ok=True)
+
     with tempfile.TemporaryDirectory(dir=out) as tmp:
-        if max_episodes:
-            for i in range(max_episodes):
-                f = f"data/chunk-{chunk:03d}/episode_{chunk * 1000 + i:06d}.parquet"
-                hf_hub_download(HF_REPO, f, repo_type="dataset", revision=HF_REVISION, local_dir=tmp)
-        else:
-            snapshot_download(HF_REPO, repo_type="dataset", revision=HF_REVISION, local_dir=tmp,
-                              allow_patterns=[f"data/chunk-{chunk:03d}/*"], max_workers=workers)
-        files = sorted(Path(tmp).glob("data/chunk-*/episode_*.parquet"))
+        def get(i: int) -> str:
+            f = f"data/chunk-{chunk:03d}/episode_{i:06d}.parquet"
+            return hf_hub_download(HF_REPO, f, repo_type="dataset", revision=HF_REVISION, local_dir=tmp)
+
+        with ThreadPoolExecutor(workers) as ex:
+            files = [Path(f) for f in ex.map(get, episode_ids)]
         convert_files(files, part, workers)
-        shutil.rmtree(Path(tmp) / ".cache", ignore_errors=True)
 
 
 def merge_parts(out: Path, keep_parts: bool = False) -> pd.DataFrame:
@@ -104,15 +113,17 @@ def merge_parts(out: Path, keep_parts: bool = False) -> pd.DataFrame:
     episodes.to_parquet(out / "episodes.parquet", index=False)
     if not keep_parts:
         shutil.rmtree(out / "parts")
+        shutil.rmtree(out / "meta", ignore_errors=True)
     return episodes
 
 
 def build_from_hub(out: str | Path, chunks: list[int] | None, workers: int, max_episodes: int | None = None):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
-    chunks = list(range(NUM_CHUNKS)) if chunks is None else chunks
+    by_chunk = episode_ids_by_chunk(out)
+    chunks = sorted(by_chunk) if chunks is None else chunks
     for i, c in enumerate(chunks):
-        fetch_chunk(c, out, workers, max_episodes)
+        fetch_chunk(c, by_chunk[c][:max_episodes], out, workers)
         print(f"chunk {c:03d} done ({i + 1}/{len(chunks)})", flush=True)
     return merge_parts(out)
 
