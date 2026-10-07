@@ -11,7 +11,7 @@ done
 : "${CONDA:?conda not found}"
 # Private package cache: the shared ~/miniconda3/pkgs cache can be corrupted by other users.
 export CONDA_PKGS_DIRS=${CONDA_PKGS_DIRS:-$PREFIX.pkgs}
-[ -x "$PREFIX/bin/python" ] || { rm -rf "$PREFIX"; "$CONDA" create -y -q -p "$PREFIX" -c conda-forge --override-channels python=3.11 pip; }
+[ -x "$PREFIX/bin/python" ] || { rm -rf "$PREFIX"; "$CONDA" create -y -q -p "$PREFIX" -c conda-forge --override-channels python=3.11 pip "_openmp_mutex=4.5=2_gnu"; }  # newest build fails conda 24.x verification
 rm -rf "$CONDA_PKGS_DIRS"
 "$PREFIX/bin/pip" install -q -e ".[dev]"
 "$PREFIX/bin/python" -c "import torch, sopt; print('torch', torch.__version__, 'cuda', torch.cuda.is_available())"
