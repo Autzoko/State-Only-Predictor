@@ -25,7 +25,7 @@ import pyarrow.compute as pc
 import pyarrow.parquet as pq
 
 HF_REPO = "cadene/droid_1.0.1_v30"
-HF_REVISION = "421fe53b89b073df8c9231d03650afd71f53c79e"  # pinned 2025-04-23; 95,584 episodes, 997 data files
+HF_REVISION = "421fe53b89b073df8c9231d03650afd71f53c79e"  # pinned 2025-04-23; 95,584 episodes, 2048 data files
 
 STATE_COLUMNS = [
     "observation.state.joint_position",
