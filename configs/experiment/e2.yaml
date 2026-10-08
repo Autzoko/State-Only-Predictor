@@ -1,0 +1,4 @@
+# E2: data scaling. Defaults chosen from E1b: horizon 32 (~2.1 s), 40k steps (val saturates by 20-40k).
+# Vary data.train_fraction in {0.01, 0.1, 1.0} (nested subsets) and model.objective in {masked, ar_flow}.
+model: {horizon: 32}
+train: {max_steps: 40000}

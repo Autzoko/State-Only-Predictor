@@ -1,0 +1,4 @@
+# E2 regularization arm (stack on top of e2.yaml): does stronger regularization reduce OOD-site overfitting?
+model: {dropout: 0.2}
+train: {weight_decay: 0.1}
+aug: {yaw_deg: 60.0, input_noise: 0.02}
