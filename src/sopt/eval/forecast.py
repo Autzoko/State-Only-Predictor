@@ -40,35 +40,73 @@ def forecast_errors(pred: torch.Tensor, fut: torch.Tensor) -> dict[str, torch.Te
     }
 
 
+def _traj_rms_cm(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    """RMS over the horizon of EE position distance, in cm. (..., H, D) x (..., H, D) -> (...)."""
+    return ((a[..., POS] - b[..., POS]).pow(2).sum(-1).mean(-1)).sqrt() * 100
+
+
+def energy_score_pos(pred: torch.Tensor, fut: torch.Tensor) -> torch.Tensor:
+    """Energy score of the EE position trajectory (proper scoring rule; lower is better), per batch item.
+
+    ES = E d(X, y) - 0.5 E d(X, X'), d = RMS-over-time distance in cm, unbiased over K samples.
+    For a deterministic forecast it reduces to the trajectory RMSE, so deterministic and generative models
+    are directly comparable (unlike min-of-K, which always favours diverse samplers).
+    """
+    K = pred.shape[1]
+    term1 = _traj_rms_cm(pred, fut[:, None].expand_as(pred)).mean(1)
+    if K == 1:
+        return term1
+    pair = _traj_rms_cm(pred[:, :, None], pred[:, None, :])  # (B, K, K), zero diagonal
+    return term1 - 0.5 * pair.sum((1, 2)) / (K * (K - 1))
+
+
 class ForecastMeter:
-    """Per model: mean error over samples, min over samples (minADE@K), and error of the sample mean."""
+    """Per model: mean error over samples, min over samples (minADE@K), error of the sample mean,
+    energy score, and per-step position error curves (lists, `*_by_step`)."""
 
     def __init__(self):
         self.sums = defaultdict(float)
+        self.curves: dict[str, torch.Tensor] = {}
         self.n = 0
 
+    def _add_curve(self, key: str, per_step: torch.Tensor) -> None:
+        v = per_step.sum(0).double().cpu()
+        self.curves[key] = self.curves[key] + v if key in self.curves else v
+
     def update(self, name: str, pred: torch.Tensor, fut: torch.Tensor) -> None:
-        errs = forecast_errors(pred.float(), fut.float())
+        pred, fut = pred.float(), fut.float()
+        stochastic = pred.shape[1] > 1 and not torch.equal(pred[:, 0], pred[:, 1])
+        step_err = (pred[..., POS] - fut[:, None, :, POS]).norm(dim=-1) * 100  # (B, K, H) cm
+        self._add_curve(f"{name}/pos_err_cm_by_step", step_err.mean(1))
+        self.sums[f"{name}/energy_pos_cm"] += energy_score_pos(pred if stochastic else pred[:, :1], fut).sum().item()
+        if stochastic:
+            self._add_curve(f"{name}/min{pred.shape[1]}_pos_err_cm_by_step", step_err.min(1).values)
+            mean_step = (pred.mean(1)[..., POS] - fut[..., POS]).norm(dim=-1) * 100
+            self._add_curve(f"{name}/samplemean_pos_err_cm_by_step", mean_step)
+        errs = forecast_errors(pred, fut)
         for k, v in errs.items():
             self.sums[f"{name}/{k}"] += v.mean(1).sum().item()
             if pred.shape[1] > 1:
                 self.sums[f"{name}/min{pred.shape[1]}_{k}"] += v.min(1).values.sum().item()
-        if pred.shape[1] > 1 and not torch.equal(pred[:, 0], pred[:, 1]):
+        if stochastic:
             # Point estimate from samples (averaging rot6d then Gram-Schmidt is fine for nearby rotations);
             # this is the fair comparison against deterministic models.
-            mean_errs = forecast_errors(pred.float().mean(1, keepdim=True), fut.float())
+            mean_errs = forecast_errors(pred.mean(1, keepdim=True), fut)
             for k, v in mean_errs.items():
                 self.sums[f"{name}/samplemean_{k}"] += v[:, 0].sum().item()
 
     def step(self, batch_size: int) -> None:
         self.n += batch_size
 
-    def result(self) -> dict[str, float]:
-        return {k: v / max(self.n, 1) for k, v in self.sums.items()}
+    def result(self) -> dict:
+        n = max(self.n, 1)
+        out: dict = {k: v / n for k, v in self.sums.items()}
+        out.update({k: (v / n).round(decimals=4).tolist() for k, v in self.curves.items()})
+        return out
 
 
 @torch.no_grad()
-def evaluate_forecast(model, loader, device, num_samples: int, max_batches: int) -> dict[str, float]:
+def evaluate_forecast(model, loader, device, num_samples: int, max_batches: int) -> dict:
     """Windows must be fully valid (no padding) to be scored."""
     model.eval()
     meter = ForecastMeter()

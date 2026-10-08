@@ -75,3 +75,16 @@ def test_site_splits_hold_out_whole_sites():
     # "glen bureau" shares collector g with "Glen's office" -> same site; "AHG_lab" (collector b) is not linked
     # to "AHG kitchen" (collector a), so the pattern only holds out the latter.
     assert split.tolist() == ["val", "val", "train", "train", "test", "train", "train", "train"]
+
+
+def test_energy_score():
+    from sopt.eval.forecast import energy_score_pos
+
+    fut = torch.zeros(2, 8, 17)
+    det = torch.zeros(2, 1, 8, 17)
+    det[..., 8] = 0.01  # 1 cm off in x at every step
+    assert torch.allclose(energy_score_pos(det, fut), torch.tensor([1.0, 1.0]))
+    # Two samples straddling the truth (+-1 cm): ES = 1 - 0.5 * 2 = 0, better than the 1 cm deterministic guess.
+    two = torch.zeros(2, 2, 8, 17)
+    two[:, 0, :, 8], two[:, 1, :, 8] = 0.01, -0.01
+    assert torch.allclose(energy_score_pos(two, fut), torch.zeros(2), atol=1e-5)

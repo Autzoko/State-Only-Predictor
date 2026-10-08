@@ -121,7 +121,7 @@ def run(cfg) -> Path:
                 t0 = time.time()
             if step % cfg.train.eval_every == 0 or step == cfg.train.max_steps:
                 res = evaluate_forecast(model, val_dl, device, cfg.eval.num_samples, cfg.train.eval_batches)
-                logger.log(step, **{f"val/{k}": v for k, v in res.items()})
+                logger.log(step, **{f"val/{k}": v for k, v in res.items() if not isinstance(v, list)})
                 key = res.get(f"model/min{cfg.eval.num_samples}_pos_ade_cm", res["model/pos_ade_cm"])
                 print(f"step {step} val pos_ade_cm model {res['model/pos_ade_cm']:.3f} "
                       f"const_vel {res['const_vel/pos_ade_cm']:.3f} selection {key:.3f}", flush=True)
