@@ -35,11 +35,13 @@ GRIPPER_OPEN_WIDTH = 0.08
 COLUMNS = ["observation.states.joint_state", "observation.states.gripper_state", "episode_index", "task_index"]
 
 
-def to_droid_raw(q: np.ndarray, fingers: np.ndarray, src_fps: float = SRC_FPS) -> np.ndarray:
-    """(n, 7) joints + (n, 2) finger positions at src_fps -> (m, 14) DROID raw layout at 15 Hz."""
+def to_droid_raw(
+    q: np.ndarray, fingers: np.ndarray, src_fps: float = SRC_FPS, dst_fps: float = DST_FPS
+) -> np.ndarray:
+    """(n, 7) joints + (n, 2) finger positions at src_fps -> (m, 14) DROID raw layout at dst_fps."""
     n = len(q)
     t_src = np.arange(n) / src_fps
-    t_dst = np.arange(0.0, t_src[-1] + 1e-9, 1.0 / DST_FPS)
+    t_dst = np.arange(0.0, t_src[-1] + 1e-9, 1.0 / dst_fps)
     q15 = np.stack([np.interp(t_dst, t_src, q[:, j]) for j in range(7)], axis=1)
     width = fingers[:, 0] - fingers[:, 1]
     g15 = np.clip((GRIPPER_OPEN_WIDTH - np.interp(t_dst, t_src, width)) / GRIPPER_OPEN_WIDTH, 0.0, 1.0)
@@ -95,3 +97,50 @@ def build(out: str | Path, workers: int = 16, val_frac: float = 0.15, test_frac:
     np.save(out / "states.npy", states)
     eps.to_parquet(out / "episodes.parquet", index=False)
     return eps
+
+
+ACTION_COLUMNS = COLUMNS + ["action"]
+
+
+def build_raw20(out: str | Path, splits_from: str | Path, workers: int = 8) -> pd.DataFrame:
+    """Native 20 Hz arrays with actions, for control (inverse dynamics, closed-loop policies).
+
+    Writes q.npy (N, 7), fingers.npy (N, 2), actions.npy (N, 7; gripper 1 = open, 0 = close), and
+    episodes.parquet (start/length at 20 Hz, task, split copied from the 15 Hz build at `splits_from`).
+    Row i of an episode corresponds to video frame i.
+    """
+    from huggingface_hub import HfFileSystem
+
+    out = Path(out)
+    if (out / "q.npy").exists():
+        print(f"{out} already built", flush=True)
+        return pd.read_parquet(out / "episodes.parquet")
+    out.mkdir(parents=True, exist_ok=True)
+    fs = HfFileSystem()
+    root = f"datasets/{HF_REPO}@{HF_REVISION}"
+    files = sorted(fs.glob(f"{root}/data/chunk-*/episode_*.parquet"))
+
+    def work(f: str):
+        t = pq.read_table(f, columns=ACTION_COLUMNS, filesystem=fs)
+        n = t.num_rows
+        return (_to_2d(t[COLUMNS[0]], n), _to_2d(t[COLUMNS[1]], n), _to_2d(t["action"], n),
+                int(t["episode_index"][0].as_py()))
+
+    with ThreadPoolExecutor(workers) as ex:
+        res = list(ex.map(work, files))
+    ref = pd.read_parquet(Path(splits_from) / "episodes.parquet").set_index("episode_index")
+    eps = pd.DataFrame({"episode_index": [r[3] for r in res], "length": [len(r[0]) for r in res]})
+    eps = eps.join(ref[["task_index", "task", "split"]], on="episode_index")
+    eps["start"] = np.concatenate([[0], np.cumsum(eps["length"].to_numpy())[:-1]])
+    np.save(out / "q.npy", np.concatenate([r[0] for r in res]))
+    np.save(out / "fingers.npy", np.concatenate([r[1] for r in res]))
+    np.save(out / "actions.npy", np.concatenate([r[2] for r in res]))
+    eps.to_parquet(out / "episodes.parquet", index=False)
+    return eps
+
+
+def features_20hz(q: np.ndarray, fingers: np.ndarray) -> np.ndarray:
+    """Per-frame 17-d SOPT features at the native 20 Hz (no resampling)."""
+    from sopt.data.features import raw_to_features
+
+    return raw_to_features(to_droid_raw(q, fingers, src_fps=SRC_FPS, dst_fps=SRC_FPS))
