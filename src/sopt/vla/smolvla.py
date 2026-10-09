@@ -67,7 +67,6 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     cfg.input_features = {k: PolicyFeature(type=FeatureType.VISUAL, shape=(3, 256, 256)) for k in IMAGE_KEYS}
     state_dim = prior.cfg.ctx_len * prior.D
     cfg.input_features["observation.state"] = PolicyFeature(type=FeatureType.STATE, shape=(state_dim,))
-    cfg.max_state_dim = state_dim
     cfg.output_features = {"action": PolicyFeature(type=FeatureType.ACTION, shape=(7,))}
     cfg.normalization_mapping = {"VISUAL": NormalizationMode.IDENTITY, "STATE": NormalizationMode.IDENTITY,
                                  "ACTION": NormalizationMode.MEAN_STD}
@@ -78,6 +77,7 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     cfg.vlm_model_name = _snapshot("HuggingFaceTB/SmolVLM2-500M-Video-Instruct")
     cfg.device = device
     policy = SmolVLAPolicy.from_pretrained(base, config=cfg)
+    policy.config.max_state_dim = state_dim  # after loading: the base state_proj (32 -> d) is replaced below
     hidden = policy.model.vlm_with_expert.config.text_config.hidden_size
     policy.model.state_proj = MotionStateProj(prior, hidden, use_motion=arm != "none")
     for p in policy.model.state_proj.parameters():
