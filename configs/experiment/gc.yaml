@@ -1,0 +1,4 @@
+# Goal-conditioned post-training (stack on model/s.yaml + experiment/e2.yaml + objective).
+# Start from a pretrained checkpoint: init_from=<path to best.pt>. Scratch control: omit init_from, lr 3e-4.
+model: {goal_cond: true, goal_probs: [0.2, 0.4, 0.4]}   # none / endpoint / keyframe
+train: {max_steps: 20000, lr: 1.0e-4, warmup_steps: 500}

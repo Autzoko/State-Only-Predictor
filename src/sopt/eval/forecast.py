@@ -105,9 +105,22 @@ class ForecastMeter:
         return out
 
 
+def interpolate_to(ctx: torch.Tensor, goal: torch.Tensor, horizon: int) -> torch.Tensor:
+    """Kinematic baseline when the endpoint is known: straight line from the last frame to the goal."""
+    a = torch.arange(1, horizon + 1, device=ctx.device, dtype=ctx.dtype)[None, :, None] / horizon
+    return (ctx[:, -1:] + a * (goal[:, None] - ctx[:, -1:]))[:, None]
+
+
 @torch.no_grad()
-def evaluate_forecast(model, loader, device, num_samples: int, max_batches: int) -> dict:
-    """Windows must be fully valid (no padding) to be scored."""
+def evaluate_forecast(
+    model, loader, device, num_samples: int, max_batches: int, goal_modes: tuple[str, ...] = ("none",)
+) -> dict:
+    """Windows must be fully valid (no padding) to be scored.
+
+    goal_modes: 'none' always scores the unconditional forecast as `model`; 'endpoint' / 'keyframe' score a
+    goal-conditioned model as `model@<mode>` (goal = state at C-1+H, or at the next gripper event after C-1;
+    the latter needs batches with `kf`). 'endpoint' also scores the `interp@endpoint` baseline.
+    """
     model.eval()
     meter = ForecastMeter()
     C, H = model.cfg.ctx_len, model.H
@@ -115,11 +128,23 @@ def evaluate_forecast(model, loader, device, num_samples: int, max_batches: int)
         if i >= max_batches:
             break
         x, mask = batch["x"].to(device), batch["mask"].to(device)
-        x = x[mask.all(1)]
+        full = mask.all(1)
+        x = x[full]
         if len(x) == 0:
             continue
         ctx, fut = x[:, :C], x[:, C : C + H]
         meter.update("model", model.forecast(ctx, num_samples), fut)
+        goals = {"endpoint": x[:, C - 1 + H]}
+        if "kf" in batch:
+            goals["keyframe"] = batch["kf"].to(device)[full][:, C - 1]
+        for mode in goal_modes:
+            if mode == "none":
+                continue
+            if getattr(model, "goal_cond", False):
+                pred = model.forecast(ctx, num_samples, goal=goals[mode], goal_type=mode)
+                meter.update(f"model@{mode}", pred, fut)
+            if mode == "endpoint":
+                meter.update("interp@endpoint", interpolate_to(ctx, goals[mode], H), fut)
         meter.update("zero_vel", zero_velocity(ctx, H), fut)
         meter.update("const_vel", constant_velocity(ctx, H), fut)
         meter.step(len(x))

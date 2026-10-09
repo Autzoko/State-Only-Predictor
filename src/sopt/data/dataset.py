@@ -9,7 +9,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from sopt.data.features import raw_to_features
+from sopt.data.features import GRIPPER, raw_to_features
 from sopt.data.splits import assign_splits, subsample_fraction
 
 
@@ -25,6 +25,32 @@ class TrajectoryStore:
         else:
             self.features = raw_to_features(np.load(root / "states.npy"))
             np.save(cache, self.features)
+        self._root = root
+        self._next_event: np.ndarray | None = None
+
+    @property
+    def next_event(self) -> np.ndarray:
+        """Global frame index of the next gripper open/close event after each frame (episode end if none).
+
+        Gripper is binarized at 0.5; an event is a frame whose binarized state differs from the previous frame.
+        Used as the "keyframe" goal (e.g. the grasp pose a VLM could point at). Cached as next_event.npy.
+        """
+        if self._next_event is None:
+            cache = self._root / "next_event.npy"
+            if cache.exists():
+                self._next_event = np.load(cache, mmap_mode="r")
+            else:
+                closed = np.asarray(self.features[:, GRIPPER.start]) > 0.5
+                out = np.empty(len(closed), dtype=np.int64)
+                for s, L in zip(self.episodes["start"].to_numpy(), self.episodes["length"].to_numpy()):
+                    c = closed[s : s + L]
+                    events = np.flatnonzero(c[1:] != c[:-1]) + 1  # local frame indices of state changes
+                    events = np.append(events, L - 1)
+                    t = np.arange(L)
+                    out[s : s + L] = s + events[np.searchsorted(events, t, side="right").clip(max=len(events) - 1)]
+                np.save(cache, out)
+                self._next_event = out
+        return self._next_event
 
     def split_episodes(self, data_cfg, split: str) -> pd.DataFrame:
         eps = self.episodes
@@ -50,8 +76,10 @@ class WindowDataset(Dataset):
         stride: int = 1,
         speed_aug: tuple[float, float] | None = None,
         speed_aug_prob: float = 0.0,
+        next_event: np.ndarray | None = None,
     ):
         self.features = features
+        self.next_event = next_event
         self.window = window
         self.speed_aug = speed_aug
         self.speed_aug_prob = speed_aug_prob
@@ -77,6 +105,7 @@ class WindowDataset(Dataset):
         if speed == 1.0:
             seg = np.asarray(self.features[s0 + t : s0 + min(t + W, L)])
             n_valid = len(seg)
+            src = s0 + t + np.arange(n_valid)
         else:
             t = min(t, int(np.floor(L - 1 - (W - 1) * speed)))
             pos = t + speed * np.arange(W)
@@ -85,9 +114,20 @@ class WindowDataset(Dataset):
             frames = np.asarray(self.features[s0 + lo[0] : s0 + lo[-1] + 2])
             seg = (1 - w) * frames[lo - lo[0]] + w * frames[lo - lo[0] + 1]
             n_valid = W
+            src = s0 + lo
         x = np.empty((W, seg.shape[1]), dtype=np.float32)
         x[:n_valid] = seg
         x[n_valid:] = seg[-1]
         mask = np.zeros(W, dtype=bool)
         mask[:n_valid] = True
-        return {"x": torch.from_numpy(x), "mask": torch.from_numpy(mask)}
+        out = {"x": torch.from_numpy(x), "mask": torch.from_numpy(mask)}
+        if self.next_event is not None:
+            # Keyframe goal per frame: the state at the next gripper event (in source-frame time).
+            ev = np.asarray(self.next_event[src])
+            kf = np.empty_like(x)
+            kf[:n_valid] = self.features[ev]
+            kf[n_valid:] = kf[n_valid - 1]
+            dt = np.zeros(W, dtype=np.float32)
+            dt[:n_valid] = ev - src
+            out["kf"], out["kf_dt"] = torch.from_numpy(kf), torch.from_numpy(dt)
+        return out

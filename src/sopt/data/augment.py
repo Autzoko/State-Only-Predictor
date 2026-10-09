@@ -26,8 +26,11 @@ def yaw_rotate(x: torch.Tensor, theta: torch.Tensor) -> torch.Tensor:
     return x
 
 
-def augment_batch(x: torch.Tensor, yaw_deg: float) -> torch.Tensor:
+def augment_batch(x: torch.Tensor, yaw_deg: float, *extra: torch.Tensor):
+    """Rotates x and any extra (B, T, D) feature tensors (e.g. goals) by the same per-sample yaw.
+    Returns x alone when no extras are given, else a tuple."""
     if yaw_deg > 0:
         theta = (torch.rand(x.shape[0], device=x.device) * 2 - 1) * math.radians(yaw_deg)
         x = yaw_rotate(x, theta)
-    return x
+        extra = tuple(yaw_rotate(e, theta) for e in extra)
+    return (x, *extra) if extra else x

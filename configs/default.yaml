@@ -1,6 +1,7 @@
 # Base config. Overlay with `--config configs/model/s.yaml --config configs/experiment/...yaml key=value`.
 seed: 0
 run_name: default
+init_from: null            # checkpoint to initialize from (post-training / fine-tuning)
 output_root: outputs
 
 data:
@@ -33,6 +34,8 @@ model:
   flow_steps: 10
   mask_ratio: 0.5
   future_mask_prob: 0.5
+  goal_cond: false
+  goal_probs: [0.2, 0.4, 0.4]  # none / endpoint / keyframe, when goal_cond
 
 aug:
   yaw_deg: 30.0

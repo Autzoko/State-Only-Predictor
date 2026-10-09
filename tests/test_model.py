@@ -88,3 +88,47 @@ def test_energy_score():
     two = torch.zeros(2, 2, 8, 17)
     two[:, 0, :, 8], two[:, 1, :, 8] = 0.01, -0.01
     assert torch.allclose(energy_score_pos(two, fut), torch.zeros(2), atol=1e-5)
+
+
+def test_next_event_and_keyframe_goals(tmp_path):
+    from sopt.data.dataset import TrajectoryStore
+
+    # Two episodes; gripper (feature 7) closes at local frame 3 and opens at 6 in episode 0, never changes in 1.
+    feats = np.zeros((14, 17), dtype=np.float32)
+    feats[3:6, 7] = 1.0
+    feats[:, 0] = np.arange(14)
+    np.save(tmp_path / "features.npy", feats)
+    pd.DataFrame({"start": [0, 8], "length": [8, 6], "episode_index": [0, 1], "building": ["a", "b"],
+                  "collector_id": ["u", "v"], "success": [True, True]}).to_parquet(tmp_path / "episodes.parquet")
+    store = TrajectoryStore(tmp_path)
+    assert store.next_event.tolist() == [3, 3, 3, 6, 6, 6, 7, 7, 13, 13, 13, 13, 13, 13]
+    ds = WindowDataset(store.features, store.episodes, window=4, next_event=store.next_event)
+    item = ds[0]  # frames 0..3 of episode 0
+    assert item["kf"][:, 0].tolist() == [3, 3, 3, 6] and item["kf_dt"].tolist() == [3, 2, 1, 3]
+
+
+@pytest.mark.parametrize("objective", ["ar_flow", "masked"])
+def test_goal_conditioning_starts_at_pretrained_model(objective):
+    base = ["model.d_model=32", "model.n_layers=2", "model.n_heads=2", "model.head_hidden=64",
+            "model.ctx_len=32", "model.horizon=8", f"model.objective={objective}"]
+    feats, eps = _toy_data()
+    stats = compute_stats(feats, eps, 8, max_samples=5000)
+    pre = StatePrior(load_config(overrides=base).model, stats).eval()
+    with torch.no_grad():  # stand-in for pretraining: an untrained flow head's AdaLN gates are exactly zero
+        for prm in pre.head.parameters():
+            prm.add_(0.05 * torch.randn_like(prm))
+    gc = StatePrior(load_config(overrides=[*base, "model.goal_cond=true"]).model, stats).eval()
+    missing, unexpected = gc.load_state_dict(pre.state_dict(), strict=False)
+    assert all(k.startswith("goal_proj") or k == "goal_probs" for k in missing) and not unexpected
+    ds = WindowDataset(feats, eps, pre.window)
+    batch = torch.utils.data.default_collate([ds[i] for i in range(4)])
+    ctx, goal = batch["x"][:, :32], batch["x"][:, -1]
+    torch.manual_seed(0)
+    a = pre.forecast(ctx, 2)
+    torch.manual_seed(0)
+    b = gc.forecast(ctx, 2, goal=goal, goal_type="endpoint")
+    assert torch.allclose(a, b, atol=1e-5)
+    gc.train()
+    loss = gc.loss(batch["x"], batch["mask"], kf=batch["x"])["loss"]
+    loss.backward()
+    assert torch.isfinite(loss) and gc.goal_proj[-1].weight.grad.abs().sum() > 0
