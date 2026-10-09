@@ -56,6 +56,8 @@ def main():
     p.add_argument("--bs", type=int, default=64)
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--prior-override", action="append", default=[],
+                   help="model.* overrides for a scratch prior, e.g. model.per_step_norm=true")
     args = p.parse_args()
     seed_everything(args.seed)
     sopt_data = Path(args.sopt_data)
@@ -85,7 +87,7 @@ def main():
         if args.kind in ("prior", "trunkbc"):
             if args.init == "scratch":
                 mcfg = load_config([str(REPO_ROOT / "configs/model/s.yaml"), str(REPO_ROOT / "configs/experiment/e2.yaml")],
-                                   ["model.objective=ar_flow"]).model
+                                   ["model.objective=ar_flow", *args.prior_override]).model
                 prior = StatePrior(mcfg, libero_state_stats(sopt_data))
             else:
                 prior, _ = load_checkpoint(args.init)
