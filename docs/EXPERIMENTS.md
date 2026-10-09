@@ -181,3 +181,31 @@ val（UW），H=32，40k 步。ES 为 energy score；ADE 对 flow 用样本均�
 - 2k 步时的 val ES：
   - flow_ft：endpoint 2.23（interp 2.89），keyframe 3.67（无目标 4.12）；
   - flow_scratch：endpoint 2.75，keyframe 4.18。
+
+### 2026-10-09 E3a 结果：目标条件先验（127, c54ee25；best.pt 按 val keyframe ES 选择；单 seed）
+val（UW），H=32（2.1 s），单位 cm。ADE 对 flow 用样本均值；"中段" 为第 16 步（1.07 s）的误差。
+
+| 模型 | 无目标 ES | endpoint ES | endpoint ADE | endpoint 中段 | keyframe ES | keyframe ADE |
+|---|---|---|---|---|---|---|
+| const-vel | 8.83 | – | – | – | – | – |
+| interp@endpoint | – | 2.89 | 2.54 | 3.81 | – | – |
+| 预训练 flow（无后训练） | 3.98 | – | – | – | – | 4.91（无目标） |
+| 预训练 masked（无后训练） | 5.28 | – | – | – | – | 4.45（无目标） |
+| gc_ar_flow_ft | 3.97 | **1.88** | 2.37 | 3.34 | **3.51** | 4.35 |
+| gc_ar_flow_scratch | 4.09 | 1.91 | 2.41 | 3.41 | 3.52 | 4.38 |
+| gc_masked_ft | 5.25 | 2.38 | 2.06 | 3.09 | 4.62 | 3.91 |
+| gc_masked_scratch | 5.38 | 2.32 | **2.00** | **3.06** | 4.50 | **3.82** |
+
+id_val 上的趋势相同（flow_ft：endpoint ES 1.97 vs interp 3.59，keyframe 3.69 vs 无目标 4.30）。
+
+**结论**
+1. **知道"往哪去"后，先验能把"怎么去"做得比直线好**：endpoint 条件下，flow 的 ES 比插值低 35%，masked 的 ADE 低 19%，轨迹中段误差从 3.8 降到 3.1 cm。gripper 误差与插值持平或更好。
+2. **只给 keyframe（时间未知）也有帮助，但有限**：ES 和 ADE 都降约 12%。keyframe 中位数在约 3.5 s 之后，且不知道何时到达，所以 2 s 内的约束较弱。
+3. **后训练不损害无目标能力**：ft 模型的无目标 ES 为 3.97，预训练模型为 3.98（20% 的无目标采样起了作用）。
+4. **在全量 DROID 上，预训练的优势到 20k 步时基本消失**：2k 步时 ft 明显领先（endpoint ES 2.23 vs 2.75），到 20k 步时 scratch 追平，masked scratch 甚至略好。原因是后训练用的是同一份全量数据，scratch 本身就相当于在做预训练。**这个设置测不出预训练的价值**，只能说明预训练能加快收敛。
+
+**下一步**
+- 正确衡量预训练价值的方式是**少量目标标注**或**换数据域**：
+  - (a) 只用 1% / 10% 的 episode 做目标条件后训练，比较 ft 和 scratch；
+  - (b) LIBERO 迁移（E4）。
+- 即使已知终点，中段误差仍有约 3 cm：更强的条件注入（让 backbone 也看到目标）和更大的模型可能还有提升空间。
