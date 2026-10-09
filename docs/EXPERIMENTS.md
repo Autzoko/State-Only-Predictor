@@ -165,3 +165,19 @@ val（UW），H=32，40k 步。ES 为 energy score；ADE 对 flow 用样本均�
 **含义与下一步**
 - 用 100% 数据时 S 模型不再过拟合，而从 10% 到 100% 的收益在递减。下一步的问题变成"**更大的模型能否从现有数据中挖出更多**"（E2b：B/L × 100%）。如果不能，就需要扩充数据的多样性（引入其他 Franka state 数据集）。
 - 关键对比需要多 seed（至少 3 个），才能写进论文。
+
+### 2026-10-09 12:05 E3a 启动：目标条件先验（后训练；127, c54ee25）
+- 问题：如果有人告诉先验"往哪去"（例如 VLM 给出抓取位姿），它能否把"怎么去"做好？预训练对这种后训练有没有帮助？
+- 目标类型（都由数据自监督生成）：
+  - **endpoint** = horizon 末端（锚点 + 32 步）的状态；
+  - **keyframe** = 下一次夹爪开合事件时的状态，时间未知。中位数在 52 步之后，35% 落在 32 步以内，26% 回退为 episode 末端。
+  - 训练时按 20% / 40% / 40% 混合无目标 / endpoint / keyframe。
+- 注入方式：目标（相对锚点的 EE 位姿 + gripper + 类型 one-hot）经过 MLP 加到 head 的输入上。最后一层零初始化，所以后训练从预训练模型完全等价的状态开始（有测试验证）。backbone 不感知目标。
+- 4 个 run，S 模型，H=32，20k 步：
+  - `gc_{ar_flow,masked}_ft`：从 `e2_*_f100_s/best.pt` 初始化，lr 1e-4；
+  - `gc_*_scratch`：从零训练，lr 3e-4（对照，衡量预训练的价值）。
+  - masked 后训练只用 future mask。
+- 新基线 `interp@endpoint`：从当前状态直线插值到 endpoint，是已知终点时很强的运动学基线。
+- 2k 步时的 val ES：
+  - flow_ft：endpoint 2.23（interp 2.89），keyframe 3.67（无目标 4.12）；
+  - flow_scratch：endpoint 2.75，keyframe 4.18。
