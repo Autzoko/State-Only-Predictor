@@ -60,6 +60,7 @@ train:
   compile: false
   wandb: false
   wandb_project: sopt
+  eval_at_start: false      # post-training: also evaluate/select the initial checkpoint (step 0)
   select_on: auto           # auto (keyframe ES if goal_cond, else min-K ADE) | energy
 
 eval:

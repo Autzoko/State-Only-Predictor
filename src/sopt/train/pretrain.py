@@ -58,6 +58,8 @@ def make_loaders(cfg, store: TrajectoryStore, window: int):
     common = dict(num_workers=nw, pin_memory=torch.cuda.is_available(), persistent_workers=nw > 0)
     g = torch.Generator().manual_seed(cfg.seed)
     train_dl = DataLoader(train_ds, cfg.train.batch_size, shuffle=True, drop_last=True, generator=g, **common)
+    # Shuffled so `eval_batches` is a random subset, re-seeded before every evaluation (see `reset_val_order`)
+    # so all evaluations of a run score the same windows.
     val_dl = DataLoader(val_ds, cfg.eval.batch_size, shuffle=True, generator=torch.Generator().manual_seed(0), **common)
     return train_eps, val_eps, train_dl, val_dl
 
@@ -116,7 +118,31 @@ def run(cfg) -> Path:
         torch.save({"model": model.state_dict(), "optim": opt.state_dict(), "step": step, "stats": stats,
                     "config": OmegaConf.to_container(cfg), "meta": meta}, out / name)
 
-    best, t0 = float("inf"), time.time()
+    best = float("inf")
+
+    def evaluate_and_select():
+        nonlocal best
+        val_dl.generator.manual_seed(0)  # same val subset at every evaluation
+        res = evaluate_forecast(model, val_dl, device, cfg.eval.num_samples, cfg.train.eval_batches,
+                                goal_modes(cfg.model))
+        logger.log(step, **{f"val/{k}": v for k, v in res.items() if not isinstance(v, list)})
+        if cfg.model.get("goal_cond", False):  # select on the realistic goal type
+            key = res["model@keyframe/energy_pos_cm"]
+        elif cfg.train.get("select_on", "auto") == "energy":
+            key = res["model/energy_pos_cm"]
+        else:
+            key = res.get(f"model/min{cfg.eval.num_samples}_pos_ade_cm", res["model/pos_ade_cm"])
+        print(f"step {step} val pos_ade_cm model {res['model/pos_ade_cm']:.3f} "
+              f"const_vel {res['const_vel/pos_ade_cm']:.3f} selection {key:.3f}", flush=True)
+        if key < best:
+            best = key
+            save("best.pt")
+        save("last.pt")
+
+    # For post-training, score the initial model too, so early stopping can never end below "no post-training".
+    if cfg.train.get("eval_at_start", False) and step == 0:
+        evaluate_and_select()
+    t0 = time.time()
     model.train()
     while step < cfg.train.max_steps:
         for batch in train_dl:
@@ -144,21 +170,7 @@ def run(cfg) -> Path:
                 print(f"step {step} loss {loss.item():.4f} ({cfg.train.log_every / dt:.1f} it/s)", flush=True)
                 t0 = time.time()
             if step % cfg.train.eval_every == 0 or step == cfg.train.max_steps:
-                res = evaluate_forecast(model, val_dl, device, cfg.eval.num_samples, cfg.train.eval_batches,
-                                        goal_modes(cfg.model))
-                logger.log(step, **{f"val/{k}": v for k, v in res.items() if not isinstance(v, list)})
-                if cfg.model.get("goal_cond", False):  # select on the realistic goal type
-                    key = res["model@keyframe/energy_pos_cm"]
-                elif cfg.train.get("select_on", "auto") == "energy":
-                    key = res["model/energy_pos_cm"]
-                else:
-                    key = res.get(f"model/min{cfg.eval.num_samples}_pos_ade_cm", res["model/pos_ade_cm"])
-                print(f"step {step} val pos_ade_cm model {res['model/pos_ade_cm']:.3f} "
-                      f"const_vel {res['const_vel/pos_ade_cm']:.3f} selection {key:.3f}", flush=True)
-                if key < best:
-                    best = key
-                    save("best.pt")
-                save("last.pt")
+                evaluate_and_select()
             elif step % cfg.train.save_every == 0:
                 save("last.pt")
             if step >= cfg.train.max_steps:
