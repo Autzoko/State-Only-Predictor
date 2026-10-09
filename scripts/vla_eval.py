@@ -62,7 +62,7 @@ def main():
                 imgs = [np.stack([obs[i]["agent"], obs[i]["wrist"]]) for i in live]
                 img = torch.from_numpy(np.stack(imgs)).permute(0, 1, 4, 2, 3).float().div(255).to(device)
                 batch = {IMAGE_KEYS[0]: img[:, 0], IMAGE_KEYS[1]: img[:, 1],
-                         "observation.state": torch.from_numpy(ctx.astype(np.float32)).to(device),
+                         "observation.state": torch.from_numpy(ctx.astype(np.float32)).flatten(1).to(device),
                          "task": [tasks[i] for i in live]}
                 with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
                     act = policy.predict_action_chunk(pre(batch))

@@ -32,7 +32,7 @@ CHUNK, CTX = 50, 96
 def to_lerobot(b: dict, tasks: list[str], device) -> dict:
     img = b["img"].to(device, non_blocking=True).float() / 255.0  # (B, 2, 3, H, W)
     return {IMAGE_KEYS[0]: img[:, 0], IMAGE_KEYS[1]: img[:, 1],
-            "observation.state": b["ctx"].to(device, non_blocking=True),
+            "observation.state": b["ctx"].flatten(1).to(device, non_blocking=True),
             "action": b["act"].to(device, non_blocking=True), "action_is_pad": b["act_pad"].to(device),
             "task": [tasks[int(i)] for i in b["task"]]}
 

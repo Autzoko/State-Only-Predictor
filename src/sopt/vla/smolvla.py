@@ -4,7 +4,9 @@ Integration point: SmolVLA's `state_proj`. Its prefix builder already accepts a 
 appends N state tokens after image + language tokens (image/language do not attend to them; the action expert
 reads them through the KV cache). We replace `state_proj` by `MotionStateProj`:
 
-  observation.state = the last C frames of SOPT features on the 15 Hz grid, (B, C, 17), raw (identity norm)
+  observation.state = the last C frames of SOPT features on the 15 Hz grid, flattened to (B, C * 17), raw
+                      (identity norm). Flattened because SmolVLA's prepare_state keeps only [:, -1] of 3-D
+                      states; max_state_dim = C * 17 makes its padding a no-op.
   -> [ N motion tokens = Linear(SOPT backbone token features) ] + [ 1 current-state token ]
 
 Arms: `none` (current-state token only = vanilla SmolVLA with SOPT state features), `scratch` (random motion
@@ -38,10 +40,8 @@ class MotionStateProj(nn.Module):
             self.motion_proj = nn.Sequential(nn.LayerNorm(prior.cfg.d_model), nn.Linear(prior.cfg.d_model, hidden))
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
-        """state: (B, C, max_state_dim) after LeRobot's padding (features in [..., :17]) -> (B, N + 1, hidden)."""
-        x = state[..., : self.prior.D].float()
-        if x.ndim == 2:
-            x = x[:, None]
+        """state: (B, C * 17) flattened history -> (B, N + 1, hidden)."""
+        x = state.float().view(state.shape[0], self.prior.cfg.ctx_len, self.prior.D)
         cur = self.cur_proj(self.prior.normalizer.norm(x[:, -1]))[:, None]
         if not self.use_motion:
             return cur
@@ -65,7 +65,9 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     base = _snapshot("lerobot/smolvla_base")
     cfg = PreTrainedConfig.from_pretrained(base)
     cfg.input_features = {k: PolicyFeature(type=FeatureType.VISUAL, shape=(3, 256, 256)) for k in IMAGE_KEYS}
-    cfg.input_features["observation.state"] = PolicyFeature(type=FeatureType.STATE, shape=(prior.D,))
+    state_dim = prior.cfg.ctx_len * prior.D
+    cfg.input_features["observation.state"] = PolicyFeature(type=FeatureType.STATE, shape=(state_dim,))
+    cfg.max_state_dim = state_dim
     cfg.output_features = {"action": PolicyFeature(type=FeatureType.ACTION, shape=(7,))}
     cfg.normalization_mapping = {"VISUAL": NormalizationMode.IDENTITY, "STATE": NormalizationMode.IDENTITY,
                                  "ACTION": NormalizationMode.MEAN_STD}
