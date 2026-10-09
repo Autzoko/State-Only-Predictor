@@ -47,11 +47,13 @@ def make_loaders(cfg, store: TrajectoryStore, window: int):
     train_eps = store.split_episodes(cfg.data, "train")
     val_eps = store.split_episodes(cfg.data, "val")
     ne = store.next_event if cfg.model.get("goal_cond", False) else None
+    pad = min(cfg.data.get("left_pad", 0), cfg.model.ctx_len - cfg.model.patch)  # keep >= 1 real context patch
     train_ds = WindowDataset(
         store.features, train_eps, window, cfg.data.stride, tuple(cfg.data.speed_aug), cfg.data.speed_aug_prob,
-        next_event=ne,
+        next_event=ne, left_pad=pad,
     )
-    val_ds = WindowDataset(store.features, val_eps, window, stride=cfg.model.ctx_len, next_event=ne)
+    val_ds = WindowDataset(store.features, val_eps, window, stride=cfg.data.get("eval_stride") or cfg.model.ctx_len,
+                           next_event=ne, left_pad=pad)
     nw = cfg.train.num_workers
     common = dict(num_workers=nw, pin_memory=torch.cuda.is_available(), persistent_workers=nw > 0)
     g = torch.Generator().manual_seed(cfg.seed)
@@ -147,6 +149,8 @@ def run(cfg) -> Path:
                 logger.log(step, **{f"val/{k}": v for k, v in res.items() if not isinstance(v, list)})
                 if cfg.model.get("goal_cond", False):  # select on the realistic goal type
                     key = res["model@keyframe/energy_pos_cm"]
+                elif cfg.train.get("select_on", "auto") == "energy":
+                    key = res["model/energy_pos_cm"]
                 else:
                     key = res.get(f"model/min{cfg.eval.num_samples}_pos_ade_cm", res["model/pos_ade_cm"])
                 print(f"step {step} val pos_ade_cm model {res['model/pos_ade_cm']:.3f} "

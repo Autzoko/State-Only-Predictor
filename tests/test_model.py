@@ -5,6 +5,7 @@ import torch
 from omegaconf import OmegaConf
 
 from sopt.data.dataset import WindowDataset
+from sopt.data.features import raw_to_features
 from sopt.data.normalize import compute_stats
 from sopt.models.state_prior import StatePrior
 from sopt.utils.config import load_config
@@ -132,3 +133,30 @@ def test_goal_conditioning_starts_at_pretrained_model(objective):
     loss = gc.loss(batch["x"], batch["mask"], kf=batch["x"])["loss"]
     loss.backward()
     assert torch.isfinite(loss) and gc.goal_proj[-1].weight.grad.abs().sum() > 0
+
+
+def test_left_pad_windows():
+    feats, eps = _toy_data()
+    eps = eps.iloc[:1].assign(length=20)
+    ds = WindowDataset(feats, eps, window=16, stride=4, left_pad=8)
+    first = ds[0]  # starts 8 frames before the episode
+    assert first["mask"].all() and torch.equal(first["x"][0], first["x"][8])
+    assert torch.equal(first["x"][8], torch.from_numpy(feats[0]))
+    assert len(ds) == (20 - 16 + 8) // 4 + 1
+
+
+def test_libero_conversion_matches_fk():
+    from sopt.data.features import POS, ROT
+    from sopt.data.libero import to_droid_raw
+    from sopt.utils.franka_fk import franka_fk
+
+    rng = np.random.default_rng(0)
+    q = np.cumsum(rng.normal(0, 0.01, (41, 7)), 0) + np.array([0, -0.5, 0, -2.2, 0, 1.8, 0.8])
+    fingers = np.stack([np.full(41, 0.04), np.full(41, -0.04)], 1)
+    raw = to_droid_raw(q, fingers)
+    assert len(raw) == 31  # 2 s at 20 Hz -> 15 Hz
+    feats = raw_to_features(raw)
+    M = franka_fk(raw[:, :7].astype(np.float64))
+    assert np.allclose(feats[:, POS], M[:, :3, 3], atol=1e-5)
+    assert np.allclose(feats[:, ROT], np.concatenate([M[:, :3, 0], M[:, :3, 1]], 1), atol=1e-5)
+    assert np.allclose(raw[:, 7], 0.0)  # fully open

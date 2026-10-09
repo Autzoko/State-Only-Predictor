@@ -41,3 +41,11 @@ def geodesic_angle(R1: torch.Tensor, R2: torch.Tensor) -> torch.Tensor:
     """Angle (rad) of R1^T R2."""
     tr = torch.einsum("...ij,...ij->...", R1, R2)
     return torch.acos(((tr - 1) / 2).clamp(-1 + 1e-6, 1 - 1e-6))
+
+
+def matrix_to_euler_xyz(R: np.ndarray) -> np.ndarray:
+    """Inverse of euler_xyz_to_matrix (extrinsic XYZ): (..., 3, 3) -> (..., 3) roll/pitch/yaw."""
+    roll = np.arctan2(R[..., 2, 1], R[..., 2, 2])
+    pitch = -np.arcsin(np.clip(R[..., 2, 0], -1.0, 1.0))
+    yaw = np.arctan2(R[..., 1, 0], R[..., 0, 0])
+    return np.stack([roll, pitch, yaw], axis=-1)

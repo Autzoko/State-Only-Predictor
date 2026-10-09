@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 
-def _unit_hash(key: str, salt: str) -> float:
+def unit_hash(key: str, salt: str) -> float:
     return int(hashlib.sha1(f"{salt}:{key}".encode()).hexdigest()[:12], 16) / 16**12
 
 
@@ -57,7 +57,7 @@ def assign_splits(episodes: pd.DataFrame, data_cfg) -> np.ndarray:
         held = np.isin(sites, np.unique(sites[hit]))
         assert not (held & (split != "train")).any(), f"{name}_sites overlap with another held-out split"
         split[held] = name
-    u = episodes["episode_index"].map(lambda e: _unit_hash(str(e), data_cfg.split_salt)).to_numpy()
+    u = episodes["episode_index"].map(lambda e: unit_hash(str(e), data_cfg.split_salt)).to_numpy()
     split[(split == "train") & (u < data_cfg.id_val_frac)] = "id_val"
     return split.astype(str)
 
@@ -66,5 +66,5 @@ def subsample_fraction(episodes: pd.DataFrame, fraction: float, salt: str) -> np
     """Nested episode subsets for data-scaling runs (1% subset is contained in the 10% subset)."""
     if fraction >= 1.0:
         return np.ones(len(episodes), dtype=bool)
-    u = episodes["episode_index"].map(lambda e: _unit_hash(str(e), salt + ":frac")).to_numpy()
+    u = episodes["episode_index"].map(lambda e: unit_hash(str(e), salt + ":frac")).to_numpy()
     return u < fraction

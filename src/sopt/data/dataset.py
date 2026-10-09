@@ -10,6 +10,7 @@ import torch
 from torch.utils.data import Dataset
 
 from sopt.data.features import GRIPPER, raw_to_features
+from sopt.data.splits import unit_hash as hash_unit
 from sopt.data.splits import assign_splits, subsample_fraction
 
 
@@ -53,10 +54,22 @@ class TrajectoryStore:
         return self._next_event
 
     def split_episodes(self, data_cfg, split: str) -> pd.DataFrame:
+        """Datasets with a stored `split` column (e.g. LIBERO, split by task) use it; DROID uses site splits."""
         eps = self.episodes
-        keep = assign_splits(eps, data_cfg) == split
+        if "split" in eps.columns:
+            keep = (eps["split"] == split).to_numpy().copy()  # pandas copy-on-write arrays are read-only
+        else:
+            keep = assign_splits(eps, data_cfg) == split
         if split == "train":
             keep &= subsample_fraction(eps, data_cfg.train_fraction, data_cfg.split_salt)
+            k = data_cfg.get("demos_per_task")
+            if k is not None:  # nested few-shot subsets: the first k episodes of each task by salted hash
+                rank = (
+                    eps.assign(_h=eps["episode_index"].map(lambda e: hash_unit(str(e), data_cfg.split_salt)))
+                    .groupby("task_index")["_h"].rank(method="first")
+                    .to_numpy()
+                )
+                keep &= rank <= k
         if data_cfg.success_only:
             keep &= eps["success"].to_numpy()
         return eps[keep].reset_index(drop=True)
@@ -66,6 +79,9 @@ class WindowDataset(Dataset):
     """Windows of `window` frames. Short episodes are padded with their last frame (mask=False).
 
     With `speed_aug=(lo, hi)` a window is resampled at a random speed factor by linear interpolation.
+    With `left_pad > 0`, windows may start up to `left_pad` frames before the episode: those frames repeat the
+    first frame ("robot at rest before the episode") and count as valid context. Needed for short episodes
+    (LIBERO demos are ~110 frames at 15 Hz, shorter than a 128-frame window).
     """
 
     def __init__(
@@ -77,17 +93,20 @@ class WindowDataset(Dataset):
         speed_aug: tuple[float, float] | None = None,
         speed_aug_prob: float = 0.0,
         next_event: np.ndarray | None = None,
+        left_pad: int = 0,
     ):
         self.features = features
         self.next_event = next_event
+        assert 0 <= left_pad < window, "left_pad must leave at least one real frame in the window"
+        self.left_pad = left_pad
         self.window = window
         self.speed_aug = speed_aug
         self.speed_aug_prob = speed_aug_prob
         ep_starts, ep_lens = episodes["start"].to_numpy(), episodes["length"].to_numpy()
-        n_items = np.maximum(ep_lens - window, 0) // stride + 1
+        n_items = (np.maximum(ep_lens - window, 0) + left_pad) // stride + 1
         self.item_ep = np.repeat(np.arange(len(episodes)), n_items).astype(np.int32)
         offsets = np.arange(n_items.sum()) - np.repeat(np.cumsum(n_items) - n_items, n_items)
-        self.item_t = (offsets * stride).astype(np.int32)
+        self.item_t = (offsets * stride - left_pad).astype(np.int32)
         self.ep_starts, self.ep_lens = ep_starts, ep_lens
 
     def __len__(self) -> int:
@@ -98,11 +117,17 @@ class WindowDataset(Dataset):
         s0, L, t = int(self.ep_starts[e]), int(self.ep_lens[e]), int(self.item_t[idx])
         W = self.window
         speed = 1.0
-        if self.speed_aug and np.random.rand() < self.speed_aug_prob:
+        if self.speed_aug and t >= 0 and np.random.rand() < self.speed_aug_prob:
             speed = float(np.exp(np.random.uniform(np.log(self.speed_aug[0]), np.log(self.speed_aug[1]))))
             if (W - 1) * speed > L - 1:
                 speed = 1.0
-        if speed == 1.0:
+        if t < 0:  # left padding: repeat the first frame
+            pre = -t
+            real = np.asarray(self.features[s0 : s0 + min(W - pre, L)])
+            seg = np.concatenate([np.repeat(real[:1], pre, axis=0), real])
+            n_valid = len(seg)
+            src = s0 + np.concatenate([np.zeros(pre, dtype=np.int64), np.arange(len(real))])
+        elif speed == 1.0:
             seg = np.asarray(self.features[s0 + t : s0 + min(t + W, L)])
             n_valid = len(seg)
             src = s0 + t + np.arange(n_valid)

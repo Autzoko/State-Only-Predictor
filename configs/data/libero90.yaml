@@ -1,0 +1,7 @@
+# LIBERO-90 (IPEC port, joints -> DROID-style features at 15 Hz) as a target domain. Split by task (stored).
+data:
+  root: data/processed/libero90         # servers: $SOPT_DATA/processed/libero90
+  left_pad: 80                          # demos are ~110 frames; keep >= 16 real context frames
+  eval_stride: 8
+  stride: 1
+  demos_per_task: null                  # few-shot: 1 / 5 / null (all, ~37 per task)
