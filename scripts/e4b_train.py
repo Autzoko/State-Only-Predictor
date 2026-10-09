@@ -131,6 +131,21 @@ def main():
                 break
     torch.save({"kind": args.kind, "model": model.state_dict(), "tasks": tasks, "meta": meta, **extra},
                out / "final.pt")
+    if args.kind == "idm":  # held-out tasks: is the IDM accurate enough that it is not the bottleneck?
+        model.eval()
+        vds = IDMDataset(raw, raw.eps[raw.eps["split"] == "val"], k=4)
+        vdl = DataLoader(vds, 4096, shuffle=False, num_workers=args.workers)
+        l1, grip, n = 0.0, 0.0, 0
+        for b in vdl:
+            b = {k: v.to(device) for k, v in b.items()}
+            a = model.act(b["cur"], b["nxt"])
+            l1 += (a[:, :6] - b["act"][:, :6]).abs().mean(1).sum().item()
+            grip += (a[:, 6] == b["act"][:, 6]).float().sum().item()
+            n += len(a)
+        res = {"val_l1_osc": l1 / n, "val_gripper_acc": grip / n,
+               "val_l1_zero_action": float(np.mean([vds.A[e][t][:6].__abs__().mean() for e, t in vds.items[::50]]))}
+        (out / "val_metrics.json").write_text(json.dumps(res, indent=2))
+        print(json.dumps(res), flush=True)
     print("saved", out / "final.pt", flush=True)
 
 
