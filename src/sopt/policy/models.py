@@ -4,6 +4,10 @@ PriorPolicy   images + task condition a StatePrior (ar_flow) that predicts the n
               inverse-dynamics model turns predicted states into simulator actions. The trunk can start from
               scratch, from DROID pretraining, or from DROID -> LIBERO post-training.
 DirectBC      the conventional baseline: images + task + current state -> chunk of actions (no prior, no IDM).
+TrunkBC       the prior's Transformer as the policy trunk over the 15 Hz state history, conditioned on images +
+              task, with an action-chunk head (same outputs/losses as DirectBC). Trunk from scratch / DROID /
+              DROID -> LIBERO. Added after E4b v1: prior + IDM failed because the prior's near-term plan
+              (0.05-0.2 s) is less precise than constant-velocity extrapolation (single scale for all horizons).
 IDM           (current state, next k states at 20 Hz) -> 7-d action (6 OSC deltas + gripper open logit).
 """
 
@@ -118,3 +122,26 @@ class IDM(nn.Module):
     def act(self, cur, nxt) -> torch.Tensor:
         out = self._out(cur, nxt)
         return torch.cat([out[:, :6].clamp(-1, 1), (out[:, 6:] > 0).float()], -1)
+
+
+class TrunkBC(nn.Module):
+    def __init__(self, prior: StatePrior, n_tasks: int, chunk: int):
+        super().__init__()
+        self.prior, self.chunk = prior, chunk
+        d = prior.cfg.d_model
+        self.cond = VisionTaskEncoder(n_tasks, d, zero_init=False)
+        self.head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 1024), nn.GELU(), nn.Linear(1024, 1024), nn.GELU(),
+                                  nn.Linear(1024, chunk * 7))
+
+    def _out(self, ctx, img, task):
+        h = self.prior.encode(ctx)[:, -1] + self.cond(img, task)
+        return self.head(h).view(-1, self.chunk, 7)
+
+    def loss(self, batch: dict) -> torch.Tensor:
+        out, act = self._out(batch["ctx"], batch["img"], batch["task"]), batch["act"]
+        return F.l1_loss(out[..., :6], act[..., :6]) + F.binary_cross_entropy_with_logits(out[..., 6], act[..., 6])
+
+    @torch.no_grad()
+    def act(self, ctx, img, task) -> torch.Tensor:
+        out = self._out(ctx, img, task)
+        return torch.cat([out[..., :6].clamp(-1, 1), (out[..., 6:] > 0).float()], -1)

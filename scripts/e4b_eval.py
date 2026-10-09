@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 def worker(args_tuple):
-    policy_path, idm_path, sopt_data, task_lang, task_id, inits, replan, max_steps, gpu = args_tuple
+    policy_path, idm_path, sopt_data, task_lang, task_id, inits, replan, max_steps, gpu, plan_samples = args_tuple
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu
     import torch
 
@@ -26,12 +26,13 @@ def worker(args_tuple):
     device = torch.device("cuda")
     policy, ck = load_policy(policy_path, device)
     idm = load_idm(idm_path, device) if ck["kind"] == "prior" else None
-    ctx_len = ck["prior_config"]["ctx_len"] if ck["kind"] == "prior" else 96
+    ctx_len = ck["prior_config"]["ctx_len"] if "prior_config" in ck else 96
     env = LiberoTaskEnv("libero_90", suite_tasks("libero_90").index(task_lang))
     res = []
     for i in inits:
         torch.manual_seed(1000 * task_id + i)
-        r = run_episode(env, i, policy, ck["kind"], idm, task_id, device, replan, max_steps, ctx_len, seed=i)
+        r = run_episode(env, i, policy, ck["kind"], idm, task_id, device, replan, max_steps, ctx_len, seed=i,
+                        plan_samples=plan_samples)
         res.append({"task": task_lang, "init": i, **r})
     env.close()
     return res
@@ -46,18 +47,19 @@ def main():
     p.add_argument("--replan", type=int, default=8)
     p.add_argument("--max-steps", type=int, default=400)
     p.add_argument("--gpu", default="0")
+    p.add_argument("--plan-samples", type=int, default=1, help="prior arms: plan = mean of K flow samples")
     p.add_argument("--out", required=True)
     args = p.parse_args()
     import torch
 
     tasks = torch.load(args.policy, map_location="cpu", weights_only=False)["tasks"]
     jobs = [(args.policy, args.idm, args.sopt_data, t, i, list(range(args.n_init)), args.replan, args.max_steps,
-             args.gpu) for i, t in enumerate(tasks)]
+             args.gpu, args.plan_samples) for i, t in enumerate(tasks)]
     t0 = time.time()
     with mp.get_context("spawn").Pool(len(jobs)) as pool:
         rows = [r for rs in pool.map(worker, jobs) for r in rs]
     per_task = {t: sum(r["success"] for r in rows if r["task"] == t) / args.n_init for t in tasks}
-    summary = {"policy": args.policy, "success_rate": sum(r["success"] for r in rows) / len(rows),
+    summary = {"policy": args.policy, "plan_samples": args.plan_samples, "success_rate": sum(r["success"] for r in rows) / len(rows),
                "per_task": per_task, "n_episodes": len(rows), "wall_s": time.time() - t0, "episodes": rows}
     Path(args.out).write_text(json.dumps(summary, indent=2))
     print(json.dumps({k: v for k, v in summary.items() if k != "episodes"}, indent=2))

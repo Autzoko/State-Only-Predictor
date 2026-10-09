@@ -9,7 +9,7 @@ from omegaconf import OmegaConf
 from sopt.data.libero import features_20hz
 from sopt.models.state_prior import StatePrior
 from sopt.policy.data import context_indices, interp_frames
-from sopt.policy.models import IDM, DirectBC, PriorPolicy
+from sopt.policy.models import IDM, DirectBC, PriorPolicy, TrunkBC
 from sopt.sim.libero_env import dataset_to_sim_gripper
 
 IMG = 128
@@ -18,9 +18,9 @@ IMG = 128
 def load_policy(path: str, device) -> tuple[torch.nn.Module, dict]:
     ck = torch.load(path, map_location="cpu", weights_only=False)
     n_tasks = len(ck["tasks"])
-    if ck["kind"] == "prior":
+    if ck["kind"] in ("prior", "trunkbc"):
         prior = StatePrior(OmegaConf.create(ck["prior_config"]), ck["prior_stats"])
-        model = PriorPolicy(prior, n_tasks)
+        model = PriorPolicy(prior, n_tasks) if ck["kind"] == "prior" else TrunkBC(prior, n_tasks, ck["chunk"])
     else:
         st = ck["stats"]
         model = DirectBC(n_tasks, ck["chunk"], torch.tensor(st["mean"]), torch.tensor(st["std"]))
@@ -44,7 +44,7 @@ def _img(o: dict) -> torch.Tensor:
 
 
 def run_episode(env, init_index: int, policy, kind: str, idm, task_id: int, device, replan: int = 8,
-                max_steps: int = 400, ctx_len: int = 96, seed: int = 0) -> dict:
+                max_steps: int = 400, ctx_len: int = 96, seed: int = 0, plan_samples: int = 1) -> dict:
     o = env.reset(init_index, seed=seed)
     hist = [features_20hz(o["q"][None], o["fingers"][None])[0]]
     task = torch.tensor([task_id], device=device)
@@ -55,7 +55,8 @@ def run_episode(env, init_index: int, policy, kind: str, idm, task_id: int, devi
             ctx = torch.from_numpy(interp_frames(F, context_indices(len(F) - 1, ctx_len)).astype(np.float32))[None]
             img = _img(o).to(device)
             if kind == "prior":
-                fut = policy.plan(ctx.to(device), img, task)[0, 0].float().cpu().numpy()  # (H, D) at 15 Hz
+                # mean of K flow samples: a single sample's near-term steps are noisier than const-velocity
+                fut = policy.plan(ctx.to(device), img, task, plan_samples)[0].mean(0).float().cpu().numpy()
                 plan = np.concatenate([F[-1:], fut])  # plan[j] = state at j/15 s after replanning
                 plan_t = t
             else:

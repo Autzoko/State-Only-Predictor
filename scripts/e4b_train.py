@@ -25,7 +25,7 @@ from sopt.data.dataset import TrajectoryStore
 from sopt.data.normalize import compute_stats
 from sopt.models.state_prior import StatePrior
 from sopt.policy.data import IDMDataset, PolicyDataset, Raw20, build_frame_cache, select_episodes
-from sopt.policy.models import IDM, DirectBC, PriorPolicy
+from sopt.policy.models import IDM, DirectBC, PriorPolicy, TrunkBC
 from sopt.train.pretrain import load_checkpoint
 from sopt.utils.config import REPO_ROOT, load_config
 from sopt.utils.misc import JsonlLogger, git_rev, seed_everything
@@ -46,7 +46,7 @@ def libero_state_stats(sopt_data: Path):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--kind", choices=["idm", "prior", "bc"], required=True)
+    p.add_argument("--kind", choices=["idm", "prior", "bc", "trunkbc"], required=True)
     p.add_argument("--run", required=True)
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--k", type=int, default=0, help="demos per task (0 = all)")
@@ -82,15 +82,15 @@ def main():
         frames = sopt_data / "processed/libero90_frames"
         build_frame_cache(sel, frames, workers=args.workers)
         meta["episodes"] = sel["episode_index"].tolist()
-        if args.kind == "prior":
+        if args.kind in ("prior", "trunkbc"):
             if args.init == "scratch":
                 mcfg = load_config([str(REPO_ROOT / "configs/model/s.yaml"), str(REPO_ROOT / "configs/experiment/e2.yaml")],
                                    ["model.objective=ar_flow"]).model
                 prior = StatePrior(mcfg, libero_state_stats(sopt_data))
             else:
                 prior, _ = load_checkpoint(args.init)
-            model = PriorPolicy(prior, len(tasks))
-            extra = {"prior_config": OmegaConf.to_container(prior.cfg),
+            model = PriorPolicy(prior, len(tasks)) if args.kind == "prior" else TrunkBC(prior, len(tasks), 16)
+            extra = {"prior_config": OmegaConf.to_container(prior.cfg), "chunk": 16,
                      "prior_stats": {k: v.cpu().numpy() for k, v in prior.normalizer.state_dict().items()}}
             ctx_len, horizon = prior.cfg.ctx_len, prior.H
         else:
