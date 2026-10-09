@@ -322,3 +322,26 @@ ES（cm）；括号中为样本均值 ADE（cm）。test = 10 个没见过的 LI
 
 → 近端误差降低 25–34%，样本均值在近端也优于 const-vel；远端误差和 ES 基本不变。**今后的预训练默认应开启按步归一化。**
 E4b v3（374d20c，运行中）：用按步归一化的先验做先验 + IDM（scratch 与 DROID 对比，每任务 5 条 / 全部 demo），计划取 16 样本均值。
+
+### 2026-10-09 E4b v2 结果：先验 Transformer 作为 BC trunk（127, ae12c7d；单个训练 seed，140 个配对 episode）
+闭环成功率（7 个任务 × 20 个官方初始状态，各 arm 使用相同的种子；最终 checkpoint）：
+
+| 策略 | 每任务 5 条 | 全部（约 44 条） |
+|---|---|---|
+| BC（MLP，只用当前状态） | 65.0% | 91.4% |
+| trunk-BC，scratch | 57.1% | 87.9% |
+| **trunk-BC，DROID 预训练** | **71.4%** | **95.7%** |
+| trunk-BC，DROID→LIBERO 后训练 | 67.1% | 95.0% |
+
+各任务（k5，DROID trunk vs scratch trunk）：drawer 0.90 vs 0.55，cream cheese 0.70 vs 0.70，tomato sauce 0.75 vs 0.80，ketchup→drawer 0.45 vs 0.30，white bowl 0.85 vs 0.75，wine bottle 0.55 vs 0.20，mug 0.80 vs 0.70。
+
+配对 McNemar 精确检验（只在一方成功的 episode 数）：
+- DROID trunk vs scratch trunk：k5 27 vs 7，**p = 0.0008**；全部 15 vs 4，**p = 0.019**。
+- DROID→LIBERO trunk vs scratch trunk：k5 p = 0.016；全部 p = 0.041。
+- DROID trunk vs BC：k5 21 vs 12，p = 0.16；全部 10 vs 4，p = 0.18（方向占优但不显著）。
+- scratch trunk vs BC：k5 p = 0.07（scratch trunk 更差）；全部 p = 0.33。
+
+**结论**
+1. **DROID 的 state-only 预训练显著提升同一架构的闭环成功率**（+14.3 / +7.8 个百分点）。它把一个从零训练时比 BC 还差的历史 Transformer trunk（scratch 57% < BC 65%）变成最好的策略（71%），说明预训练缓解了长状态历史带来的过拟合 / copycat 问题。
+2. 先在其他 LIBERO 任务上后训练没有额外收益（67% / 95% vs 71% / 96%）：DROID 预训练已经足够，LIBERO 后训练可能对 train 任务过于特化。
+3. 相对 BC 的优势方向一致但还不显著；需要更多 seed 或更多初始状态。
