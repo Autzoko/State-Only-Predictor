@@ -76,8 +76,9 @@ def select_episodes(eps: pd.DataFrame, tasks: list[str], k: int | None, salt: st
     return sel.drop(columns="_h").reset_index(drop=True)
 
 
-def build_frame_cache(sel: pd.DataFrame, out: str | Path, workers: int = 8) -> None:
-    """Decode both camera videos of the selected episodes to (frames, 2, IMG, IMG, 3) uint8, one file per episode."""
+def build_frame_cache(sel: pd.DataFrame, out: str | Path, workers: int = 8, size: int = IMG) -> None:
+    """Decode both camera videos of the selected episodes to (frames, 2, size, size, 3) uint8, one file per episode.
+    size=256 keeps the native resolution (no resize)."""
     from concurrent.futures import ThreadPoolExecutor
 
     import av
@@ -97,8 +98,9 @@ def build_frame_cache(sel: pd.DataFrame, out: str | Path, workers: int = 8) -> N
             f = hf_hub_download(HF_REPO, f"videos/chunk-{ep // 1000:03d}/{key}/episode_{ep:06d}.mp4",
                                 repo_type="dataset", revision=HF_REVISION)
             with av.open(f) as c:
-                frames = [np.asarray(Image.fromarray(fr.to_ndarray(format="rgb24")).resize((IMG, IMG),
-                          Image.BILINEAR)) for fr in c.decode(video=0)]
+                frames = [fr.to_ndarray(format="rgb24") for fr in c.decode(video=0)]
+                if frames[0].shape[0] != size:
+                    frames = [np.asarray(Image.fromarray(f).resize((size, size), Image.BILINEAR)) for f in frames]
             cams.append(np.stack(frames))
         n = min(len(cams[0]), len(cams[1]), int(row.length))
         assert abs(len(cams[0]) - int(row.length)) <= 1, f"episode {row.episode_index}: video/state mismatch"
@@ -131,17 +133,20 @@ class PolicyDataset(Dataset):
         F, A = self.F[e], self.A[e]
         ctx = interp_frames(F, context_indices(a, self.ctx_len))
         fut = interp_frames(F, future_indices(a, self.horizon))
-        act = A[np.minimum(np.arange(a, a + self.act_chunk), len(A) - 1)]
+        idx = np.arange(a, a + self.act_chunk)
+        act = A[np.minimum(idx, len(A) - 1)]
         img = torch.from_numpy(np.array(self.imgs[e][a])).permute(0, 3, 1, 2)  # (2, 3, H, W) uint8
         if self.shift:  # random shift augmentation (pad + crop), per camera
+            S = img.shape[-1]
             img = torch.nn.functional.pad(img.float(), (self.shift,) * 4, mode="replicate")
-            out = torch.empty(2, 3, IMG, IMG)
+            out = torch.empty(2, 3, S, S)
             for c in range(2):
                 dx, dy = np.random.randint(0, 2 * self.shift + 1, size=2)
-                out[c] = img[c, :, dy : dy + IMG, dx : dx + IMG]
+                out[c] = img[c, :, dy : dy + S, dx : dx + S]
             img = out.to(torch.uint8)
         return {"ctx": torch.from_numpy(ctx.astype(np.float32)), "fut": torch.from_numpy(fut.astype(np.float32)),
-                "act": torch.from_numpy(act), "img": img, "task": torch.tensor(self.task[e])}
+                "act": torch.from_numpy(act), "act_pad": torch.from_numpy(idx >= len(A)), "img": img,
+                "task": torch.tensor(self.task[e])}
 
 
 class IDMDataset(Dataset):
