@@ -232,3 +232,16 @@ id_val 上的趋势相同（flow_ft：endpoint ES 1.97 vs interp 3.59，keyframe
 
   → 虽然存在域差异，**DROID 先验零样本迁移到 LIBERO**，ES 比 const-vel 低 60%，ADE 比 zero-vel 低约 30%。
 - **后训练**（运行中）：{flow, masked} × {从 DROID ft（lr 1e-4），从零训练（lr 3e-4）} × 每任务 {1, 5, 全部} 条 demo，各 10k 步，按 val ES 选 checkpoint。
+- **E4a v1 结果**（10k 步，每 500 步评估一次，ft lr 1e-4；归档在 `outputs/e4a_v1/`）。LIBERO val ES：
+
+| | k=1 | k=5 | 全部 |
+|---|---|---|---|
+| flow ft | 7.58 | 5.93 | 5.32 |
+| flow scratch | 7.50 | 6.61 | 5.71 |
+| masked ft | 9.64 | 7.90 | 7.30 |
+| masked scratch | 11.80 | 9.39 | 7.91 |
+| 零样本（flow / masked） | 6.91 / 9.86 | | |
+
+  - **协议问题**：大多数 run 的最优点出现在第一次评估（500 步），说明小数据下几百步内就开始过拟合。k=1 时 flow ft 反而差于零样本，原因是错过了最优停止点。结论暂不采用。
+  - 另外发现每次评估抽到的 val 子集不同（打乱时没有重新设种子）。DROID 实验的 eval_batches 覆盖了 val 的约 90%，影响很小。
+- **E4a v2**（4b17929）：在 step 0 也做评估和选择（`eval_at_start`，保证后训练结果不劣于零样本），每 100 步评估一次，固定 val 子集；ft lr 3e-5，scratch lr 3e-4，3k 步。评估 val 和 test。
