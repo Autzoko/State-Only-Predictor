@@ -19,6 +19,18 @@ train() { local name=${1%%|*} args=${1#*|}; [ -f outputs/$name/final.pt ] && ret
 evaluate() { local name=${1%%|*}; [ -f outputs/$name/rollouts.json ] && return
   python scripts/e4b_eval.py --policy outputs/$name/final.pt --idm outputs/e4b_idm/final.pt --n-init 20 \
     --out outputs/$name/rollouts.json > outputs/$name.eval.log 2>&1; }
+# Decode all demo videos once, single process (the k=5 subsets are contained in "all").
+python - <<'PY'
+import json, os
+from pathlib import Path
+from sopt.policy.data import Raw20, build_frame_cache, select_episodes
+d = Path(os.environ["SOPT_DATA"]) / "processed"
+raw = Raw20(d / "libero90_raw20")
+tasks = json.loads(Path("configs/e4b_tasks.json").read_text())
+sel = select_episodes(raw.eps[raw.eps["split"] == "test"], tasks, None)
+build_frame_cache(sel, d / "libero90_frames", workers=8)
+print("frames cached:", len(sel), flush=True)
+PY
 for i in 0 4; do for j in 0 1 2 3; do train "${runs[$((i+j))]}" & done; wait; done
 echo "TRAIN DONE $(date -Is)"
 for i in 0 2 4 6; do evaluate "${runs[$i]}" & evaluate "${runs[$((i+1))]}" & wait; done

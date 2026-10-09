@@ -8,6 +8,7 @@ obtained by linear interpolation of the 20 Hz features — exactly what the clos
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -101,7 +102,9 @@ def build_frame_cache(sel: pd.DataFrame, out: str | Path, workers: int = 8) -> N
             cams.append(np.stack(frames))
         n = min(len(cams[0]), len(cams[1]), int(row.length))
         assert abs(len(cams[0]) - int(row.length)) <= 1, f"episode {row.episode_index}: video/state mismatch"
-        np.save(path, np.stack([cams[0][:n], cams[1][:n]], axis=1))
+        tmp = path.with_suffix(f".{os.getpid()}.tmp.npy")
+        np.save(tmp, np.stack([cams[0][:n], cams[1][:n]], axis=1))
+        os.replace(tmp, path)  # atomic: concurrent builders never see a partial file
 
     with ThreadPoolExecutor(workers) as ex:
         list(ex.map(work, sel.itertuples()))
