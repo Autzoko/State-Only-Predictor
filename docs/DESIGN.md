@@ -116,8 +116,8 @@ Transformer (pre-LN, RoPE, causal 或 bidirectional)
 |---|---|---|---|
 | 1 | 先验本身是否有效、能否泛化 | E1 / E1b / E2（DROID 内，OOD 实验室） | 完成 |
 | 2 | 给定"往哪去"，能否补全"怎么去"（VLM 接口） | E3a 目标条件后训练 | 完成：endpoint 比插值低 35% |
-| 3 | 能否迁移到新数据域 | E4a DROID → LIBERO 预测（零样本 / 少样本微调 / 从零训练） | 进行中 |
-| 4 | 能否提升视觉策略（VLA） | E4b：LIBERO 少样本 BC，用先验初始化动作头 / 作为噪声源，闭环成功率 | 待做（Jubail） |
+| 3 | 能否迁移到新数据域 | E4a DROID → LIBERO 预测（零样本 / 少样本微调 / 从零训练） | 完成：1 条 demo 的 ft 优于全部 demo 的 scratch |
+| 4 | 能否提升视觉策略（VLA） | E4b：LIBERO 闭环，先验作为 trunk / 先验 + IDM | 完成：trunk 初始化相比 scratch 提升 +14 / +8 个百分点（显著）；先验 + IDM 不可行 |
 | 5 | 能否提升 WM 规划 | E5：先验作为 CEM / MPPI 的动作提议分布，接入动作条件 WM（如 V-JEPA 2-AC，同为 DROID Franka） | 待做 |
 | 6 | VLM + 先验 | E6：VLM 给出关键点 / 子目标 → 目标条件先验生成轨迹，对比 VLM 直接输出动作 | 待做 |
 | 7 | in-context 能力 | E7：多 episode 上下文（同场景 + 同操作员 + 同指令的 DROID 示范拼接），比较 0/1/3 条示范与不相关示范；随模型规模和上下文长度观察 | 待做 |
