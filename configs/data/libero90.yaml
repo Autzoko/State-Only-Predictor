@@ -4,4 +4,4 @@ data:
   left_pad: 80                          # demos are ~110 frames; keep >= 16 real context frames
   eval_stride: 8
   stride: 1
-  demos_per_task: null                  # few-shot: 1 / 5 / null (all, ~37 per task)
+  demos_per_task: null                  # few-shot: 1 / 5 / null (all, ~52 per task)

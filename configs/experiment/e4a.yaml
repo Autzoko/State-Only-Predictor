@@ -1,0 +1,4 @@
+# E4a: DROID -> LIBERO-90 forecasting transfer (stack on model/s.yaml + experiment/e2.yaml + data/libero90.yaml).
+# Fine-tune: init_from=<DROID best.pt>, lr 1e-4. Scratch: no init_from, lr 3e-4, warmup 500.
+data: {root: null}          # set data.root=$SOPT_DATA/processed/libero90
+train: {max_steps: 10000, lr: 1.0e-4, warmup_steps: 200, eval_every: 500, eval_batches: 40, select_on: energy}
