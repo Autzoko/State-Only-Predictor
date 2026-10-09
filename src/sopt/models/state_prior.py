@@ -25,10 +25,19 @@ from sopt.models.transformer import Transformer
 
 
 class Normalizer(nn.Module):
-    def __init__(self, stats: dict):
+    def __init__(self, stats: dict, per_step: bool = False):
         super().__init__()
         for k in ("mean", "std", "delta_std"):
             self.register_buffer(k, torch.as_tensor(stats[k], dtype=torch.float32))
+        self.per_step = per_step
+        if per_step:  # (H, D) scale of the k-step deltas
+            self.register_buffer("delta_std_k", torch.as_tensor(stats["delta_std_k"], dtype=torch.float32))
+
+    def chunk_scale(self, horizon: int) -> torch.Tensor:
+        """(H, D) scale of the predicted delta chunk: per step if enabled, else the pooled delta_std."""
+        if self.per_step:
+            return self.delta_std_k[:horizon]
+        return self.delta_std.expand(horizon, -1)
 
     def norm(self, x):
         return (x - self.mean) / self.std
@@ -49,7 +58,7 @@ class StatePrior(nn.Module):
         assert cfg.ctx_len % P == 0 and H % P == 0, "ctx_len and horizon must be multiples of patch"
         self.D, self.P, self.H = D, P, H
         self.objective = cfg.objective
-        self.normalizer = Normalizer(stats)
+        self.normalizer = Normalizer(stats, per_step=bool(cfg.get("per_step_norm", False)))
         self.embed = nn.Linear(P * D, cfg.d_model)
         self.backbone = Transformer(
             cfg.d_model, cfg.n_layers, cfg.n_heads, cfg.mlp_ratio, cfg.dropout, cfg.get("qk_norm", False)
@@ -124,7 +133,7 @@ class StatePrior(nn.Module):
         h = self.backbone(tokens, valid, causal=True)  # (B, N, d)
         anchors = torch.arange(P - 1, C, P, device=x.device)  # last frame of each patch
         fut = anchors[:, None] + 1 + torch.arange(H, device=x.device)  # (N, H)
-        target = (x[:, fut] - x[:, anchors][:, :, None]) / self.normalizer.delta_std  # (B, N, H, D)
+        target = (x[:, fut] - x[:, anchors][:, :, None]) / self.normalizer.chunk_scale(H)  # (B, N, H, D)
         if self.goal_cond:
             B, N = h.shape[:2]
             gtype = self._sample_goal_types(B, x.device)[:, None].expand(B, N)
@@ -204,4 +213,4 @@ class StatePrior(nn.Module):
         if g_emb is not None:
             h = h + g_emb
         delta = self.head.sample(h, num_samples).reshape(B, num_samples, self.H, D)
-        return ctx[:, -1][:, None, None] + delta * self.normalizer.delta_std
+        return ctx[:, -1][:, None, None] + delta * self.normalizer.chunk_scale(self.H)

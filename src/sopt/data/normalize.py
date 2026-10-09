@@ -17,8 +17,13 @@ def compute_stats(
     t = (rng.random(len(ep)) * (lengths[ep] - k)).astype(np.int64)
     x0 = features[starts[ep] + t]
     x1 = features[starts[ep] + t + k]
+    d = x1 - x0
+    # Per-step scale (H, D): std of k-step deltas for each k. Used when model.per_step_norm (E4b showed the
+    # pooled scale drowns near-term steps in sampling noise).
+    per_k = np.stack([d[k == j].std(0) if (k == j).sum() > 1 else d.std(0) for j in range(1, horizon + 1)])
     return {
         "mean": x0.mean(0).astype(np.float32),
         "std": np.maximum(x0.std(0), 1e-3).astype(np.float32),
-        "delta_std": np.maximum((x1 - x0).std(0), 1e-4).astype(np.float32),
+        "delta_std": np.maximum(d.std(0), 1e-4).astype(np.float32),
+        "delta_std_k": np.maximum(per_k, 1e-5).astype(np.float32),
     }

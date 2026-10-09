@@ -160,3 +160,17 @@ def test_libero_conversion_matches_fk():
     assert np.allclose(feats[:, POS], M[:, :3, 3], atol=1e-5)
     assert np.allclose(feats[:, ROT], np.concatenate([M[:, :3, 0], M[:, :3, 1]], 1), atol=1e-5)
     assert np.allclose(raw[:, 7], 0.0)  # fully open
+
+
+def test_per_step_norm_scales_near_term_smaller():
+    feats, eps = _toy_data()
+    stats = compute_stats(feats, eps, 8, max_samples=20000)
+    assert stats["delta_std_k"].shape == (8, 17)
+    assert (stats["delta_std_k"][0] < stats["delta_std_k"][-1]).mean() > 0.9  # random walk: grows with k
+    cfg = load_config(overrides=["model.d_model=32", "model.n_layers=1", "model.n_heads=2", "model.ctx_len=32",
+                                 "model.horizon=8", "model.per_step_norm=true"])
+    m = StatePrior(cfg.model, stats)
+    ds = WindowDataset(feats, eps, m.window)
+    b = torch.utils.data.default_collate([ds[i] for i in range(4)])
+    assert torch.isfinite(m.loss(b["x"], b["mask"])["loss"])
+    assert m.forecast(b["x"][:, :32], 2).shape == (4, 2, 8, 17)

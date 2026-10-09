@@ -61,7 +61,7 @@ class PriorPolicy(nn.Module):
 
     def loss(self, batch: dict) -> torch.Tensor:
         ctx, fut = batch["ctx"], batch["fut"]
-        target = (fut - ctx[:, -1:]) / self.prior.normalizer.delta_std
+        target = (fut - ctx[:, -1:]) / self.prior.normalizer.chunk_scale(self.prior.H)
         return self.prior.head.loss(self._h(ctx, batch["img"], batch["task"]), target.flatten(1)).mean()
 
     @torch.no_grad()
@@ -70,7 +70,7 @@ class PriorPolicy(nn.Module):
         h = self._h(ctx, img, task)
         B, H, D = ctx.shape[0], self.prior.H, self.prior.D
         delta = self.prior.head.sample(h, num_samples).reshape(B, num_samples, H, D)
-        return ctx[:, -1][:, None, None] + delta * self.prior.normalizer.delta_std
+        return ctx[:, -1][:, None, None] + delta * self.prior.normalizer.chunk_scale(self.prior.H)
 
 
 class DirectBC(nn.Module):
