@@ -28,6 +28,7 @@ def main():
     p.add_argument("--bc", required=True)
     p.add_argument("--idm", required=True)
     p.add_argument("--n", type=int, default=2000)
+    p.add_argument("--k-samples", type=int, default=1, help="plan = mean of K flow samples")
     args = p.parse_args()
     dev = torch.device("cuda")
     sopt_data = Path(os.environ["SOPT_DATA"])
@@ -43,7 +44,7 @@ def main():
     rng = np.random.default_rng(0)
     idx = rng.choice(len(ds), size=min(args.n, len(ds)), replace=False)
     stats = {k: [] for k in ["oracle_l1", "oracle_g", "prior_l1", "prior_g", "bc_l1", "bc_g", "near_switch",
-                             "ade02", "ade1", "plan_grip_err"]}
+                             "ade02", "ade1", "plan_grip_err", "zv02", "cv02"]}
     for i0 in range(0, len(idx), 128):
         items = [ds[int(i)] for i in idx[i0 : i0 + 128]]
         b = {k: torch.stack([it[k] for it in items]).to(dev) for k in items[0]}
@@ -54,7 +55,7 @@ def main():
                                 for j, (_, a) in enumerate(meta)]).to(dev)
         act = b["act"][:, 0]
         a_or = idm.act(cur, true_nxt)
-        plan = prior.plan(b["ctx"], b["img"], b["task"])[:, 0]  # (B, H, D) at 15 Hz
+        plan = prior.plan(b["ctx"], b["img"], b["task"], args.k_samples).mean(1)  # (B, H, D) at 15 Hz
         plan = torch.cat([cur[:, None], plan], 1)
         t15 = torch.arange(1, 5, device=dev) / 20.0 * 15.0
         lo = t15.floor().long()
@@ -69,6 +70,10 @@ def main():
         stats["near_switch"] += switch
         fut = b["fut"]
         stats["ade02"] += ((plan[:, 3, POS] - fut[:, 2, POS]).norm(dim=-1) * 100).tolist()  # ~0.2 s
+        ctx = b["ctx"]
+        stats["zv02"] += ((ctx[:, -1, POS] - fut[:, 2, POS]).norm(dim=-1) * 100).tolist()
+        cv = ctx[:, -1, POS] + 3 * (ctx[:, -1, POS] - ctx[:, -2, POS])
+        stats["cv02"] += ((cv - fut[:, 2, POS]).norm(dim=-1) * 100).tolist()
         stats["ade1"] += ((plan[:, 15, POS] - fut[:, 14, POS]).norm(dim=-1) * 100).tolist()  # ~1 s
         stats["plan_grip_err"] += (plan[:, 1:16, GRIPPER] - fut[:, :15, GRIPPER]).abs().mean((1, 2)).tolist()
     s = {k: np.asarray(v, dtype=float) for k, v in stats.items()}
@@ -77,9 +82,9 @@ def main():
     for name in ["oracle", "prior", "bc"]:
         res[name] = {"osc_l1": s[f"{name}_l1"].mean(), "grip_acc": s[f"{name}_g"].mean(),
                      "grip_acc_near_switch": s[f"{name}_g"][ns].mean()}
-    res["plan"] = {"pos_err_cm_0.2s": s["ade02"].mean(), "pos_err_cm_1s": s["ade1"].mean(),
+    res["plan"] = {"pos_err_cm_0.2s": s["ade02"].mean(), "zero_vel_0.2s": s["zv02"].mean(),
+                   "const_vel_0.2s": s["cv02"].mean(), "pos_err_cm_1s": s["ade1"].mean(),
                    "gripper_state_err": s["plan_grip_err"].mean()}
-    res["zero_action_osc_l1"] = None
     print(json.dumps(res, indent=2))
 
 
