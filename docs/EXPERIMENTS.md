@@ -209,3 +209,26 @@ id_val 上的趋势相同（flow_ft：endpoint ES 1.97 vs interp 3.59，keyframe
   - (a) 只用 1% / 10% 的 episode 做目标条件后训练，比较 ft 和 scratch；
   - (b) LIBERO 迁移（E4）。
 - 即使已知终点，中段误差仍有约 3 cm：更强的条件注入（让 backbone 也看到目标）和更大的模型可能还有提升空间。
+
+### 2026-10-09 E4a：DROID → LIBERO-90 迁移（预测任务；127, 549ec85）
+- **数据**：`IPEC-COMMUNITY/libero_90_no_noops_lerobot` @70696ae（唯一保留关节状态的 LeRobot 版本）。
+  - 校验：FK + 基座偏移 (-0.75, 0, 0.912) + 工具偏移 9.65 cm 重建 `ee_state`，残差 0.2 mm。
+  - 处理：20 Hz 重采样到 15 Hz；夹爪 = (0.08 − 两指间距) / 0.08；按任务切分。
+  - 规模：train 52 个任务 / 2,725 条 demo，val 11 / 551，test 10 / 645；平均 109 帧（7.3 s）。
+  - 窗口：左侧 padding 80 帧（用第一帧填充，视为静止）。
+- **已知域差异**：
+  - LIBERO 去掉了空闲帧（运动更快、更不连贯）；
+  - q7 的均值不同（1.25 vs 0.21），夹爪语义不同（夹住物体时约 0.6，DROID 接近 1）；
+  - 机器人基座安装方式不同。由于用的是基座坐标系下的 FK，这一项已经消除。
+- **零样本**（DROID 预训练的 `e2_*_f100_s`，不做任何后训练）：
+
+| | val ES | val ADE | test ES | test ADE |
+|---|---|---|---|---|
+| zero-vel | 13.08 | 11.55 | 14.48 | 12.79 |
+| const-vel | 17.47 | 14.22 | 17.79 | 14.41 |
+| flow 零样本 | **6.91** | 8.06 | **7.63** | 8.84 |
+| masked 零样本 | 9.86 | 8.19 | 10.67 | 8.85 |
+| （参考）interp@endpoint，已知终点 | 6.08 | – | 6.17 | – |
+
+  → 虽然存在域差异，**DROID 先验零样本迁移到 LIBERO**，ES 比 const-vel 低 60%，ADE 比 zero-vel 低约 30%。
+- **后训练**（运行中）：{flow, masked} × {从 DROID ft（lr 1e-4），从零训练（lr 3e-4）} × 每任务 {1, 5, 全部} 条 demo，各 10k 步，按 val ES 选 checkpoint。
