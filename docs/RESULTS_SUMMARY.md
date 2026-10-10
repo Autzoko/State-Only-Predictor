@@ -37,12 +37,14 @@
 
 合并配对检验：DROID trunk vs scratch p = 2e-6 / 4e-5；vs BC p = 0.012 / 0.0095。
 
-### 4b. SmolVLA + SOPT 运动 token（seed 0；k5 的 seed 1–2 运行中）
-| SmolVLA | k5 | 全部 |
+### 4b. SmolVLA + SOPT 运动 token
+| SmolVLA | k5（3 个 seed） | 全部（seed 0） |
 |---|---|---|
-| none | 56.4% | 85.0% |
-| scratch 运动 token | 55.7% | 82.1% |
-| **DROID 运动 token** | **65.0%** | 80.7% |
+| none | 60.5 ± 4.8% | 85.0% |
+| scratch 运动 token | 57.4 ± 1.5% | 82.1% |
+| DROID 运动 token | 61.2 ± 3.6% | 80.7% |
+
+k5 合并配对检验：droid vs scratch p = 0.11，droid vs none p = 0.85，均**不显著**。seed 0 的 65.0% 没有复现（seed 1 / 2 分别为 57.9% / 60.7%）。当前的 VLA 接入方式还不足以支撑主张 C2，需要改进接口（见 PAPER_IDEAS 实验 7）。
 
 ## 5. 负面结果 / 已修复的问题
 - 不带 QK-norm 时训练在约 25k 步后发散（第一层 qkv 范数涨到 590）→ QK-norm 修复。

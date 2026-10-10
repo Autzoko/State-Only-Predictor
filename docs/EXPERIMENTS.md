@@ -410,3 +410,21 @@ E4b v3（374d20c，运行中）：用按步归一化的先验做先验 + IDM（s
 **初步解读**：少数据时提升来自**预训练本身**（随机初始化的运动 token 没有收益）；数据充足时没有收益，甚至略有下降（不显著）。这和 E4b 一致：低数据下收益最大。不过 SmolVLA 本身在全部数据时（85%）弱于我们的小模型 BC（92%），说明 20k 步、冻结 VLM 的配置对这个任务集并不是最优。
 
 **下一步**：k5 补跑 seed 1 和 seed 2（`scripts/slurm/e5_vla_seeds.sbatch`），确认显著性。
+
+### 2026-10-10 E5 k5 多 seed 结果（Jubail job 18734693，cn016，aad555f；3 个训练 seed × 140 个配对 episode）
+| SmolVLA k5 | seed 0 | seed 1 | seed 2 | 均值 ± 标准差 |
+|---|---|---|---|---|
+| none | 56.4 | 59.3 | 65.7 | 60.5 ± 4.8% |
+| scratch 运动 token | 55.7 | 57.9 | 58.6 | 57.4 ± 1.5% |
+| droid 运动 token | 65.0 | 57.9 | 60.7 | 61.2 ± 3.6% |
+
+合并配对 McNemar 检验（420 对）：droid vs scratch 52 vs 36（p = 0.11）；droid vs none 55 vs 52（p = 0.85）；scratch vs none 45 vs 58（p = 0.24）。
+
+各任务合并（none / scratch / droid）：drawer 77 / 92 / 90，cream cheese 65 / 67 / 72，tomato sauce 50 / 50 / 68，ketchup 38 / 20 / 23，white bowl 87 / 87 / 93，wine 57 / 55 / 60，mug 50 / 32 / 22。
+
+**结论**：seed 0 的 +8.6 个百分点**没有复现**。在 SmolVLA 上，DROID 运动 token 相对无历史基线**没有显著收益**。方向上仍是 droid ≥ none ≥ scratch，"scratch 历史有害、预训练历史可以把损害补回来"这一模式还在，但只是弱趋势，不显著。seed 间方差（none 的标准差 4.8 pp）和单 seed 的效应大小相当，单 seed 的 VLA 结论不可靠。与 E4b（小策略 trunk，3 seed 都显著）相比，当前的接入方式（运动 token 进入 VLM 前缀，VLM 冻结、20k 步）没能把先验的作用传递到 SmolVLA。
+
+可能原因（待验证）：
+1. 运动 token 只是 prefix 中的 25 个 token，action expert 通过交叉注意力读取，信号可能被约 200 个视觉 token 稀释。
+2. 在 E4b 中先验作为 trunk 端到端微调；这里 SOPT 是端到端可训的，但学习率和调度跟随 SmolVLA（2.5e-6 余弦衰减），对 SOPT 部分可能不合适。
+3. 两个任务（ketchup、mug）上带历史的两个 arm 都明显更差，提示存在 copycat 类失败，值得做扰动分析。
