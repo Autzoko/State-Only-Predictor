@@ -391,3 +391,22 @@ E4b v3（374d20c，运行中）：用按步归一化的先验做先验 + IDM（s
 - scratch trunk vs BC：k5 p = 0.056，全部 p = 0.066（scratch trunk 略差）。
 
 **结论**（3 个 seed，6 组对比方向全部一致）：DROID state-only 预训练让历史 trunk 从"不如 BC"变为"显著优于 BC"。k5 时 +6.4 个百分点（相对 scratch trunk +11.0），全部 demo 时 +4.0 个百分点（失败率从 7.6% 降到 3.6%，约减半）。
+
+### 2026-10-10 E5 结果：SmolVLA + SOPT 运动 token（Jubail job 18731435，3×A100，3 h 48 min；单 seed）
+闭环成功率（7 个任务 × 20 个初始状态，与 E4b 的设置相同）：
+
+| SmolVLA | k5 | 全部 |
+|---|---|---|
+| none（只有当前状态 token） | 56.4% | **85.0%** |
+| scratch（运动 token，随机初始化） | 55.7% | 82.1% |
+| **droid（运动 token，DROID 预训练）** | **65.0%** | 80.7% |
+
+各任务（k5，none / scratch / droid）：drawer 0.60 / 0.95 / 0.95，cream cheese 0.65 / 0.65 / 0.70，tomato sauce 0.40 / 0.50 / 0.80，ketchup 0.40 / 0.15 / 0.20，white bowl 0.80 / 0.85 / 0.90，wine 0.65 / 0.45 / 0.65，mug 0.45 / 0.35 / 0.35。
+
+配对 McNemar 检验：
+- k5：droid vs none 24 vs 12（p = 0.065）；droid vs scratch 20 vs 7（**p = 0.019**）；scratch vs none p = 1.0。
+- 全部：droid vs none 14 vs 20（p = 0.39）；其余比较也都不显著。
+
+**初步解读**：少数据时提升来自**预训练本身**（随机初始化的运动 token 没有收益）；数据充足时没有收益，甚至略有下降（不显著）。这和 E4b 一致：低数据下收益最大。不过 SmolVLA 本身在全部数据时（85%）弱于我们的小模型 BC（92%），说明 20k 步、冻结 VLM 的配置对这个任务集并不是最优。
+
+**下一步**：k5 补跑 seed 1 和 seed 2（`scripts/slurm/e5_vla_seeds.sbatch`），确认显著性。
