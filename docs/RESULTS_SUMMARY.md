@@ -33,8 +33,11 @@
 | BC（MLP，当前状态） | 63.6 ± 1.9% | 92.4 ± 2.3% |
 | 历史 trunk，scratch | 59.0 ± 1.8% | 89.3 ± 1.4% |
 | **历史 trunk，DROID 预训练** | **70.0 ± 3.1%** | **96.4 ± 0.7%** |
+| MotionDecoder scratch（E6） | 64.5 ± 7.0% | 90.2 ± 4.3% |
+| **MotionDecoder DROID（E6）** | **71.2 ± 2.5%** | **96.2 ± 0.4%** |
 | 先验 + IDM（按步归一化，DROID） | 16.4%（1 seed） | 32.9%（1 seed） |
 
+E6 MotionDecoder DROID vs 同结构 scratch p = 0.008 / 1e-4，vs BC p = 0.007 / 0.014，vs TrunkBC DROID 不显著（p = 0.70 / 1.0）。
 合并配对检验：DROID trunk vs scratch p = 2e-6 / 4e-5；vs BC p = 0.012 / 0.0095。
 
 ### 4b. SmolVLA + SOPT 运动 token

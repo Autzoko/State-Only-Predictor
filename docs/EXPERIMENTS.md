@@ -465,3 +465,16 @@ E4b v3（374d20c，运行中）：用按步归一化的先验做先验 + IDM（s
 4. 各任务差异大：cream cheese 和 wine 大幅提升，ketchup 下降。这提示两种结构学到的是不同的东西，值得后续分析。
 
 全部示范的组正在训练。
+
+### 2026-10-11 E6 全部示范结果（127；3 个训练 seed × 140 个配对 episode）
+| 全部示范 | seed 0 | seed 1 | seed 2 | 均值 ± 标准差 |
+|---|---|---|---|---|
+| BC（E4b） | 91.4 | 90.7 | 95.0 | 92.4 ± 2.3% |
+| TrunkBC scratch（E4b） | 87.9 | 90.7 | 89.3 | 89.3 ± 1.4% |
+| TrunkBC DROID（E4b） | 95.7 | 96.4 | 97.1 | 96.4 ± 0.7% |
+| MotionDecoder scratch | 94.3 | 85.7 | 90.7 | 90.2 ± 4.3% |
+| **MotionDecoder DROID** | 96.4 | 96.4 | 95.7 | **96.2 ± 0.4%** |
+
+配对检验：MD DROID vs MD scratch 33 vs 8，**p = 1e-4**；vs BC 27 vs 11，**p = 0.014**；vs TrunkBC DROID 13 vs 14，p = 1.0。MD scratch vs BC p = 0.24。
+
+**E6 总结**：预训练的收益在两种数据量下都稳定复现（k5 p = 0.008，全部 p = 1e-4）。但在 ResNet 视觉条件下，"先验作为 decoder"这个结构与 TrunkBC 打平（71.2 vs 70.0，96.2 vs 96.4）。收益来自预训练本身，而不是结构。scratch 版本的 seed 间方差明显更大（7.0 / 4.3），预训练版本更稳定（2.5 / 0.4）。
