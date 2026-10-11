@@ -191,10 +191,12 @@ def test_motion_decoder_starts_as_prior(monkeypatch):
     B = 2
     ctx = torch.from_numpy(feats[:32]).expand(B, 32, 17).contiguous()
     img, task = torch.randint(0, 255, (B, 2, 3, 64, 64), dtype=torch.uint8), torch.tensor([0, 2])
+    model.eval()  # no dropout
     # zero-initialized cross-attention: the decoder's features equal the pretrained prior's at init
     torch.testing.assert_close(model._h(ctx, img, task), prior.encode(ctx)[:, -1])
     batch = {"ctx": ctx, "img": img, "task": task, "fut": torch.from_numpy(feats[32:40]).expand(B, 8, 17),
              "act": torch.rand(B, 4, 7).round()}
+    model.train()
     loss = model.loss(batch)
     loss.backward()
     assert torch.isfinite(loss) and model.act(ctx, img, task).shape == (B, 4, 7)
