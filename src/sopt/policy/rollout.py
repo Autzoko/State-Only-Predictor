@@ -9,7 +9,7 @@ from omegaconf import OmegaConf
 from sopt.data.libero import features_20hz
 from sopt.models.state_prior import StatePrior
 from sopt.policy.data import context_indices, interp_frames
-from sopt.policy.models import IDM, DirectBC, PriorPolicy, TrunkBC
+from sopt.policy.models import IDM, DirectBC, MotionDecoder, PriorPolicy, TrunkBC
 from sopt.sim.libero_env import dataset_to_sim_gripper
 
 IMG = 128
@@ -18,9 +18,12 @@ IMG = 128
 def load_policy(path: str, device) -> tuple[torch.nn.Module, dict]:
     ck = torch.load(path, map_location="cpu", weights_only=False)
     n_tasks = len(ck["tasks"])
-    if ck["kind"] in ("prior", "trunkbc"):
+    if ck["kind"] in ("prior", "trunkbc", "motiondec"):
         prior = StatePrior(OmegaConf.create(ck["prior_config"]), ck["prior_stats"])
-        model = PriorPolicy(prior, n_tasks) if ck["kind"] == "prior" else TrunkBC(prior, n_tasks, ck["chunk"])
+        if ck["kind"] == "motiondec":
+            model = MotionDecoder(prior, n_tasks, ck["chunk"], ck["meta"]["state_loss"])
+        else:
+            model = PriorPolicy(prior, n_tasks) if ck["kind"] == "prior" else TrunkBC(prior, n_tasks, ck["chunk"])
     else:
         st = ck["stats"]
         model = DirectBC(n_tasks, ck["chunk"], torch.tensor(st["mean"]), torch.tensor(st["std"]))

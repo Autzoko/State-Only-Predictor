@@ -174,3 +174,28 @@ def test_per_step_norm_scales_near_term_smaller():
     b = torch.utils.data.default_collate([ds[i] for i in range(4)])
     assert torch.isfinite(m.loss(b["x"], b["mask"])["loss"])
     assert m.forecast(b["x"][:, :32], 2).shape == (4, 2, 8, 17)
+
+
+def test_motion_decoder_starts_as_prior(monkeypatch):
+    import torchvision
+
+    from sopt.policy.models import MotionDecoder
+
+    resnet18 = torchvision.models.resnet18
+    monkeypatch.setattr(torchvision.models, "resnet18", lambda weights=None: resnet18(weights=None))
+    cfg = load_config(overrides=["model.objective=ar_flow", "model.d_model=32", "model.n_layers=2", "model.n_heads=2",
+                                 "model.head_hidden=64", "model.ctx_len=32", "model.horizon=8"])
+    feats, eps = _toy_data()
+    prior = StatePrior(cfg.model, compute_stats(feats, eps, cfg.model.horizon, max_samples=5000))
+    model = MotionDecoder(prior, n_tasks=3, chunk=4, img_size=64)
+    B = 2
+    ctx = torch.from_numpy(feats[:32]).expand(B, 32, 17).contiguous()
+    img, task = torch.randint(0, 255, (B, 2, 3, 64, 64), dtype=torch.uint8), torch.tensor([0, 2])
+    # zero-initialized cross-attention: the decoder's features equal the pretrained prior's at init
+    torch.testing.assert_close(model._h(ctx, img, task), prior.encode(ctx)[:, -1])
+    batch = {"ctx": ctx, "img": img, "task": task, "fut": torch.from_numpy(feats[32:40]).expand(B, 8, 17),
+             "act": torch.rand(B, 4, 7).round()}
+    loss = model.loss(batch)
+    loss.backward()
+    assert torch.isfinite(loss) and model.act(ctx, img, task).shape == (B, 4, 7)
+    assert model.foresight(ctx, img, task, 3).shape == (B, 3, 8, 17)

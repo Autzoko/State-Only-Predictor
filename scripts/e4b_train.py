@@ -25,7 +25,7 @@ from sopt.data.dataset import TrajectoryStore
 from sopt.data.normalize import compute_stats
 from sopt.models.state_prior import StatePrior
 from sopt.policy.data import IDMDataset, PolicyDataset, Raw20, build_frame_cache, select_episodes
-from sopt.policy.models import IDM, DirectBC, PriorPolicy, TrunkBC
+from sopt.policy.models import IDM, DirectBC, MotionDecoder, PriorPolicy, TrunkBC
 from sopt.train.pretrain import load_checkpoint
 from sopt.utils.config import REPO_ROOT, load_config
 from sopt.utils.misc import JsonlLogger, git_rev, seed_everything
@@ -46,7 +46,7 @@ def libero_state_stats(sopt_data: Path):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--kind", choices=["idm", "prior", "bc", "trunkbc"], required=True)
+    p.add_argument("--kind", choices=["idm", "prior", "bc", "trunkbc", "motiondec"], required=True)
     p.add_argument("--run", required=True)
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--k", type=int, default=0, help="demos per task (0 = all)")
@@ -56,6 +56,8 @@ def main():
     p.add_argument("--bs", type=int, default=64)
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--state-loss", type=float, default=1.0, help="motiondec: weight of the foresight (state) loss")
+    p.add_argument("--prior-lr-mult", type=float, default=1.0, help="motiondec: lr multiplier for prior weights")
     p.add_argument("--prior-override", action="append", default=[],
                    help="model.* overrides for a scratch prior, e.g. model.per_step_norm=true")
     args = p.parse_args()
@@ -84,14 +86,17 @@ def main():
         frames = sopt_data / "processed/libero90_frames"
         build_frame_cache(sel, frames, workers=args.workers)
         meta["episodes"] = sel["episode_index"].tolist()
-        if args.kind in ("prior", "trunkbc"):
+        if args.kind in ("prior", "trunkbc", "motiondec"):
             if args.init == "scratch":
                 mcfg = load_config([str(REPO_ROOT / "configs/model/s.yaml"), str(REPO_ROOT / "configs/experiment/e2.yaml")],
                                    ["model.objective=ar_flow", *args.prior_override]).model
                 prior = StatePrior(mcfg, libero_state_stats(sopt_data))
             else:
                 prior, _ = load_checkpoint(args.init)
-            model = PriorPolicy(prior, len(tasks)) if args.kind == "prior" else TrunkBC(prior, len(tasks), 16)
+            if args.kind == "motiondec":
+                model = MotionDecoder(prior, len(tasks), 16, args.state_loss)
+            else:
+                model = PriorPolicy(prior, len(tasks)) if args.kind == "prior" else TrunkBC(prior, len(tasks), 16)
             extra = {"prior_config": OmegaConf.to_container(prior.cfg), "chunk": 16,
                      "prior_stats": {k: v.cpu().numpy() for k, v in prior.normalizer.state_dict().items()}}
             ctx_len, horizon = prior.cfg.ctx_len, prior.H
@@ -105,7 +110,13 @@ def main():
     model = model.to(device)
     dl = DataLoader(ds, bs, shuffle=True, drop_last=True, num_workers=args.workers, persistent_workers=True,
                     pin_memory=True)
-    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01, betas=(0.9, 0.95))
+    if args.kind == "motiondec":
+        pid = {id(q) for q in model.prior_parameters()}
+        groups = [{"params": [q for q in model.parameters() if id(q) in pid], "mult": args.prior_lr_mult},
+                  {"params": [q for q in model.parameters() if id(q) not in pid], "mult": 1.0}]
+    else:
+        groups = [{"params": list(model.parameters()), "mult": 1.0}]
+    opt = torch.optim.AdamW(groups, lr=args.lr, weight_decay=0.01, betas=(0.9, 0.95))
     logger = JsonlLogger(out / "metrics.jsonl")
     meta.update(samples=len(ds), n_params=sum(p.numel() for p in model.parameters()))
     (out / "meta.json").write_text(json.dumps(meta, indent=2))
@@ -117,7 +128,7 @@ def main():
         for batch in dl:
             batch = {k: v.to(device, non_blocking=True) for k, v in batch.items()}
             for g in opt.param_groups:
-                g["lr"] = lr_at(step, args.steps, args.lr)
+                g["lr"] = lr_at(step, args.steps, args.lr) * g["mult"]
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 loss = model.loss(batch)
             opt.zero_grad(set_to_none=True)
