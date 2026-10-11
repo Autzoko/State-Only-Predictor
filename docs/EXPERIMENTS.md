@@ -437,3 +437,31 @@ E4b v3（374d20c，运行中）：用按步归一化的先验做先验 + IDM（s
 - 训练设置与 E4b 相同：15k 步，bs 64，lr 1e-4（先验部分同样 1e-4），7 个任务 × 20 个初始状态评估。
 
 组别（3 个 seed）：k5 下有 droid、scratch、droid_noaux（去掉预见损失）；全部示范下有 droid、scratch。对照直接使用 E4b 的 BC 和 TrunkBC 多 seed 结果。队列为 `scripts/remote/e6_queue.sh`，tmux 会话 `sopt_e6`。冒烟测试：12 it/s（单独跑），评估流程正常。
+
+### 2026-10-11 E6 k5 结果：MotionDecoder（127, 8d5f180；3 个训练 seed × 140 个配对 episode；汇总脚本 `scripts/agg_e6.py`）
+| k5 | seed 0 | seed 1 | seed 2 | 均值 ± 标准差 |
+|---|---|---|---|---|
+| BC（E4b） | 65.0 | 61.4 | 64.3 | 63.6 ± 1.9% |
+| TrunkBC scratch（E4b） | 57.1 | 60.7 | 59.3 | 59.0 ± 1.8% |
+| TrunkBC DROID（E4b） | 71.4 | 72.1 | 66.4 | 70.0 ± 3.1% |
+| MotionDecoder scratch | 67.9 | 56.4 | 69.3 | 64.5 ± 7.0% |
+| **MotionDecoder DROID** | 73.6 | 68.6 | 71.4 | **71.2 ± 2.5%** |
+| MotionDecoder DROID，去掉预见损失 | 67.9 | 69.3 | 70.7 | 69.3 ± 1.4% |
+
+合并配对 McNemar 检验（420 对）：
+- MD DROID vs MD scratch：67 vs 39，**p = 0.008**
+- MD DROID vs BC：82 vs 50，**p = 0.007**
+- MD DROID vs TrunkBC DROID：57 vs 52，p = 0.70
+- MD DROID vs 去掉预见损失：52 vs 44，p = 0.48
+- MD scratch vs TrunkBC scratch：75 vs 52，p = 0.05
+- MD scratch vs BC：p = 0.78
+
+各任务（BC / TrunkBC DROID / MD scratch / MD DROID）：cream cheese 53 / 68 / 58 / **93**，wine 37 / 50 / 43 / **62**，drawer 83 / 78 / 93 / 85，tomato 78 / 80 / 68 / 70，ketchup 33 / **52** / 42 / 33，bowl 87 / 82 / 85 / 87，mug 73 / 80 / 62 / 68。
+
+**解读**：
+1. 在 decoder 形式下，预训练的收益依然稳定：比同结构 scratch 高 6.7 个百分点（p = 0.008），比 BC 高 7.6 个百分点（p = 0.007）。
+2. MotionDecoder DROID 是目前 k5 下最高的结果，但相对 TrunkBC DROID 只高 1.2 个百分点，不显著。在 k5 下，结构上的改动（逐层交叉注意力 + 空间视觉 token）没有带来显著的额外收益。它主要帮了 scratch（59.0 → 64.5，p = 0.05，但 seed 间方差很大）。
+3. 预见损失 +1.9 个百分点，不显著，seed 间方差变大。目前不能声称它有效。
+4. 各任务差异大：cream cheese 和 wine 大幅提升，ketchup 下降。这提示两种结构学到的是不同的东西，值得后续分析。
+
+全部示范的组正在训练。
