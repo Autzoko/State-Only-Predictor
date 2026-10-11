@@ -428,3 +428,12 @@ E4b v3（374d20c，运行中）：用按步归一化的先验做先验 + IDM（s
 1. 运动 token 只是 prefix 中的 25 个 token，action expert 通过交叉注意力读取，信号可能被约 200 个视觉 token 稀释。
 2. 在 E4b 中先验作为 trunk 端到端微调；这里 SOPT 是端到端可训的，但学习率和调度跟随 SmolVLA（2.5e-6 余弦衰减），对 SOPT 部分可能不合适。
 3. 两个任务（ketchup、mug）上带历史的两个 arm 都明显更差，提示存在 copycat 类失败，值得做扰动分析。
+
+### 2026-10-11 E6 启动：预训练先验作为动作 decoder（MotionDecoder；127, 8d5f180）
+动机：E5 中 SOPT 只是 SmolVLA 前缀里的输入 token，经过冻结的 VLM 后才被动作模块读取，3 个 seed 不显著。TrunkBC（先验直接连动作头）有效。E6 让先验本身成为动作 decoder：
+- 视觉：ResNet18 的空间特征图（2 个相机 × 4×4 = 32 个 token）+ 1 个任务 token。
+- 在先验的每一层前插入交叉注意力 + MLP，输出投影零初始化，所以初始化时 decoder 与预训练先验完全相同（单测验证）。
+- 最后一个 token 同时驱动两个头：新的动作块头（L1 + 夹爪 BCE，与 TrunkBC 相同）和预训练的 flow 头，后者预测未来 32 帧状态（"本体预见"，权重 1.0）。两个头共享特征，动作直接受监督，不经过状态到动作的换算。
+- 训练设置与 E4b 相同：15k 步，bs 64，lr 1e-4（先验部分同样 1e-4），7 个任务 × 20 个初始状态评估。
+
+组别（3 个 seed）：k5 下有 droid、scratch、droid_noaux（去掉预见损失）；全部示范下有 droid、scratch。对照直接使用 E4b 的 BC 和 TrunkBC 多 seed 结果。队列为 `scripts/remote/e6_queue.sh`，tmux 会话 `sopt_e6`。冒烟测试：12 it/s（单独跑），评估流程正常。
