@@ -608,3 +608,16 @@ k5，每任务 50 个初始状态：
 - **VLA 的失败同样以执行为主**：none 的 145 次失败中，grasp_miss + place_fail + 抽屉失败共 130 次（90%），"去哪"类只有 15 次。这说明"主流模型在基础任务上败在执行"不只是小策略的现象。
 - SOPT 减少的仍然是执行类失败：grasp_miss −13，place_fail −8，抽屉失败 −9；"去哪"类基本不变（15 → 12）。
 - 与小策略（E9a）的机制一致：SOPT 是动作侧的运动先验。
+
+### 2026-10-12 E13 准备：标准 LIBERO 四个 suite（Spatial / Object / Goal / Long），可与文献数字对照
+- **数据**：IPEC `libero_{spatial,object,goal,10}_no_noops_1.0.0_lerobot`（OpenVLA 的去空闲帧版本，20 Hz，256 px；版本已固定）。共 1,693 条 demo、273k 帧、40 个任务。
+  - 这些数据**只有 8 维 EE 状态**（世界坐标系位置 + 轴角 + 两指），没有关节角。
+- **EE-only SOPT**：新增 `model.ee_only`。归一化后的关节输入和关节目标都置零，模型只看到夹爪 + 法兰位姿，17 维布局保持不变。
+  - 在 DROID 上按 e2 的 S 配方重新预训练：`e13_ar_flow_f100_s_ee`（127；只用 DROID）。
+- **EE → DROID 法兰坐标的标定**（在同时有关节和 EE 的 IPEC libero_90 上完成）：
+  - `R_ee = R_flange · Rz(−45°)`；`p_ee = p_flange + R_flange·[0,0,0.0965] + base(task)`；位置残差 0.27 mm，旋转偏差 ≤ 0.05°。
+  - **基座位置随场景不同**：有 (−0.75, 0, 0.912)、(−0.66, 0, 0.912)、(−0.51, 0, 0.42) 三种。每个任务的 base 在仿真中由机器人自身关节测得（`scripts/libero_std_base.py` → `configs/libero_std_base.json`），只涉及机器人几何，不用任何示范。
+  - 数据集中的任务语言与 LIBERO benchmark 完全一致（有断言检查）。
+- **闭环评估**：特征由仿真关节经 FK 得到后，同样把关节维置零（`hide_joints`），与训练完全一致。步数上限按 OpenVLA 协议：220 / 280 / 300 / 520。每任务 50 个官方初始状态，即每个 suite 500 个 episode。
+- **组别**：SmolVLA none / expert_scratch / expert_droid，全部示范，seed 0（之后视情况加 seed），20k 步，bs 32（与 E7 相同）。每个 suite 一个 job（`SUITE=... sbatch scripts/slurm/e13_libero_std.sbatch`）。
+- **防泄露**：SOPT 只用 DROID；`smolvla_base` 不含 LIBERO；下游使用 benchmark 的标准训练示范，评估使用官方初始状态（这是该 benchmark 的标准协议）。
