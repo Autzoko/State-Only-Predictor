@@ -598,3 +598,13 @@ k5，每任务 50 个初始状态：
 - **组别**：none / expert_scratch / expert_droid，k5，3 个 seed（每个 seed 一个 job，3 卡并行），每任务 50 个初始状态。
 - **冒烟测试**（job 18771945）：1.19 it/s，46.6 GB，闭环评估正常（200 步时 1 个初始状态为 1/7）。
 - 依赖：diffusers 0.39 和 ftfy 装在 `/scratch/ll5582/SOPT/pydeps`（不改动 RoboticsNAS 环境）。权重缓存在 `SOPT_DATA/hf_cache`。
+
+### 2026-10-12 E7b 第一部分：SmolVLA 失败归类（seed 0，每任务 50 个初始状态，`--trace 4`）
+| 策略 | 成功 | 错误目标 + 未接近 | grasp_miss | place_fail | 抽屉失败 |
+|---|---|---|---|---|---|
+| SmolVLA none | 205 | 15 | 97 | 20 | 13 |
+| SmolVLA + DROID SOPT（动作专家侧） | **238** | 12 | **84** | **12** | **4** |
+
+- **VLA 的失败同样以执行为主**：none 的 145 次失败中，grasp_miss + place_fail + 抽屉失败共 130 次（90%），"去哪"类只有 15 次。这说明"主流模型在基础任务上败在执行"不只是小策略的现象。
+- SOPT 减少的仍然是执行类失败：grasp_miss −13，place_fail −8，抽屉失败 −9；"去哪"类基本不变（15 → 12）。
+- 与小策略（E9a）的机制一致：SOPT 是动作侧的运动先验。
