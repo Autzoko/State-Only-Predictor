@@ -48,11 +48,13 @@ def _img(o: dict) -> torch.Tensor:
 
 
 def run_episode(env, init_index: int, policy, kind: str, idm, task_id: int, device, replan: int = 8,
-                max_steps: int = 400, ctx_len: int = 96, seed: int = 0, plan_samples: int = 1) -> dict:
+                max_steps: int = 400, ctx_len: int = 96, seed: int = 0, plan_samples: int = 1,
+                trace_every: int = 0) -> dict:
     o = env.reset(init_index, seed=seed)
     hist = [features_20hz(o["q"][None], o["fingers"][None])[0]]
     task = torch.tensor([task_id], device=device)
     plan, plan_t, chunk = None, 0, None
+    trace = []
     for t in range(max_steps):
         F = np.stack(hist)
         if t % replan == 0:
@@ -74,8 +76,17 @@ def run_episode(env, init_index: int, policy, kind: str, idm, task_id: int, devi
         else:
             a = chunk[(t % replan)]
         action = np.concatenate([a[:6], dataset_to_sim_gripper(a[6:7])])
+        if trace_every and t % trace_every == 0:
+            trace.append(trace_row(t, o, action))
         o, success = env.step(action)
         hist.append(features_20hz(o["q"][None], o["fingers"][None])[0])
         if success:
-            return {"success": True, "steps": t + 1}
-    return {"success": False, "steps": max_steps}
+            return {"success": True, "steps": t + 1, **({"trace": trace} if trace_every else {})}
+    return {"success": False, "steps": max_steps, **({"trace": trace} if trace_every else {})}
+
+
+def trace_row(t: int, o: dict, action: np.ndarray) -> dict:
+    """Simulator state for the failure taxonomy (EE, finger opening, gripper command, object positions)."""
+    r = lambda v: [round(float(x), 4) for x in v]  # noqa: E731
+    return {"t": t, "eef": r(o["eef"]), "fingers": r(o["fingers"]), "grip": float(action[6]),
+            "objs": {k: r(v) for k, v in o["objs"].items()}}

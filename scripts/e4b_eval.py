@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 def worker(args_tuple):
-    policy_path, idm_path, sopt_data, task_lang, task_id, inits, replan, max_steps, gpu, plan_samples = args_tuple
+    policy_path, idm_path, sopt_data, task_lang, task_id, inits, replan, max_steps, gpu, plan_samples, trace = args_tuple
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu
     import torch
 
@@ -32,7 +32,7 @@ def worker(args_tuple):
     for i in inits:
         torch.manual_seed(1000 * task_id + i)
         r = run_episode(env, i, policy, ck["kind"], idm, task_id, device, replan, max_steps, ctx_len, seed=i,
-                        plan_samples=plan_samples)
+                        plan_samples=plan_samples, trace_every=trace)
         res.append({"task": task_lang, "init": i, **r})
     env.close()
     return res
@@ -48,13 +48,14 @@ def main():
     p.add_argument("--max-steps", type=int, default=400)
     p.add_argument("--gpu", default="0")
     p.add_argument("--plan-samples", type=int, default=1, help="prior arms: plan = mean of K flow samples")
+    p.add_argument("--trace", type=int, default=0, help="log simulator state every N steps (failure taxonomy)")
     p.add_argument("--out", required=True)
     args = p.parse_args()
     import torch
 
     tasks = torch.load(args.policy, map_location="cpu", weights_only=False)["tasks"]
     jobs = [(args.policy, args.idm, args.sopt_data, t, i, list(range(args.n_init)), args.replan, args.max_steps,
-             args.gpu, args.plan_samples) for i, t in enumerate(tasks)]
+             args.gpu, args.plan_samples, args.trace) for i, t in enumerate(tasks)]
     t0 = time.time()
     with mp.get_context("spawn").Pool(len(jobs)) as pool:
         rows = [r for rs in pool.map(worker, jobs) for r in rs]

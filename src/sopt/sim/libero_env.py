@@ -68,6 +68,10 @@ class LiberoTaskEnv:
             "fingers": np.asarray(obs["robot0_gripper_qpos"], dtype=np.float64),
             "agent": np.ascontiguousarray(obs["agentview_image"][::-1, ::-1]),
             "wrist": np.ascontiguousarray(obs["robot0_eye_in_hand_image"][::-1, ::-1]),
+            # diagnostics only (failure taxonomy); never fed to a policy
+            "eef": np.asarray(obs["robot0_eef_pos"], dtype=np.float64),
+            "objs": {k[:-4]: np.asarray(v, dtype=np.float64) for k, v in obs.items()
+                     if k.endswith("_pos") and not k.startswith("robot0") and np.shape(v) == (3,)},
         }
 
     def reset(self, init_index: int, seed: int = 0) -> dict:
