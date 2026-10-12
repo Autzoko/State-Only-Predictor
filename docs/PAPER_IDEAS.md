@@ -21,6 +21,16 @@
 **主线叙事**："视觉和语言都有自己的预训练，本体没有。我们给本体单独预训练，并证明它能与现有的各类预训练模型组合，带来增益。"需要的证据矩阵是：X ∈ {ResNet 策略（E4b、E6）、DINOv2 策略（E8）、SmolVLA（E7）、WAM（待定）}，每个 X 都要有 X、X + scratch SOPT、X + DROID SOPT 三组，多 seed，配对检验。
 
 
+### 证据矩阵现状（2026-10-12 更新；k5，3 个 seed，配对 McNemar 检验）
+| X（已有预训练） | X | X + scratch SOPT | X + DROID SOPT | 状态 |
+|---|---|---|---|---|
+| ImageNet ResNet18 策略（E4b） | 63.6 | 59.0 | **70.0**（vs X p = 0.012） | 显著 |
+| 冻结 DINOv2-S 策略（E8） | 57.0 | 54.7 | 59.8（vs X p = 0.10；vs scratch p = 0.004） | 翻转显著，相对 X 未显著；全部示范运行中 |
+| SmolVLA（E7，动作专家侧接入） | 61.2 | 61.2 | **66.0**（vs X p = 0.0008） | 显著 |
+| FastWAM（E12，世界动作模型） | – | – | – | 冒烟测试中 |
+
+机制（E9a 失败归类）：SOPT 减少的是执行类失败（k5 下 grasp_miss 81 → 53，全部示范下 18 → 9），"去哪"类失败不减少。论文可以表述为：**SOPT 是动作侧的运动先验，与负责"看懂/去哪"的视觉和语言预训练互补。**
+
 ## 0. 定位：一个被明确指出、但尚无人填补的空白
 - 2608.03052（*How Should VLA Models Use Proprioceptive State?*，2026-08）系统比较了五种状态接口和 1–96 帧的历史长度，并明确写道：视觉和语言在 VLM 中经过了大规模预训练，**proprioceptive state 却没有任何预训练**。它研究的是"状态怎么接入"，没有研究"状态是否应该预训练"。
 - 相关但不同的工作：HPT（proprio + 视觉 stem 联合预训练，不是纯 proprio）；ReViP、Think Proprioceptively、GeoProp（重新平衡视觉与 proprio）；copycat / causal confusion（Wen et al. 2020，de Haan et al. 2019：历史输入导致抄袭先前动作）；latent action 方法（LAPA、Motion-Focused Latent Action，从视频中学动作，没有本体接地）；Blind Dexterity（人形机器人纯 proprio 控制，不涉及预训练）。
