@@ -23,7 +23,7 @@ from sopt.policy.data import PolicyDataset, Raw20, build_frame_cache, select_epi
 from sopt.train.pretrain import load_checkpoint
 from sopt.utils.config import REPO_ROOT
 from sopt.utils.misc import JsonlLogger, git_rev, seed_everything
-from sopt.vla.smolvla import IMAGE_KEYS, build_policy, save_trainable
+from sopt.vla.smolvla import ARMS, IMAGE_KEYS, build_policy, save_trainable
 
 DROID_PRIOR = "outputs/e2_ar_flow_f100_s/best.pt"
 CHUNK, CTX = 50, 96
@@ -46,14 +46,14 @@ def lr_at(step, total, peak, warmup=1000, final=2.5e-6):
 
 def make_prior(arm: str) -> StatePrior:
     ref, _ = load_checkpoint(REPO_ROOT / DROID_PRIOR)  # same config + normalization for every arm
-    if arm == "droid":
+    if arm in ("droid", "expert_droid"):
         return ref
     return StatePrior(ref.cfg, {k: v.numpy() for k, v in ref.normalizer.state_dict().items()})
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--arm", choices=["none", "scratch", "droid"], required=True)
+    p.add_argument("--arm", choices=ARMS, required=True)
     p.add_argument("--run", required=True)
     p.add_argument("--k", type=int, default=5, help="demos per task (0 = all)")
     p.add_argument("--steps", type=int, default=20000)
