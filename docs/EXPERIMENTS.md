@@ -551,3 +551,24 @@ e4b_bc_k5（seed 0，每任务 50 个初始状态，成功率 64%）：
   - 同时把 BC / TrunkBC scratch / TrunkBC DROID 的 k5 三个 seed 在 50 个初始状态上重新评估，用于配对比较。
 - 防泄露：所有先验只在 DROID 训练 split 上训练；LIBERO 只用 7 个 test 任务的 k5 示范；关键帧来自这些示范本身。
 - 冒烟测试：训练 8 it/s，闭环评估正常。
+
+### 2026-10-12 E7 结果：SOPT 调制 SmolVLA 动作专家，**显著提升**（Jubail 18769062；k5，3 个 seed，每任务 50 个初始状态，`scripts/agg_e7.py`）
+| 组别 | s0 / s1 / s2 | 均值 ± SD |
+|---|---|---|
+| SmolVLA（none，只有当前状态） | 58.9 / 58.3 / 66.6 | 61.2 ± 4.6 |
+| + SOPT 动作专家条件（scratch） | 62.0 / 56.9 / 64.9 | 61.2 ± 4.1 |
+| + SOPT 动作专家条件（DROID 预训练） | 68.6 / 64.3 / 65.1 | **66.0 ± 2.3** |
+
+按 seed 池化的配对 McNemar 检验（1050 个配对 episode）：
+- DROID 对 none：132 对 82，**p = 0.0008**；
+- DROID 对 scratch：123 对 73，**p = 0.0004**；
+- scratch 对 none：72 对 72，p = 1。
+
+结论：
+- **接口是关键**。E5 把运动 token 放进 VLM 前缀，结果不显著；E7 把 SOPT 特征经零初始化 MLP 加到动作专家的每个动作 token 上，增益显著，而且 3 个 seed 都高于 none。这和小策略中的发现一致：运动特征应该紧挨动作输出。
+- **"翻转"在 VLA 上复现**：从零训练的 SOPT 与 none 完全持平；只有预训练的 SOPT 带来增益。
+- 这是"SOPT 可以与预训练 VLA 组合、带来增益"的第一个显著证据。SmolVLA 本身完全不用重新预训练。
+
+### 2026-10-12 E7b 提交（Jubail）：SmolVLA 失败归类 + 全部示范
+- 用 `vla_eval.py --trace 4` 记录 e5_vla_none_k5 与 e7_vla_expert_droid_k5_s0 的仿真状态，做失败归类。
+- 同样的三组在全部示范下各跑 3 个 seed，检验增益在数据充足时是否保持。
