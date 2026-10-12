@@ -57,6 +57,7 @@ def main():
         dd = np.sqrt(((D[:, None] - D[None]) ** 2).mean((2, 3, 4)))
         dd = dd[~np.eye(len(D), dtype=bool)]
         nn_d, nn_j = d.min(1), d.argmin(1)
+        ratio = nn_d / np.sort(d, 1)[:, 1]  # a copied scene: nearest << second nearest (ratio near 0)
         k_ids = set(k_sel[k_sel["task"] == lang]["episode_index"].astype(int))
         report[lang] = {
             "n_demos": len(ids), "n_inits": len(I),
@@ -64,9 +65,11 @@ def main():
             "demo_to_demo": {"min": float(dd.min()), "p5": float(np.percentile(dd, 5)), "median": float(np.median(dd))},
             "nearest_demo_of_eval_inits_0_19": [ids[j] for j in nn_j[:20]],
             "eval_inits_whose_nearest_demo_is_in_k_train": [i for i in range(20) if ids[nn_j[i]] in k_ids],
+            "nn_over_2nd_ratio": {"min": float(ratio.min()), "median": float(np.median(ratio))},
             "nn_dist_eval_inits_0_19": [round(float(x), 4) for x in nn_d[:20]],
         }
-        print(lang, json.dumps(report[lang]["init_to_nearest_demo"]), json.dumps(report[lang]["demo_to_demo"]), flush=True)
+        print(lang, json.dumps(report[lang]["init_to_nearest_demo"]), json.dumps(report[lang]["demo_to_demo"]),
+              json.dumps(report[lang]["nn_over_2nd_ratio"]), flush=True)
     Path(args.out).write_text(json.dumps(report, indent=2))
 
 
