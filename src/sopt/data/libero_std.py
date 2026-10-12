@@ -3,10 +3,11 @@
 Source: the IPEC-COMMUNITY `*_no_noops_1.0.0_lerobot` ports (OpenVLA no-op filtering, 256 px, 20 Hz). They store
 only the 8-d EE state [eef pos (world), axis-angle, 2 finger joints], no joint angles, so these experiments use an
 EE-only SOPT (`model.ee_only`, joint dims hidden). The EE state is mapped into DROID's convention (flange pose in
-the robot base frame) with a transform calibrated on IPEC libero_90, which has both joints and EE state
-(500 frames from 10 episodes):
-    R_ee = R_flange @ Rz(-45 deg),   p_ee = p_flange + R_flange @ [0, 0, 0.0965] + (-0.75, 0, 0.912)
-    position residual 0.27 mm RMS, rotation offset constant to 0.05 deg (max).
+the robot base frame) with a transform calibrated on IPEC libero_90, which has both joints and EE state:
+    R_ee = R_flange @ Rz(-45 deg),   p_ee = p_flange + R_flange @ [0, 0, 0.0965] + base(task)
+    position residual 0.27 mm RMS, rotation offset constant to 0.05 deg (max). The robot mount `base` differs
+    between scenes ((-0.75, 0, 0.912), (-0.66, 0, 0.912), (-0.51, 0, 0.42)); configs/libero_std_base.json holds it
+    for every task, measured in simulation from the robot's own joints (scripts/libero_std_base.py).
 The joint slots of the 17-d features are set to 0 here and in closed-loop evaluation (`hide_joints`), so the
 policy never sees joint angles in either place.
 """
@@ -33,7 +34,6 @@ SUITES = {
     "libero_10": ("IPEC-COMMUNITY/libero_10_no_noops_1.0.0_lerobot", "e1a223d30b896c1613f270a2bfc63d382b3de7e1"),
 }
 MAX_STEPS = {"libero_spatial": 220, "libero_object": 280, "libero_goal": 300, "libero_10": 520}  # OpenVLA protocol
-BASE = np.array([-0.75, 0.0, 0.912])
 TOOL = np.array([0.0, 0.0, 0.0965])
 _c, _s = np.cos(np.radians(-45.0)), np.sin(np.radians(-45.0))
 RZ = np.array([[_c, -_s, 0.0], [_s, _c, 0.0], [0.0, 0.0, 1.0]])  # R_ee = R_flange @ RZ
@@ -45,13 +45,19 @@ def hide_joints(F: np.ndarray) -> np.ndarray:
     return F
 
 
-def ee8_to_features(state: np.ndarray) -> np.ndarray:
-    """(n, 8) LIBERO EE state -> (n, 17) SOPT features (DROID flange convention, joints = 0)."""
+def task_bases() -> dict[str, dict[str, list[float]]]:
+    from sopt.utils.config import REPO_ROOT
+
+    return json.loads((REPO_ROOT / "configs/libero_std_base.json").read_text())
+
+
+def ee8_to_features(state: np.ndarray, base) -> np.ndarray:
+    """(n, 8) LIBERO EE state -> (n, 17) SOPT features (DROID flange convention, joints = 0); base: robot mount."""
     from scipy.spatial.transform import Rotation
 
     R_ee = Rotation.from_rotvec(state[:, 3:6]).as_matrix()
     R_fl = R_ee @ RZ.T
-    p_fl = state[:, :3] - BASE - R_fl @ TOOL
+    p_fl = state[:, :3] - np.asarray(base) - R_fl @ TOOL
     width = state[:, 6] - state[:, 7]
     g = np.clip((GRIPPER_OPEN_WIDTH - width) / GRIPPER_OPEN_WIDTH, 0.0, 1.0)
     raw = np.concatenate([np.zeros((len(state), 7)), g[:, None], p_fl, matrix_to_euler_xyz(R_fl)], axis=1)
@@ -71,13 +77,15 @@ def build(suite: str, out: str | Path, workers: int = 16) -> pd.DataFrame:
     files = sorted(fs.glob(f"datasets/{repo}@{rev}/data/chunk-*/episode_*.parquet"))
     tasks_path = hf_hub_download(repo, "meta/tasks.jsonl", repo_type="dataset", revision=rev, local_dir=out / "meta")
     tasks = {r["task_index"]: r["task"] for r in map(json.loads, open(tasks_path))}
+    bases = task_bases()[suite]
+    assert set(tasks.values()) == set(bases), "dataset task languages differ from the LIBERO benchmark"
     cols = ["observation.state", "action", "episode_index", "task_index"]
 
     def work(f: str):
         t = pq.read_table(f, columns=cols, filesystem=fs)
-        n = t.num_rows
-        return (ee8_to_features(_to_2d(t[cols[0]], n).astype(np.float64)), _to_2d(t[cols[1]], n).astype(np.float32),
-                int(t["episode_index"][0].as_py()), int(t["task_index"][0].as_py()))
+        n, task = t.num_rows, int(t["task_index"][0].as_py())
+        F = ee8_to_features(_to_2d(t[cols[0]], n).astype(np.float64), bases[tasks[task]])
+        return F, _to_2d(t[cols[1]], n).astype(np.float32), int(t["episode_index"][0].as_py()), task
 
     with ThreadPoolExecutor(workers) as ex:
         res = list(ex.map(work, files))
