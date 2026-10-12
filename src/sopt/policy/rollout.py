@@ -9,7 +9,7 @@ from omegaconf import OmegaConf
 from sopt.data.libero import features_20hz
 from sopt.models.state_prior import StatePrior
 from sopt.policy.data import context_indices, interp_frames
-from sopt.policy.models import IDM, DirectBC, MotionDecoder, PriorPolicy, TrunkBC
+from sopt.policy.models import IDM, DirectBC, KFMotor, MotionDecoder, PriorPolicy, TrunkBC
 from sopt.sim.libero_env import dataset_to_sim_gripper
 
 IMG = 128
@@ -19,9 +19,11 @@ def load_policy(path: str, device) -> tuple[torch.nn.Module, dict]:
     ck = torch.load(path, map_location="cpu", weights_only=False)
     n_tasks = len(ck["tasks"])
     vision = ck["meta"].get("vision", "resnet18")
-    if ck["kind"] in ("prior", "trunkbc", "motiondec"):
+    if ck["kind"] in ("prior", "trunkbc", "motiondec", "kfmotor"):
         prior = StatePrior(OmegaConf.create(ck["prior_config"]), ck["prior_stats"])
-        if ck["kind"] == "motiondec":
+        if ck["kind"] == "kfmotor":
+            model = KFMotor(prior, n_tasks, ck["chunk"], vision, ck["meta"]["state_loss"], ck["meta"]["teacher"])
+        elif ck["kind"] == "motiondec":
             model = MotionDecoder(prior, n_tasks, ck["chunk"], ck["meta"]["state_loss"])
         else:
             model = PriorPolicy(prior, n_tasks) if ck["kind"] == "prior" else TrunkBC(prior, n_tasks, ck["chunk"], vision)

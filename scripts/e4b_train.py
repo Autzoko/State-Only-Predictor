@@ -25,7 +25,7 @@ from sopt.data.dataset import TrajectoryStore
 from sopt.data.normalize import compute_stats
 from sopt.models.state_prior import StatePrior
 from sopt.policy.data import IDMDataset, PolicyDataset, Raw20, build_frame_cache, select_episodes
-from sopt.policy.models import IDM, DirectBC, MotionDecoder, PriorPolicy, TrunkBC
+from sopt.policy.models import IDM, DirectBC, KFMotor, MotionDecoder, PriorPolicy, TrunkBC
 from sopt.train.pretrain import load_checkpoint
 from sopt.utils.config import REPO_ROOT, load_config
 from sopt.utils.misc import JsonlLogger, git_rev, seed_everything
@@ -46,7 +46,7 @@ def libero_state_stats(sopt_data: Path):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--kind", choices=["idm", "prior", "bc", "trunkbc", "motiondec"], required=True)
+    p.add_argument("--kind", choices=["idm", "prior", "bc", "trunkbc", "motiondec", "kfmotor"], required=True)
     p.add_argument("--run", required=True)
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--k", type=int, default=0, help="demos per task (0 = all)")
@@ -57,6 +57,7 @@ def main():
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--state-loss", type=float, default=1.0, help="motiondec: weight of the foresight (state) loss")
+    p.add_argument("--teacher", type=float, default=0.5, help="kfmotor: P(ground-truth keyframe) in training")
     p.add_argument("--prior-lr-mult", type=float, default=1.0, help="motiondec: lr multiplier for prior weights")
     p.add_argument("--vision", choices=["resnet18", "dinov2"], default="resnet18", help="bc / trunkbc image backbone")
     p.add_argument("--prior-override", action="append", default=[],
@@ -87,15 +88,23 @@ def main():
         frames = sopt_data / "processed/libero90_frames"
         build_frame_cache(sel, frames, workers=args.workers)
         meta["episodes"] = sel["episode_index"].tolist()
-        if args.kind in ("prior", "trunkbc", "motiondec"):
+        if args.kind in ("prior", "trunkbc", "motiondec", "kfmotor"):
             if args.init == "scratch":
                 mcfg = load_config([str(REPO_ROOT / "configs/model/s.yaml"), str(REPO_ROOT / "configs/experiment/e2.yaml")],
                                    ["model.objective=ar_flow", *args.prior_override]).model
                 prior = StatePrior(mcfg, libero_state_stats(sopt_data))
             else:
                 prior, _ = load_checkpoint(args.init)
+            if args.kind == "kfmotor" and not prior.goal_cond:  # add a fresh goal pathway (zero-init last layer)
+                gcfg = OmegaConf.merge(prior.cfg, {"goal_cond": True, "goal_probs": [0.2, 0.4, 0.4]})
+                gprior = StatePrior(gcfg, {k: v.cpu().numpy() for k, v in prior.normalizer.state_dict().items()})
+                missing, unexpected = gprior.load_state_dict(prior.state_dict(), strict=False)
+                assert not unexpected and all(k.startswith(("goal_proj", "goal_probs")) for k in missing), missing
+                prior = gprior
             if args.kind == "motiondec":
                 model = MotionDecoder(prior, len(tasks), 16, args.state_loss)
+            elif args.kind == "kfmotor":
+                model = KFMotor(prior, len(tasks), 16, args.vision, args.state_loss, args.teacher)
             else:
                 model = PriorPolicy(prior, len(tasks)) if args.kind == "prior" else TrunkBC(prior, len(tasks), 16, args.vision)
             extra = {"prior_config": OmegaConf.to_container(prior.cfg), "chunk": 16,

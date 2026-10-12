@@ -112,16 +112,27 @@ def build_frame_cache(sel: pd.DataFrame, out: str | Path, workers: int = 8, size
         list(ex.map(work, sel.itertuples()))
 
 
+def next_event_frames(F: np.ndarray) -> np.ndarray:
+    """Per frame, index of the next gripper open/close event (episode end if none); same definition as the
+    DROID keyframe goals (gripper feature binarized at 0.5) so the pretrained goal pathway transfers."""
+    from sopt.data.features import GRIPPER
+
+    c = F[:, GRIPPER.start] > 0.5
+    events = np.append(np.flatnonzero(c[1:] != c[:-1]) + 1, len(F) - 1)
+    return events[np.searchsorted(events, np.arange(len(F)), side="right").clip(max=len(events) - 1)]
+
+
 class PolicyDataset(Dataset):
     def __init__(self, raw: Raw20, sel: pd.DataFrame, frames_dir: str | Path, ctx_len: int, horizon: int,
                  act_chunk: int = 16, shift: int = 8):
-        self.items, self.F, self.A, self.imgs, self.task = [], [], [], [], []
+        self.items, self.F, self.A, self.imgs, self.task, self.ev = [], [], [], [], [], []
         for row in sel.itertuples():
             F, A = raw.episode(row)
             im = np.load(Path(frames_dir) / f"ep{int(row.episode_index):06d}.npy", mmap_mode="r")
             n = min(len(F), len(im))
             e = len(self.F)
             self.F.append(F[:n]), self.A.append(A[:n]), self.imgs.append(im), self.task.append(int(row.task_id))
+            self.ev.append(next_event_frames(F[:n]))
             self.items += [(e, a) for a in range(n)]
         self.ctx_len, self.horizon, self.act_chunk, self.shift = ctx_len, horizon, act_chunk, shift
 
@@ -145,7 +156,8 @@ class PolicyDataset(Dataset):
                 out[c] = img[c, :, dy : dy + S, dx : dx + S]
             img = out.to(torch.uint8)
         return {"ctx": torch.from_numpy(ctx.astype(np.float32)), "fut": torch.from_numpy(fut.astype(np.float32)),
-                "act": torch.from_numpy(act), "act_pad": torch.from_numpy(idx >= len(A)), "img": img,
+                "act": torch.from_numpy(act), "kf": torch.from_numpy(F[self.ev[e][a]].astype(np.float32)),
+                "act_pad": torch.from_numpy(idx >= len(A)), "img": img,
                 "task": torch.tensor(self.task[e])}
 
 

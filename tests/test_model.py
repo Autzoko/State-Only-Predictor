@@ -201,3 +201,32 @@ def test_motion_decoder_starts_as_prior(monkeypatch):
     loss.backward()
     assert torch.isfinite(loss) and model.act(ctx, img, task).shape == (B, 4, 7)
     assert model.foresight(ctx, img, task, 3).shape == (B, 3, 8, 17)
+
+
+def test_kfmotor_shapes_and_external_keyframe(monkeypatch):
+    import torchvision
+
+    from sopt.policy.models import KFMotor
+
+    monkeypatch.setattr(torchvision.models, "resnet18", lambda weights=None: torchvision.models.ResNet(
+        torchvision.models.resnet.BasicBlock, [2, 2, 2, 2]))
+    cfg = load_config(overrides=["model.objective=ar_flow", "model.d_model=32", "model.n_layers=2", "model.n_heads=2",
+                                 "model.head_hidden=64", "model.ctx_len=32", "model.horizon=8", "model.goal_cond=true",
+                                 "model.goal_probs=[0.2,0.4,0.4]"])
+    feats, eps = _toy_data()
+    prior = StatePrior(cfg.model, compute_stats(feats, eps, cfg.model.horizon, max_samples=5000))
+    model = KFMotor(prior, n_tasks=3, chunk=4)
+    B = 2
+    ctx, fut, kf = torch.randn(B, 32, 17) * 0.1, torch.randn(B, 8, 17) * 0.1, torch.randn(B, 17) * 0.1
+    batch = {"ctx": ctx, "fut": fut, "kf": kf, "img": torch.randint(0, 255, (B, 2, 3, 32, 32), dtype=torch.uint8),
+             "task": torch.tensor([0, 2]), "act": torch.rand(B, 4, 7).round()}
+    model.loss(batch).backward()
+    model.eval()
+    cur = ctx[:, -1]
+    # the 10-d keyframe code round-trips (only EE pose + gripper are encoded)
+    rt = model.kf_from_code(model.kf_code(kf, cur), cur)
+    from sopt.data.features import GRIPPER, POS, ROT
+    for sl in (POS, ROT, GRIPPER):
+        torch.testing.assert_close(rt[:, sl], kf[:, sl], atol=1e-5, rtol=1e-5)
+    assert model.act(ctx, batch["img"], batch["task"]).shape == (B, 4, 7)
+    assert model.act(ctx, batch["img"], batch["task"], kf=kf).shape == (B, 4, 7)
