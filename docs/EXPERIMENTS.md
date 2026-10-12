@@ -572,3 +572,16 @@ e4b_bc_k5（seed 0，每任务 50 个初始状态，成功率 64%）：
 ### 2026-10-12 E7b 提交（Jubail）：SmolVLA 失败归类 + 全部示范
 - 用 `vla_eval.py --trace 4` 记录 e5_vla_none_k5 与 e7_vla_expert_droid_k5_s0 的仿真状态，做失败归类。
 - 同样的三组在全部示范下各跑 3 个 seed，检验增益在数据充足时是否保持。
+
+### 2026-10-12 E10 seed 0（早期信号，未下结论）
+k5，每任务 50 个初始状态：
+- KFMotor gcdroid 66.0；
+- KFMotor scratch 61.4；
+- 对照：TrunkBC DROID 70.9（同一组初始状态，来自 E9a trace 评估），BC 64.0。
+
+关键帧瓶颈目前不如直接的 TrunkBC，主要输在抽屉任务（68 vs 88）和 tomato sauce 任务（58 vs 76）。预训练相对 scratch 仍有 +4.6 的增益。等 3 个 seed 跑完再判断。
+
+### 2026-10-12 E11 排队（127，E8 完成后自动开始）：预训练规模 → 下游
+- TrunkBC k5，先验分别为 DROID 1% / 10% / 100%（现有 S checkpoint）以及 B 模型（d512 × 12 层，在 100% DROID 上按同一配方预训练，lr 2e-4）。
+- 3 个 seed，每任务 50 个初始状态。
+- 目的是验证"更多、更大的纯状态预训练 → 更好的下游策略"（暗数据扩大规模的论点）。
