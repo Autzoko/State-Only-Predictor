@@ -499,3 +499,16 @@ E5 中运动 token 放在 VLM 前缀里，结果不显著。E7 改为：前缀�
 ### 2026-10-12 E8 启动：SOPT 与强预训练视觉编码器（冻结 DINOv2-S）组合（127, 62bfd8f）
 问题：SOPT 的收益是否只是弥补了较弱的 ResNet18？如果换成冻结的 DINOv2-S/14（CLS + patch 均值，224 px），预训练的本体表示是否仍有增益？
 组别：BC、TrunkBC scratch、TrunkBC DROID，视觉统一用 `--vision dinov2`；k5 和全部示范，各 3 个 seed，50 个初始状态。队列为 `scripts/remote/e8_queue.sh`，tmux 会话 `sopt_e8`。
+
+### 2026-10-12 E8 k5 结果（冻结 DINOv2-S，50 个初始状态 × 7 任务 × 3 seed，按 seed 池化的配对 McNemar 检验，`scripts/agg_e8.py`）
+| 组别 | s0 / s1 / s2 | 均值 ± SD |
+|---|---|---|
+| BC（DINOv2） | 55.1 / 51.1 / 64.6 | 57.0 ± 6.9 |
+| TrunkBC scratch | 51.4 / 54.9 / 57.7 | 54.7 ± 3.1 |
+| TrunkBC DROID | 58.6 / 58.3 / 62.6 | **59.8 ± 2.4** |
+
+- DROID 对 scratch：194 对 140，p = 0.0037。"翻转"在冻结 DINOv2 上复现。
+- DROID 对 BC：174 对 144，p = 0.10，方向一致但**不显著**。
+- scratch 对 BC：168 对 192，p = 0.23（从零训练的历史没有收益）。
+- 观察：冻结 DINOv2 的 BC（57.0）比可微调的 ResNet18 BC（E4b 是 63.6，但用的是 20 个初始状态）更弱。k5 下冻结特征 + MLP 头的容量不足，可能压低了所有组别。
+- 全部示范阶段仍在运行。
