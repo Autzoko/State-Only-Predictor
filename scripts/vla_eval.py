@@ -15,6 +15,7 @@ import torch
 
 from sopt.data.libero import features_20hz
 from sopt.policy.data import context_indices, interp_frames
+from sopt.policy.rollout import trace_row
 from sopt.sim.libero_env import dataset_to_sim_gripper
 from sopt.sim.vec_env import TaskVecEnv
 from sopt.vla.smolvla import IMAGE_KEYS, build_policy, load_trainable
@@ -29,6 +30,7 @@ def main():
     p.add_argument("--n-init", type=int, default=20)
     p.add_argument("--max-steps", type=int, default=400)
     p.add_argument("--n-exec", type=int, default=10, help="actions executed per predicted chunk")
+    p.add_argument("--trace", type=int, default=0, help="log simulator state every N steps (failure taxonomy)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     args = p.parse_args()
     import importlib.util
@@ -52,7 +54,7 @@ def main():
         obs = venv.reset(init)
         hist = [[features_20hz(o["q"][None], o["fingers"][None])[0]] for o in obs]
         active = {i: True for i in range(len(tasks))}
-        chunks = {}
+        chunks, traces = {}, {i: [] for i in range(len(tasks))}
         for t in range(args.max_steps):
             live = [i for i in active if active[i]]
             if not live:
@@ -72,14 +74,18 @@ def main():
             for i in live:
                 a = chunks[i][t % args.n_exec]
                 actions[i] = np.concatenate([np.clip(a[:6], -1, 1), dataset_to_sim_gripper(np.array([float(a[6] > 0.5)]))])
+            if args.trace and t % args.trace == 0:
+                for i in live:
+                    traces[i].append(trace_row(t, obs[i], actions[i]))
             for i, (o, success) in venv.step(actions).items():
                 obs[i] = o
                 hist[i].append(features_20hz(o["q"][None], o["fingers"][None])[0])
                 if success:
                     active[i] = False
-                    rows.append({"task": tasks[i], "init": init, "success": True, "steps": t + 1})
-        rows += [{"task": tasks[i], "init": init, "success": False, "steps": args.max_steps}
-                 for i in active if active[i]]
+                    rows.append({"task": tasks[i], "init": init, "success": True, "steps": t + 1,
+                                 **({"trace": traces[i]} if args.trace else {})})
+        rows += [{"task": tasks[i], "init": init, "success": False, "steps": args.max_steps,
+                  **({"trace": traces[i]} if args.trace else {})} for i in active if active[i]]
         sr = np.mean([r["success"] for r in rows])
         print(f"init {init}: running success {sr:.3f} ({time.time() - t0:.0f}s)", flush=True)
     venv.close()
