@@ -478,3 +478,24 @@ E4b v3（374d20c，运行中）：用按步归一化的先验做先验 + IDM（s
 配对检验：MD DROID vs MD scratch 33 vs 8，**p = 1e-4**；vs BC 27 vs 11，**p = 0.014**；vs TrunkBC DROID 13 vs 14，p = 1.0。MD scratch vs BC p = 0.24。
 
 **E6 总结**：预训练的收益在两种数据量下都稳定复现（k5 p = 0.008，全部 p = 1e-4）。但在 ResNet 视觉条件下，"先验作为 decoder"这个结构与 TrunkBC 打平（71.2 vs 70.0，96.2 vs 96.4）。收益来自预训练本身，而不是结构。scratch 版本的 seed 间方差明显更大（7.0 / 4.3），预训练版本更稳定（2.5 / 0.4）。
+
+### 2026-10-12 防泄露审计：LIBERO 评估初始状态 vs 训练示范的初始场景（127, 53c19d6）
+问题：如果评估用的官方初始状态和某条训练示范的初始场景相同，策略就可能只是在背轨迹。
+方法（`scripts/check_init_leakage.py`）：对 7 个任务各渲染 50 个官方初始状态（与评估相同的 settle 步数），和该任务所有示范的第一帧比较 64 px RMS 距离，统计最近示范距离、示范之间的距离分布，以及最近 / 次近距离之比。如果某个场景是从示范复制的，比值会接近 0。
+
+结果：每个任务中，初始状态到最近示范的距离中位数为 0.027–0.048，和示范之间距离的 5% 分位数（0.027–0.050）相当，没有接近 0 的匹配。最近 / 次近距离之比最小 0.52，中位数 0.92–0.95。**结论：评估场景不是训练示范场景的复制，不存在这种泄露。**其他防泄露设置：
+- SOPT 只在 DROID 训练 split 上预训练，不含任何 LIBERO 数据。
+- 7 个评估任务来自 LIBERO-90 的 test 任务 split，E4a 的后训练从未见过。
+- 策略只使用这 7 个任务的示范（k5 按 salted hash 选取，嵌套）。
+- 归一化统计来自 DROID（SOPT）或训练示范（动作）。
+- smolvla_base 的预训练数据不含 LIBERO。
+
+### 2026-10-12 E7 启动：SOPT 调制 SmolVLA 的动作专家（Jubail job 18769062，3×A100，8fc2e4c）
+E5 中运动 token 放在 VLM 前缀里，结果不显著。E7 改为：前缀与 none 组完全相同（只有当前状态 token）；SOPT 最后一个 token 的特征经过一个最后一层零初始化的 MLP，加到动作专家的每个动作 token 上（位置在 SmolVLA 的 action-time MLP 之后）。初始化时策略与 none 完全一致。这对应小策略中有效的接法：运动特征紧挨动作输出。
+- 组别：expert_droid、expert_scratch，k5，seed 0–2。训练设置与 E5 相同（20k 步，bs 32，峰值 lr 1e-4，SOPT 同 lr）。
+- 评估：每任务 50 个初始状态（每个 seed 350 个配对 episode，比之前 140 个更有统计功效），E5 的 none checkpoint 也用 50 个初始状态重新评估（`rollouts_n50.json`）。
+- 冒烟测试（job 18769001）：2.7 it/s，评估正常。
+
+### 2026-10-12 E8 启动：SOPT 与强预训练视觉编码器（冻结 DINOv2-S）组合（127, 62bfd8f）
+问题：SOPT 的收益是否只是弥补了较弱的 ResNet18？如果换成冻结的 DINOv2-S/14（CLS + patch 均值，224 px），预训练的本体表示是否仍有增益？
+组别：BC、TrunkBC scratch、TrunkBC DROID，视觉统一用 `--vision dinov2`；k5 和全部示范，各 3 个 seed，50 个初始状态。队列为 `scripts/remote/e8_queue.sh`，tmux 会话 `sopt_e8`。
