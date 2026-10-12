@@ -6,6 +6,10 @@ Objectives (cfg.objective):
   masked         bidirectional, MTM-style span / future masking; reconstructs masked patches as deltas
                  from the last visible frame before them (same target scale as the AR objectives).
 
+EE-only (cfg.ee_only): joint angles are invisible to the model (normalized joint inputs and joint targets are
+zeroed), so the prior only uses gripper + flange pose and transfers to datasets without joint states (standard
+LIBERO suites, other robots). The 17-d layout is kept so augmentation / normalization code is unchanged.
+
 Goal conditioning (cfg.goal_cond, post-training): a goal state (EE pose + gripper) is encoded relative to the
 anchor frame and added to the token features entering the head. The backbone stays goal-agnostic, so each
 token can carry its own goal without leaking goals across tokens, and the zero-initialized last layer makes
@@ -19,7 +23,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from sopt.data.features import GRIPPER, POS, ROT
+from sopt.data.features import GRIPPER, POS, Q, ROT
 from sopt.models.heads import FlowHead, RegressionHead
 from sopt.models.transformer import Transformer
 
@@ -87,7 +91,15 @@ class StatePrior(nn.Module):
         return self.cfg.ctx_len + self.H
 
     # ---- shared -------------------------------------------------------------------------------
+    def _hide_joints(self, x: torch.Tensor) -> torch.Tensor:
+        if not self.cfg.get("ee_only", False):
+            return x
+        x = x.clone()
+        x[..., Q] = 0.0
+        return x
+
     def _patchify(self, xn: torch.Tensor, mask: torch.Tensor):
+        xn = self._hide_joints(xn)
         B, T, D = xn.shape
         tokens = self.embed(xn.reshape(B, T // self.P, self.P * D))
         valid = mask.reshape(B, T // self.P, self.P).all(-1)
@@ -133,7 +145,7 @@ class StatePrior(nn.Module):
         h = self.backbone(tokens, valid, causal=True)  # (B, N, d)
         anchors = torch.arange(P - 1, C, P, device=x.device)  # last frame of each patch
         fut = anchors[:, None] + 1 + torch.arange(H, device=x.device)  # (N, H)
-        target = (x[:, fut] - x[:, anchors][:, :, None]) / self.normalizer.chunk_scale(H)  # (B, N, H, D)
+        target = self._hide_joints((x[:, fut] - x[:, anchors][:, :, None]) / self.normalizer.chunk_scale(H))
         if self.goal_cond:
             B, N = h.shape[:2]
             gtype = self._sample_goal_types(B, x.device)[:, None].expand(B, N)
@@ -165,7 +177,7 @@ class StatePrior(nn.Module):
         ref_patch = torch.where(pm, torch.zeros_like(idx), idx).cummax(dim=1).values  # patch 0 is visible
         ref = x.gather(1, ((ref_patch + 1) * self.P - 1)[..., None].expand(B, N, D))  # (B, N, D)
         delta = x.reshape(B, N, self.P, D) - ref[:, :, None]
-        return (delta / self.normalizer.delta_std).flatten(-2)
+        return self._hide_joints(delta / self.normalizer.delta_std).flatten(-2)
 
     def _masked_loss(self, x, mask, input_noise, kf=None):
         B = x.shape[0]

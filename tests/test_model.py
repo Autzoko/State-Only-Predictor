@@ -230,3 +230,14 @@ def test_kfmotor_shapes_and_external_keyframe(monkeypatch):
         torch.testing.assert_close(rt[:, sl], kf[:, sl], atol=1e-5, rtol=1e-5)
     assert model.act(ctx, batch["img"], batch["task"]).shape == (B, 4, 7)
     assert model.act(ctx, batch["img"], batch["task"], kf=kf).shape == (B, 4, 7)
+
+
+def test_ee_only_ignores_joints():
+    cfg = load_config(overrides=["model.objective=ar_flow", "model.d_model=32", "model.n_layers=2", "model.n_heads=2",
+                                 "model.head_hidden=64", "model.ctx_len=32", "model.horizon=8", "model.ee_only=true"])
+    feats, eps = _toy_data()
+    model = StatePrior(cfg.model, compute_stats(feats, eps, cfg.model.horizon, max_samples=5000)).eval()
+    x = torch.randn(2, 32, 17) * 0.1
+    y = x.clone()
+    y[..., :7] = torch.randn(2, 32, 7)  # different joint angles, same EE pose + gripper
+    torch.testing.assert_close(model.encode(x), model.encode(y))

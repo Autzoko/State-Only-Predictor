@@ -38,6 +38,7 @@ model:
   flow_steps: 10
   mask_ratio: 0.5
   future_mask_prob: 0.5
+  ee_only: false            # hide joint angles (EE-pose + gripper prior; standard LIBERO / other robots)
   goal_cond: false
   goal_probs: [0.2, 0.4, 0.4]  # none / endpoint / keyframe, when goal_cond
 
