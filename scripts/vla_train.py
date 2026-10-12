@@ -44,8 +44,8 @@ def lr_at(step, total, peak, warmup=1000, final=2.5e-6):
     return final + (peak - final) * 0.5 * (1 + math.cos(math.pi * p))
 
 
-def make_prior(arm: str) -> StatePrior:
-    ref, _ = load_checkpoint(REPO_ROOT / DROID_PRIOR)  # same config + normalization for every arm
+def make_prior(arm: str, prior: str = DROID_PRIOR) -> StatePrior:
+    ref, _ = load_checkpoint(REPO_ROOT / prior)  # same config + normalization for every arm
     if arm in ("droid", "expert_droid"):
         return ref
     return StatePrior(ref.cfg, {k: v.numpy() for k, v in ref.normalizer.state_dict().items()})
@@ -61,6 +61,8 @@ def main():
     p.add_argument("--lr", type=float, default=1e-4)
     p.add_argument("--workers", type=int, default=6)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--suite", default="libero90", help="libero90 (E4b tasks) or a standard suite, e.g. libero_spatial")
+    p.add_argument("--prior", default=DROID_PRIOR, help="SOPT checkpoint (config / normalization / droid weights)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     args = p.parse_args()
     seed_everything(args.seed)
@@ -68,22 +70,34 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     device = torch.device("cuda")
     sopt_data = Path(args.sopt_data)
-    raw = Raw20(sopt_data / "processed/libero90_raw20")
-    tasks = json.loads((REPO_ROOT / "configs/e4b_tasks.json").read_text())
-    sel = select_episodes(raw.eps[raw.eps["split"] == "test"], tasks, args.k or None)
-    frames = sopt_data / "processed/libero90_frames256"
-    build_frame_cache(sel, frames, workers=args.workers, size=256)
+    if args.suite == "libero90":
+        raw = Raw20(sopt_data / "processed/libero90_raw20")
+        tasks = json.loads((REPO_ROOT / "configs/e4b_tasks.json").read_text())
+        sel = select_episodes(raw.eps[raw.eps["split"] == "test"], tasks, args.k or None)
+        frames = sopt_data / "processed/libero90_frames256"
+        build_frame_cache(sel, frames, workers=args.workers, size=256)
+    else:  # standard benchmark suite: all its tasks, EE-only state (see sopt/data/libero_std.py)
+        from sopt.data.libero_std import SUITES, StdRaw, build
+
+        root = sopt_data / "processed/libero_std" / args.suite
+        build(args.suite, root)
+        raw = StdRaw(root)
+        tasks = raw.tasks()
+        sel = select_episodes(raw.eps, tasks, args.k or None)
+        frames = root / "frames256"
+        build_frame_cache(sel, frames, workers=args.workers, size=256, repo=SUITES[args.suite][0],
+                          revision=SUITES[args.suite][1])
     ds = PolicyDataset(raw, sel, frames, CTX, 32, act_chunk=CHUNK, shift=0)
     A = np.concatenate([raw.episode(r)[1] for r in sel.itertuples()])
     action_stats = {"mean": A.mean(0), "std": np.maximum(A.std(0), 1e-3)}
 
-    policy, pre, _ = build_policy(make_prior(args.arm), args.arm, action_stats, chunk=CHUNK)
+    policy, pre, _ = build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=CHUNK)
     params = [q for q in policy.parameters() if q.requires_grad]
     opt = torch.optim.AdamW(params, lr=args.lr, betas=(0.9, 0.95), eps=1e-8, weight_decay=1e-10)
     dl = DataLoader(ds, args.bs, shuffle=True, drop_last=True, num_workers=args.workers, persistent_workers=True,
                     pin_memory=True)
     meta = {"git": git_rev(), **vars(args), "episodes": sel["episode_index"].tolist(), "samples": len(ds),
-            "trainable_M": sum(q.numel() for q in params) / 1e6, "prior": DROID_PRIOR}
+            "trainable_M": sum(q.numel() for q in params) / 1e6}
     (out / "meta.json").write_text(json.dumps(meta, indent=2))
     print(json.dumps({k: v for k, v in meta.items() if k != "episodes"}), flush=True)
     logger = JsonlLogger(out / "metrics.jsonl")

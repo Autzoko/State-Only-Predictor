@@ -76,7 +76,8 @@ def select_episodes(eps: pd.DataFrame, tasks: list[str], k: int | None, salt: st
     return sel.drop(columns="_h").reset_index(drop=True)
 
 
-def build_frame_cache(sel: pd.DataFrame, out: str | Path, workers: int = 8, size: int = IMG) -> None:
+def build_frame_cache(sel: pd.DataFrame, out: str | Path, workers: int = 8, size: int = IMG,
+                      repo: str = HF_REPO, revision: str = HF_REVISION) -> None:
     """Decode both camera videos of the selected episodes to (frames, 2, size, size, 3) uint8, one file per episode.
     size=256 keeps the native resolution (no resize)."""
     from concurrent.futures import ThreadPoolExecutor
@@ -95,8 +96,8 @@ def build_frame_cache(sel: pd.DataFrame, out: str | Path, workers: int = 8, size
         cams = []
         for key in CAMERAS:
             ep = int(row.episode_index)
-            f = hf_hub_download(HF_REPO, f"videos/chunk-{ep // 1000:03d}/{key}/episode_{ep:06d}.mp4",
-                                repo_type="dataset", revision=HF_REVISION)
+            f = hf_hub_download(repo, f"videos/chunk-{ep // 1000:03d}/{key}/episode_{ep:06d}.mp4",
+                                repo_type="dataset", revision=revision)
             with av.open(f) as c:
                 frames = [fr.to_ndarray(format="rgb24") for fr in c.decode(video=0)]
                 if frames[0].shape[0] != size:

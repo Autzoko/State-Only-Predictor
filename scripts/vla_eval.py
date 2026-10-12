@@ -28,7 +28,7 @@ def main():
     p.add_argument("--ckpt", required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--n-init", type=int, default=20)
-    p.add_argument("--max-steps", type=int, default=400)
+    p.add_argument("--max-steps", type=int, default=None, help="default: 400 (libero90) / OpenVLA per-suite limits")
     p.add_argument("--n-exec", type=int, default=10, help="actions executed per predicted chunk")
     p.add_argument("--trace", type=int, default=0, help="log simulator state every N steps (failure taxonomy)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
@@ -44,15 +44,25 @@ def main():
     ck = torch.load(args.ckpt, map_location="cpu", weights_only=False)
     tasks, arm = ck["tasks"], ck["arm"]
     device = torch.device("cuda")
-    policy, pre, post = build_policy(vt.make_prior(arm), arm, ck["action_stats"], chunk=vt.CHUNK)
+    suite = ck["meta"].get("suite", "libero90")
+    policy, pre, post = build_policy(vt.make_prior(arm, ck["meta"].get("prior", vt.DROID_PRIOR)), arm,
+                                     ck["action_stats"], chunk=vt.CHUNK)
     load_trainable(policy, args.ckpt)
     policy.eval()
-    venv = TaskVecEnv(args.sopt_data, tasks)
+    if suite == "libero90":
+        venv, feat = TaskVecEnv(args.sopt_data, tasks), features_20hz
+        args.max_steps = args.max_steps or 400
+    else:  # EE-only features: joints hidden exactly as in training (sopt/data/libero_std.py)
+        from sopt.data.libero_std import MAX_STEPS, hide_joints
+
+        venv = TaskVecEnv(args.sopt_data, tasks, suite=suite)
+        feat = lambda q, f: hide_joints(features_20hz(q, f))  # noqa: E731
+        args.max_steps = args.max_steps or MAX_STEPS[suite]
     rows, t0 = [], time.time()
     for init in range(args.n_init):
         torch.manual_seed(init)
         obs = venv.reset(init)
-        hist = [[features_20hz(o["q"][None], o["fingers"][None])[0]] for o in obs]
+        hist = [[feat(o["q"][None], o["fingers"][None])[0]] for o in obs]
         active = {i: True for i in range(len(tasks))}
         chunks, traces = {}, {i: [] for i in range(len(tasks))}
         for t in range(args.max_steps):
@@ -79,7 +89,7 @@ def main():
                     traces[i].append(trace_row(t, obs[i], actions[i]))
             for i, (o, success) in venv.step(actions).items():
                 obs[i] = o
-                hist[i].append(features_20hz(o["q"][None], o["fingers"][None])[0])
+                hist[i].append(feat(o["q"][None], o["fingers"][None])[0])
                 if success:
                     active[i] = False
                     rows.append({"task": tasks[i], "init": init, "success": True, "steps": t + 1,
@@ -90,7 +100,7 @@ def main():
         print(f"init {init}: running success {sr:.3f} ({time.time() - t0:.0f}s)", flush=True)
     venv.close()
     per_task = {t: float(np.mean([r["success"] for r in rows if r["task"] == t])) for t in tasks}
-    summary = {"ckpt": args.ckpt, "arm": arm, "success_rate": float(np.mean([r["success"] for r in rows])),
+    summary = {"ckpt": args.ckpt, "arm": arm, "suite": suite, "max_steps": args.max_steps, "success_rate": float(np.mean([r["success"] for r in rows])),
                "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "wall_s": time.time() - t0,
                "episodes": rows}
     Path(args.out).write_text(json.dumps(summary, indent=2))
