@@ -7,7 +7,7 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 source scripts/remote/env.sh
 export CUDA_VISIBLE_DEVICES=${GPU:-0}
-until grep -q "E8 DONE" outputs/e8_queue.log 2>/dev/null; do sleep 300; done
+until grep -q "E8 DONE" outputs/e8_queue.log && { [ ! -f outputs/e8b_queue.log ] || grep -q "E8 DONE" outputs/e8b_queue.log; } 2>/dev/null; do sleep 300; done
 echo "start $(date -Is)"
 evaluate() { [ -f outputs/$1/rollouts_n50.json ] && return
   python scripts/e4b_eval.py --policy outputs/$1/final.pt --idm outputs/e4b_idm/final.pt --n-init 50 \
@@ -22,7 +22,7 @@ for seed in 0 1 2; do
 done
 if [ ! -f outputs/e11_ar_flow_f100_b/best.pt ]; then
   python scripts/train.py --config configs/model/b.yaml --config configs/experiment/e2.yaml model.objective=ar_flow \
-    train.lr=2e-4 run_name=e11_ar_flow_f100_b > outputs/e11_ar_flow_f100_b.log 2>&1
+    train.lr=2e-4 data.root=/home/nyuair/langtian/SOPT_DATA/processed/droid run_name=e11_ar_flow_f100_b > outputs/e11_ar_flow_f100_b.log 2>&1
   echo "pretrain B exit $? $(date -Is)"
 fi
 for seed in 0 1 2; do
