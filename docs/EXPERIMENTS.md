@@ -621,3 +621,21 @@ k5，每任务 50 个初始状态：
 - **闭环评估**：特征由仿真关节经 FK 得到后，同样把关节维置零（`hide_joints`），与训练完全一致。步数上限按 OpenVLA 协议：220 / 280 / 300 / 520。每任务 50 个官方初始状态，即每个 suite 500 个 episode。
 - **组别**：SmolVLA none / expert_scratch / expert_droid，全部示范，seed 0（之后视情况加 seed），20k 步，bs 32（与 E7 相同）。每个 suite 一个 job（`SUITE=... sbatch scripts/slurm/e13_libero_std.sbatch`）。
 - **防泄露**：SOPT 只用 DROID；`smolvla_base` 不含 LIBERO；下游使用 benchmark 的标准训练示范，评估使用官方初始状态（这是该 benchmark 的标准协议）。
+
+### 2026-10-12 E10 结果：关键帧分解（KFMotor）**不如**直接用 SOPT 历史主干（127；k5，3 个 seed × 350 个配对 episode，`scripts/agg_e10.py`）
+| 方法 | seed 0 / 1 / 2 | 均值 ± std |
+|---|---|---|
+| BC（无历史） | 64.0 / 62.9 / 65.7 | 64.2 ± 1.4 |
+| TrunkBC 从零训练 | 61.1 / 62.9 / 59.4 | 61.1 ± 1.7 |
+| **TrunkBC + DROID SOPT** | 70.9 / 71.7 / 66.3 | **69.6 ± 2.9** |
+| KFMotor 从零训练 | 61.4 / 62.3 / 60.3 | 61.3 ± 1.0 |
+| KFMotor + 目标条件 DROID SOPT | 66.0 / 58.3 / 65.7 | 63.3 ± 4.4 |
+| KFMotor + DROID SOPT（目标通路零初始化新加） | 59.7 / 69.1 / 69.7 | 66.2 ± 5.6 |
+
+池化配对 McNemar（只统计结果不同的 episode）：TrunkBC DROID 对 BC 155:98，p=4e-4；对 TrunkBC 从零 160:71，p=5e-9。KFMotor gcdroid 对 KFMotor 从零 155:134，p=0.24；对 TrunkBC DROID 114:180，p=1.4e-4。KFMotor droid 对 KFMotor 从零 159:108，p=0.002。
+
+结论：
+- 显式地"先预测关键帧，再生成动作"没有带来收益，反而显著低于直接把 SOPT 当历史主干（负结果，写进论文分析）。关键帧预测的误差会传给动作，抵消了结构带来的好处。
+- 在 KFMotor 这个架构里，"预训练优于从零"依然成立（droid 对 scratch，p=0.002），和 E4b/E7/E8 一致。
+- DROID 上的 hindsight 目标条件微调（gc_ar_flow_ft）对下游没有额外好处，而且方差更大。
+- 主线仍然是：**预训练 SOPT 作为历史/运动表征接入**（TrunkBC、SmolVLA expert 调制）。
