@@ -585,3 +585,16 @@ k5，每任务 50 个初始状态：
 - TrunkBC k5，先验分别为 DROID 1% / 10% / 100%（现有 S checkpoint）以及 B 模型（d512 × 12 层，在 100% DROID 上按同一配方预训练，lr 2e-4）。
 - 3 个 seed，每任务 50 个初始状态。
 - 目的是验证"更多、更大的纯状态预训练 → 更好的下游策略"（暗数据扩大规模的论点）。
+
+### 2026-10-12 E12 启动：SOPT + FastWAM（世界动作模型）（Jubail）
+- **X = FastWAM**（LeRobot 0.6.2）：Wan2.2-TI2V-5B 视频 DiT + 1B 动作 DiT（Mixture-of-Transformers）。
+  - 基座 `lerobot/fastwam_base`：Wan2.2 权重，动作专家从 Wan DiT 插值得到；没有机器人数据，也没有数据统计。动作 encoder/head 不在 checkpoint 中，需要新建。因此不存在 LIBERO 泄露。
+- **微调**：所有组完全相同。
+  - 冻结视频专家、VAE 和文本编码器；训练动作专家（10.3 亿参数）和 proprio encoder。
+  - 损失为 FastWAM 自己的 flow-matching 动作损失，走推理路径（当前帧 → 32 步动作块），不训练视频损失（显存所限）。
+  - proprio token 为当前 17 维 SOPT 特征。
+  - 10k 步，bs 16，lr 1e-4（warmup 500，余弦退火）。
+- **SOPT 接入**：与 E7 完全相同的思路。SOPT 历史的最后一个 token 经零初始化 MLP 加到每个动作 token 上（动作 encoder 之后），所以初始化时等于 none。
+- **组别**：none / expert_scratch / expert_droid，k5，3 个 seed（每个 seed 一个 job，3 卡并行），每任务 50 个初始状态。
+- **冒烟测试**（job 18771945）：1.19 it/s，46.6 GB，闭环评估正常（200 步时 1 个初始状态为 1/7）。
+- 依赖：diffusers 0.39 和 ftfy 装在 `/scratch/ll5582/SOPT/pydeps`（不改动 RoboticsNAS 环境）。权重缓存在 `SOPT_DATA/hf_cache`。
