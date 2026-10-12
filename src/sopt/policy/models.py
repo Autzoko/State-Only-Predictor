@@ -30,17 +30,52 @@ IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
 IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
 
 
-class VisionTaskEncoder(nn.Module):
-    """Shared ImageNet ResNet18 over (agentview, wrist) + learned camera and task embeddings -> (B, out_dim)."""
+DINOV2 = ("facebook/dinov2-small", "ed25f3a31f01632728cabb09d1542f84ab7b0056")
 
-    def __init__(self, n_tasks: int, out_dim: int, zero_init: bool):
+
+class FrozenDINOv2(nn.Module):
+    """Frozen DINOv2-S/14 at 224 px -> [CLS, mean patch] (768). Always in eval mode, no gradients."""
+
+    out_dim = 768
+
+    def __init__(self):
         super().__init__()
-        net = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.IMAGENET1K_V1)
-        net.fc = nn.Identity()
-        self.backbone = net
-        self.cam = nn.Parameter(torch.zeros(2, 512))
+        from transformers import AutoModel
+
+        self.net = AutoModel.from_pretrained(DINOV2[0], revision=DINOV2[1])
+        self.net.requires_grad_(False)
+
+    def train(self, mode: bool = True):
+        super().train(mode)
+        self.net.eval()
+        return self
+
+    @torch.no_grad()
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = F.interpolate(x, size=224, mode="bilinear", align_corners=False)
+        h = self.net(pixel_values=x).last_hidden_state
+        return torch.cat([h[:, 0], h[:, 1:].mean(1)], dim=-1).float()
+
+
+class VisionTaskEncoder(nn.Module):
+    """Shared image backbone over (agentview, wrist) + learned camera and task embeddings -> (B, out_dim).
+    vision: 'resnet18' (ImageNet, fine-tuned; E4b / E6) or 'dinov2' (frozen DINOv2-S; E8)."""
+
+    def __init__(self, n_tasks: int, out_dim: int, zero_init: bool, vision: str = "resnet18"):
+        super().__init__()
+        if vision == "resnet18":
+            net = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.IMAGENET1K_V1)
+            net.fc = nn.Identity()
+            self.backbone, feat = net, 512
+        elif vision == "dinov2":
+            self.backbone = FrozenDINOv2()
+            feat = FrozenDINOv2.out_dim
+        else:
+            raise ValueError(vision)
+        self.feat = feat
+        self.cam = nn.Parameter(torch.zeros(2, feat))
         self.task = nn.Embedding(n_tasks, 64)
-        self.proj = nn.Sequential(nn.Linear(2 * 512 + 64, 512), nn.GELU(), nn.Linear(512, out_dim))
+        self.proj = nn.Sequential(nn.Linear(2 * feat + 64, 512), nn.GELU(), nn.Linear(512, out_dim))
         if zero_init:  # a pretrained prior starts as its unconditional self
             nn.init.zeros_(self.proj[-1].weight)
             nn.init.zeros_(self.proj[-1].bias)
@@ -51,7 +86,7 @@ class VisionTaskEncoder(nn.Module):
         """img: (B, 2, 3, H, W) uint8."""
         B = img.shape[0]
         x = (img.flatten(0, 1).float() / 255.0 - self.mean) / self.std
-        f = self.backbone(x).view(B, 2, 512) + self.cam
+        f = self.backbone(x).view(B, 2, self.feat) + self.cam
         return self.proj(torch.cat([f.flatten(1), self.task(task)], dim=-1))
 
 
@@ -82,10 +117,11 @@ class PriorPolicy(nn.Module):
 class DirectBC(nn.Module):
     """Images + task + current state (and 4-step velocity) -> action chunk (L1 on OSC deltas, BCE on gripper)."""
 
-    def __init__(self, n_tasks: int, chunk: int, state_mean: torch.Tensor, state_std: torch.Tensor):
+    def __init__(self, n_tasks: int, chunk: int, state_mean: torch.Tensor, state_std: torch.Tensor,
+                 vision: str = "resnet18"):
         super().__init__()
         self.chunk = chunk
-        self.cond = VisionTaskEncoder(n_tasks, 512, zero_init=False)
+        self.cond = VisionTaskEncoder(n_tasks, 512, zero_init=False, vision=vision)
         self.register_buffer("s_mean", state_mean)
         self.register_buffer("s_std", state_std)
         self.net = nn.Sequential(nn.Linear(512 + 2 * 17, 1024), nn.GELU(), nn.Linear(1024, 1024), nn.GELU(),
@@ -222,11 +258,11 @@ class IDM(nn.Module):
 
 
 class TrunkBC(nn.Module):
-    def __init__(self, prior: StatePrior, n_tasks: int, chunk: int):
+    def __init__(self, prior: StatePrior, n_tasks: int, chunk: int, vision: str = "resnet18"):
         super().__init__()
         self.prior, self.chunk = prior, chunk
         d = prior.cfg.d_model
-        self.cond = VisionTaskEncoder(n_tasks, d, zero_init=False)
+        self.cond = VisionTaskEncoder(n_tasks, d, zero_init=False, vision=vision)
         self.head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 1024), nn.GELU(), nn.Linear(1024, 1024), nn.GELU(),
                                   nn.Linear(1024, chunk * 7))
 

@@ -58,6 +58,7 @@ def main():
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--state-loss", type=float, default=1.0, help="motiondec: weight of the foresight (state) loss")
     p.add_argument("--prior-lr-mult", type=float, default=1.0, help="motiondec: lr multiplier for prior weights")
+    p.add_argument("--vision", choices=["resnet18", "dinov2"], default="resnet18", help="bc / trunkbc image backbone")
     p.add_argument("--prior-override", action="append", default=[],
                    help="model.* overrides for a scratch prior, e.g. model.per_step_norm=true")
     args = p.parse_args()
@@ -96,13 +97,13 @@ def main():
             if args.kind == "motiondec":
                 model = MotionDecoder(prior, len(tasks), 16, args.state_loss)
             else:
-                model = PriorPolicy(prior, len(tasks)) if args.kind == "prior" else TrunkBC(prior, len(tasks), 16)
+                model = PriorPolicy(prior, len(tasks)) if args.kind == "prior" else TrunkBC(prior, len(tasks), 16, args.vision)
             extra = {"prior_config": OmegaConf.to_container(prior.cfg), "chunk": 16,
                      "prior_stats": {k: v.cpu().numpy() for k, v in prior.normalizer.state_dict().items()}}
             ctx_len, horizon = prior.cfg.ctx_len, prior.H
         else:
             st = libero_state_stats(sopt_data)
-            model = DirectBC(len(tasks), 16, torch.tensor(st["mean"]), torch.tensor(st["std"]))
+            model = DirectBC(len(tasks), 16, torch.tensor(st["mean"]), torch.tensor(st["std"]), args.vision)
             extra = {"chunk": 16, "stats": {"mean": st["mean"], "std": st["std"]}}
             ctx_len, horizon = 96, 32
         ds = PolicyDataset(raw, sel, frames, ctx_len, horizon)

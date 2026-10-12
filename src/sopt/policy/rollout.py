@@ -18,15 +18,16 @@ IMG = 128
 def load_policy(path: str, device) -> tuple[torch.nn.Module, dict]:
     ck = torch.load(path, map_location="cpu", weights_only=False)
     n_tasks = len(ck["tasks"])
+    vision = ck["meta"].get("vision", "resnet18")
     if ck["kind"] in ("prior", "trunkbc", "motiondec"):
         prior = StatePrior(OmegaConf.create(ck["prior_config"]), ck["prior_stats"])
         if ck["kind"] == "motiondec":
             model = MotionDecoder(prior, n_tasks, ck["chunk"], ck["meta"]["state_loss"])
         else:
-            model = PriorPolicy(prior, n_tasks) if ck["kind"] == "prior" else TrunkBC(prior, n_tasks, ck["chunk"])
+            model = PriorPolicy(prior, n_tasks) if ck["kind"] == "prior" else TrunkBC(prior, n_tasks, ck["chunk"], vision)
     else:
         st = ck["stats"]
-        model = DirectBC(n_tasks, ck["chunk"], torch.tensor(st["mean"]), torch.tensor(st["std"]))
+        model = DirectBC(n_tasks, ck["chunk"], torch.tensor(st["mean"]), torch.tensor(st["std"]), vision)
     model.load_state_dict(ck["model"])
     return model.to(device).eval(), ck
 
