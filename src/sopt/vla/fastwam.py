@@ -81,7 +81,9 @@ def build_fastwam(prior: StatePrior, arm: str, chunk: int = 32, device: str = "c
     model = policy.model
     for p in model.parameters():
         p.requires_grad_(False)
-    model.action_expert.requires_grad_(True)
+    model.action_expert.requires_grad_(True)  # encoder / text + time embeddings / head
+    for layer in model.mot.layers:  # the action DiT blocks are re-parented onto the MoT layers
+        layer.blocks["action"].requires_grad_(True)
     model.proprio_encoder.requires_grad_(True)
     sopt = SOPTCond(prior, model.action_expert.hidden_dim, use=arm != "none").to(device)
     sopt.requires_grad_(arm != "none")
@@ -90,13 +92,17 @@ def build_fastwam(prior: StatePrior, arm: str, chunk: int = 32, device: str = "c
 
 
 def trainable_state(model, sopt: SOPTCond) -> dict:
-    return {"action_expert": model.action_expert.state_dict(), "proprio_encoder": model.proprio_encoder.state_dict(),
+    return {"model": {k: v.detach().cpu() for k, v in model.named_parameters() if v.requires_grad},
             "sopt": sopt.state_dict()}
 
 
 def load_trainable(model, sopt: SOPTCond, state: dict) -> None:
-    model.action_expert.load_state_dict(state["action_expert"])
-    model.proprio_encoder.load_state_dict(state["proprio_encoder"])
+    params = dict(model.named_parameters())
+    trainable = {k for k, v in params.items() if v.requires_grad}
+    assert set(state["model"]) == trainable, set(state["model"]) ^ trainable
+    with torch.no_grad():
+        for k, v in state["model"].items():
+            params[k].copy_(v)
     sopt.load_state_dict(state["sopt"])
 
 
@@ -138,7 +144,8 @@ def action_loss(model, sopt: SOPTCond, prompts: PromptCache, batch: dict, tasks:
     t = sch.sample_training_t(batch_size=action.shape[0], device=dev, dtype=action.dtype)
     noisy, target = sch.add_noise(action, noise, t), sch.training_target(action, noise, t)
     fuse = bool(getattr(model.video_expert, "fuse_vae_embedding_in_latents", False))
-    pred = model._predict_action_noise(first_frame_latents=first, latents_action=noisy, timestep_action=t,
+    # FastWAM decorates this inference helper with no_grad; call the undecorated function to train through it
+    pred = type(model)._predict_action_noise.__wrapped__(model, first_frame_latents=first, latents_action=noisy, timestep_action=t,
                                        context=context, context_mask=mask, fuse_vae_embedding_in_latents=fuse)
     return model._compute_training_action_loss({"action_is_pad": batch["act_pad"].to(dev)}, pred, target, t)
 
