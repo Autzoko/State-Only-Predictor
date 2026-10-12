@@ -25,6 +25,11 @@ TARGET = {
     "put the wine bottle on the wine rack": "wine_bottle_1",
     "put the yellow and white mug on the right plate": "white_yellow_mug_1",
 }
+# Grasp distance (EE to object origin) depends on the object (a bottle is grasped ~11 cm above its origin), so
+# "approached" = within 6 cm of the median EE-object distance of successful grasps (median over the 224
+# successes of e4b_bc_k5 seed 0, 50 init states; fixed constants, not tuned per policy).
+GRASP_DIST = {"cream_cheese_1": 0.011, "tomato_sauce_1": 0.012, "ketchup_1": 0.033, "white_bowl_1": 0.033,
+              "wine_bottle_1": 0.114, "white_yellow_mug_1": 0.090}
 NEAR, LIFT, MOVED = 0.06, 0.03, 0.03  # m
 
 
@@ -36,7 +41,7 @@ def classify(ep: dict) -> str:
         return "drawer_fail"
     tr = ep["trace"]
     pos = np.array([r["objs"][tgt] for r in tr])
-    near = np.linalg.norm(np.array([r["objs"][tgt + "_to_robot0_eef"] for r in tr]), axis=1).min() < NEAR
+    near = np.linalg.norm(np.array([r["objs"][tgt + "_to_robot0_eef"] for r in tr]), axis=1).min() < GRASP_DIST[tgt] + NEAR
     lifted = (pos[:, 2] - pos[0, 2]).max() > LIFT
     if lifted:
         return "place_fail"
