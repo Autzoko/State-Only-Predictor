@@ -685,3 +685,28 @@ k5，每任务 50 个初始状态：
 - B 模型（d512×12，56.6M 参数，100% DROID，40k 步，lr 2e-4，93d88ba）的预训练验证指标：selection 3.37。S 模型（约 5M 参数）是 4.2 左右。B 的位置 ADE 是 6.04 cm，S 是 7.37 cm。也就是说，B 在预训练任务上明显更好。
 - 下游成功率：B_f100 为 68.0 / 70.3 / 72.6，平均 70.3 ± 2.3；S_f100 为 69.6 ± 2.9。B 对 S 的配对结果 128:121，p=0.70，没有显著差别。B 对从零训练 192:96，p=2e-8。
 - 结论：下游增益随**预训练数据量**单调上升（E11 第一部分），但把模型从 5M 扩大到 57M，在 LIBERO-90 k5 上几乎没有额外收益。预训练指标更好，没有转化成下游成功率的提升。目前的瓶颈更可能在下游（只有 5 个示范、策略容量、视觉），而不是先验本身的容量。论文中主模型继续用 S，B 作为规模消融。
+
+### 2026-10-13 E13 libero_spatial 全部示范（seed 0，Jubail 18773286，cn008，03a5941）：**无提升**
+| 方法（SmolVLA，EE-only SOPT） | 成功率 | 各任务 |
+|---|---|---|
+| 无 SOPT | 78.2 | 90 92 84 82 72 88 96 18 86 74 |
+| + SOPT 从零训练 | 79.0 | 88 96 76 92 80 80 96 24 84 74 |
+| + DROID SOPT | 77.6 | 82 86 90 94 80 88 86 16 82 72 |
+
+配对 McNemar（500 个 episode）：DROID 对无 SOPT 44:47，p=0.83；从零对无 SOPT 43:39，p=0.74。
+- 每任务约 43 个示范，10 个任务的动作几乎一样（拿碗放到盘子上），难点主要在"去哪"。SmolVLA 可能已经能从下游示范里学到这个动作。
+- 有一个任务三种方法都只有 16–24%，需要核查（是任务本身难，还是标定有问题）。
+- 待检验的假设：SOPT 的增益随"模型已经掌握的机器人动作知识"增加而减小。这里的动作知识既来自基础模型的预训练，也来自下游示范的数量。对应两组新实验：
+  1. **E13 k5**：在 4 个标准 suite 上补跑每任务 5 个示范（`K=5`，dcb77cc），检验是不是示范数量的原因；
+  2. **E14**：π0.5-DROID + SOPT。
+
+### 2026-10-13 E14 准备：π0.5-DROID + SOPT（e406355）
+- 基础模型 `lerobot/pi05_droid`（revision 72824c0）：Physical Intelligence 在 π0.5 base 上用 DROID **动作**微调得到的模型，LeRobot 移植版。它已经见过 DROID 的图像、语言和动作，是检验"VLA 已经学到了 SOPT 的运动先验"最强的情况。
+- 各分支用同一套配方（π0.5/openpi 默认）：冻结 VLM（`train_expert_only`），训练 Gemma-300M 动作专家；lr 2.5e-5，wd 0.01，梯度裁剪 1.0；状态和动作都用 QUANTILES 归一化（训练帧的 q01/q99）；当前状态离散化后写进 prompt（π0.5 原生方式）；开 gradient checkpointing。
+- 相机：agent view → base_0_rgb，wrist → left_wrist_0_rgb，right_wrist 为空（mask 掉，和 DROID 一致）。
+- SOPT 接入方式和 E7/E12 相同：历史 96 帧的最后一个 token 特征，经零初始化 MLP 加到每个动作 token 上。
+- 协议与 E7/E12 相同：LIBERO-90 E4b 的 7 个任务，k5，20k 步，bs 32，每任务 50 个初始状态。
+- Tokenizer：HF 上的 PaliGemma tokenizer 需要申请权限，所以改用 openpi 用的公开 SentencePiece 模型（gs://big_vision/paligemma_tokenizer.model，sha256 8986bb4f…）转换成 HF 格式，并在 LIBERO 提示词上逐 token 和 SentencePiece（带 BOS）比对，结果一致。
+- `scripts/vla_train.py` / `vla_eval.py` 新增 `--vla smolvla|pi05`；SmolVLA 的行为不变。
+- sbatch 先跑 30 步 + 1 个初始状态的冒烟测试，失败就整个作业退出。
+- Jubail 修复：之前手动 scp 的 agg_e12.py 挡住了 `git pull`，导致 E12 seed 1 用的是不带 80g 约束的旧脚本。已取消并重新提交（18774817）。提交队列的作业数判断 bug 也已修复。
