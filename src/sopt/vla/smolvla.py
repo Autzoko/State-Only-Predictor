@@ -38,6 +38,7 @@ IMAGE_KEYS = ("observation.images.image", "observation.images.image2")
 
 
 ARMS = ("none", "scratch", "droid", "expert_scratch", "expert_droid")
+OPT = {"lr": 1e-4, "weight_decay": 1e-10, "clip": 10.0}  # E5 / E7 recipe
 
 
 class MotionStateProj(nn.Module):
@@ -129,6 +130,11 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     stats = {"action": {k: torch.as_tensor(v, dtype=torch.float32) for k, v in action_stats.items()}}
     pre, post = make_smolvla_pre_post_processors(policy.config, dataset_stats=stats)
     return policy.to(device), pre, post
+
+
+def make_batch(policy, img: torch.Tensor, ctx: torch.Tensor, tasks: list[str]) -> dict:
+    """img (B, 2, 3, H, W) float [0, 1], ctx (B, 96, 17): the flattened history is SmolVLA's observation.state."""
+    return {IMAGE_KEYS[0]: img[:, 0], IMAGE_KEYS[1]: img[:, 1], "observation.state": ctx.flatten(1), "task": tasks}
 
 
 def save_trainable(policy, path: str | Path, extra: dict) -> None:

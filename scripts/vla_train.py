@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""E5: fine-tune SmolVLA on the E4b LIBERO-90 tasks, with or without SOPT motion tokens.
+"""E5 / E7 / E13 / E14: fine-tune a VLA (SmolVLA, or pi0.5-DROID with --vla pi05) with or without SOPT.
 
   python scripts/vla_train.py --arm droid   --k 5 --run e5_vla_droid_k5
   python scripts/vla_train.py --arm scratch --k 5 --run e5_vla_scratch_k5
@@ -8,6 +8,7 @@ Same data / demos / schedule for all arms; SmolVLA defaults (frozen VLM, trainab
 """
 
 import argparse
+import importlib
 import json
 import math
 import os
@@ -23,18 +24,24 @@ from sopt.policy.data import PolicyDataset, Raw20, build_frame_cache, select_epi
 from sopt.train.pretrain import load_checkpoint
 from sopt.utils.config import REPO_ROOT
 from sopt.utils.misc import JsonlLogger, git_rev, seed_everything
-from sopt.vla.smolvla import ARMS, IMAGE_KEYS, build_policy, save_trainable
 
 DROID_PRIOR = "outputs/e2_ar_flow_f100_s/best.pt"
 CHUNK, CTX = 50, 96
 
 
-def to_lerobot(b: dict, tasks: list[str], device) -> dict:
+def vla_module(name: str):
+    return importlib.import_module(f"sopt.vla.{name}")
+
+
+def to_lerobot(V, policy, b: dict, tasks: list[str], device) -> dict:
     img = b["img"].to(device, non_blocking=True).float() / 255.0  # (B, 2, 3, H, W)
-    return {IMAGE_KEYS[0]: img[:, 0], IMAGE_KEYS[1]: img[:, 1],
-            "observation.state": b["ctx"].flatten(1).to(device, non_blocking=True),
-            "action": b["act"].to(device, non_blocking=True), "action_is_pad": b["act_pad"].to(device),
-            "task": [tasks[int(i)] for i in b["task"]]}
+    batch = V.make_batch(policy, img, b["ctx"].to(device, non_blocking=True), [tasks[int(i)] for i in b["task"]])
+    return {**batch, "action": b["act"].to(device, non_blocking=True), "action_is_pad": b["act_pad"].to(device)}
+
+
+def stats_of(x: np.ndarray) -> dict:
+    return {"mean": x.mean(0), "std": np.maximum(x.std(0), 1e-3), "q01": np.quantile(x, 0.01, axis=0),
+            "q99": np.quantile(x, 0.99, axis=0)}
 
 
 def lr_at(step, total, peak, warmup=1000, final=2.5e-6):
@@ -53,18 +60,22 @@ def make_prior(arm: str, prior: str = DROID_PRIOR) -> StatePrior:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--arm", choices=ARMS, required=True)
+    p.add_argument("--vla", default="smolvla", choices=["smolvla", "pi05"])
+    p.add_argument("--arm", required=True)
     p.add_argument("--run", required=True)
     p.add_argument("--k", type=int, default=5, help="demos per task (0 = all)")
     p.add_argument("--steps", type=int, default=20000)
     p.add_argument("--bs", type=int, default=32)
-    p.add_argument("--lr", type=float, default=1e-4)
+    p.add_argument("--lr", type=float, default=None, help="default: the VLA's recipe (sopt.vla.<vla>.OPT)")
     p.add_argument("--workers", type=int, default=6)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--suite", default="libero90", help="libero90 (E4b tasks) or a standard suite, e.g. libero_spatial")
     p.add_argument("--prior", default=DROID_PRIOR, help="SOPT checkpoint (config / normalization / droid weights)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     args = p.parse_args()
+    V = vla_module(args.vla)
+    assert args.arm in V.ARMS, (args.arm, V.ARMS)
+    args.lr = args.lr or V.OPT["lr"]
     seed_everything(args.seed)
     out = REPO_ROOT / "outputs" / args.run
     out.mkdir(parents=True, exist_ok=True)
@@ -89,11 +100,16 @@ def main():
                           revision=SUITES[args.suite][1])
     ds = PolicyDataset(raw, sel, frames, CTX, 32, act_chunk=CHUNK, shift=0)
     A = np.concatenate([raw.episode(r)[1] for r in sel.itertuples()])
-    action_stats = {"mean": A.mean(0), "std": np.maximum(A.std(0), 1e-3)}
-
-    policy, pre, _ = build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=CHUNK)
+    action_stats = stats_of(A)
+    if args.vla == "smolvla":  # E5 / E7 / E13 (unchanged: mean / std only)
+        action_stats, state_stats = {k: action_stats[k] for k in ("mean", "std")}, None
+        policy, pre, _ = V.build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=CHUNK)
+    else:  # current-state quantiles over the training frames
+        state_stats = stats_of(np.concatenate([raw.episode(r)[0] for r in sel.itertuples()]))
+        policy, pre, _ = V.build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=CHUNK,
+                                        state_stats=state_stats)
     params = [q for q in policy.parameters() if q.requires_grad]
-    opt = torch.optim.AdamW(params, lr=args.lr, betas=(0.9, 0.95), eps=1e-8, weight_decay=1e-10)
+    opt = torch.optim.AdamW(params, lr=args.lr, betas=(0.9, 0.95), eps=1e-8, weight_decay=V.OPT["weight_decay"])
     dl = DataLoader(ds, args.bs, shuffle=True, drop_last=True, num_workers=args.workers, persistent_workers=True,
                     pin_memory=True)
     meta = {"git": git_rev(), **vars(args), "episodes": sel["episode_index"].tolist(), "samples": len(ds),
@@ -105,14 +121,14 @@ def main():
     policy.train()
     while step < args.steps:
         for b in dl:
-            batch = pre(to_lerobot(b, tasks, device))
+            batch = pre(to_lerobot(V, policy, b, tasks, device))
             for g in opt.param_groups:
                 g["lr"] = lr_at(step, args.steps, args.lr)
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 loss, _ = policy.forward(batch)
             opt.zero_grad(set_to_none=True)
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(params, 10.0)
+            torch.nn.utils.clip_grad_norm_(params, V.OPT["clip"])
             opt.step()
             step += 1
             if step % 100 == 0:
@@ -121,8 +137,8 @@ def main():
                 t0 = time.time()
             if step >= args.steps:
                 break
-    save_trainable(policy, out / "final.pt", {"arm": args.arm, "tasks": tasks, "action_stats": action_stats,
-                                              "meta": meta})
+    V.save_trainable(policy, out / "final.pt", {"arm": args.arm, "tasks": tasks, "action_stats": action_stats,
+                                                "state_stats": state_stats, "meta": meta})
     print("saved", out / "final.pt", flush=True)
 
 

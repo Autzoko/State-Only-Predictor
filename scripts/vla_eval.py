@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Closed-loop LIBERO-90 success of an E5 SmolVLA policy (7 tasks in lockstep, one policy copy).
+"""Closed-loop LIBERO success of a fine-tuned VLA (SmolVLA or pi0.5; tasks in lockstep, one policy copy).
 
   python scripts/vla_eval.py --ckpt outputs/e5_vla_droid_k5/final.pt --out outputs/e5_vla_droid_k5/rollouts.json
 """
@@ -18,7 +18,6 @@ from sopt.policy.data import context_indices, interp_frames
 from sopt.policy.rollout import trace_row
 from sopt.sim.libero_env import dataset_to_sim_gripper
 from sopt.sim.vec_env import TaskVecEnv
-from sopt.vla.smolvla import IMAGE_KEYS, build_policy, load_trainable
 
 CTX = 96
 
@@ -45,9 +44,11 @@ def main():
     tasks, arm = ck["tasks"], ck["arm"]
     device = torch.device("cuda")
     suite = ck["meta"].get("suite", "libero90")
-    policy, pre, post = build_policy(vt.make_prior(arm, ck["meta"].get("prior", vt.DROID_PRIOR)), arm,
-                                     ck["action_stats"], chunk=vt.CHUNK)
-    load_trainable(policy, args.ckpt)
+    V = vt.vla_module(ck["meta"].get("vla", "smolvla"))
+    prior = vt.make_prior(arm, ck["meta"].get("prior", vt.DROID_PRIOR))
+    extra = {"state_stats": ck["state_stats"]} if ck.get("state_stats") is not None else {}
+    policy, pre, post = V.build_policy(prior, arm, ck["action_stats"], chunk=vt.CHUNK, **extra)
+    V.load_trainable(policy, args.ckpt)
     policy.eval()
     if suite == "libero90":
         venv, feat = TaskVecEnv(args.sopt_data, tasks), features_20hz
@@ -73,10 +74,9 @@ def main():
                 ctx = np.stack([interp_frames(np.stack(hist[i]), context_indices(len(hist[i]) - 1, CTX)) for i in live])
                 imgs = [np.stack([obs[i]["agent"], obs[i]["wrist"]]) for i in live]
                 img = torch.from_numpy(np.stack(imgs)).permute(0, 1, 4, 2, 3).float().div(255).to(device)
-                batch = {IMAGE_KEYS[0]: img[:, 0], IMAGE_KEYS[1]: img[:, 1],
-                         "observation.state": torch.from_numpy(ctx.astype(np.float32)).flatten(1).to(device),
-                         "task": [tasks[i] for i in live]}
                 with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
+                    batch = V.make_batch(policy, img, torch.from_numpy(ctx.astype(np.float32)).to(device),
+                                         [tasks[i] for i in live])
                     act = policy.predict_action_chunk(pre(batch))
                 act = post(act.float()).cpu().numpy()  # (B, chunk, 7), dataset convention
                 chunks.update({i: act[j] for j, i in enumerate(live)})
@@ -100,7 +100,7 @@ def main():
         print(f"init {init}: running success {sr:.3f} ({time.time() - t0:.0f}s)", flush=True)
     venv.close()
     per_task = {t: float(np.mean([r["success"] for r in rows if r["task"] == t])) for t in tasks}
-    summary = {"ckpt": args.ckpt, "arm": arm, "suite": suite, "max_steps": args.max_steps, "success_rate": float(np.mean([r["success"] for r in rows])),
+    summary = {"ckpt": args.ckpt, "arm": arm, "vla": ck["meta"].get("vla", "smolvla"), "suite": suite, "max_steps": args.max_steps, "success_rate": float(np.mean([r["success"] for r in rows])),
                "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "wall_s": time.time() - t0,
                "episodes": rows}
     Path(args.out).write_text(json.dumps(summary, indent=2))
