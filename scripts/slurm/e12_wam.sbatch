@@ -5,6 +5,7 @@
 #SBATCH --job-name=sopt-e12
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3
+#SBATCH --constraint=80g
 #SBATCH --exclude=cn014,cn015,cn270
 #SBATCH --cpus-per-task=30
 #SBATCH --mem=360G
