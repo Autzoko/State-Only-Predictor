@@ -69,7 +69,7 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     from lerobot.configs.policies import PreTrainedConfig
     from lerobot.configs.types import FeatureType, NormalizationMode, PolicyFeature
     from lerobot.policies.pi05.modeling_pi05 import PI05Policy
-    from lerobot.policies.pi05.processor_pi05 import make_pi05_pre_post_processors
+    from lerobot.policies.pi05 import processor_pi05 as proc
     from lerobot.processor import TokenizerProcessorStep
 
     assert arm in ARMS, arm
@@ -95,11 +95,13 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
         if p.requires_grad:
             p.data = p.data.float()
     stats = {"action": _q(action_stats), "observation.state": _q(state_stats)}
-    pre, post = make_pi05_pre_post_processors(policy.config, dataset_stats=stats)
-    for i, step in enumerate(pre.steps):  # gated HF tokenizer -> verified local copy of the same SentencePiece model
-        if isinstance(step, TokenizerProcessorStep):
-            pre.steps[i] = TokenizerProcessorStep(tokenizer_name=TOKENIZER, max_length=cfg.tokenizer_max_length,
-                                                  padding_side="right", padding="max_length")
+    # gated HF tokenizer -> verified local copy of the same SentencePiece model (loaded when the step is built)
+    proc.TokenizerProcessorStep = lambda **kw: TokenizerProcessorStep(**{**kw, "tokenizer_name": TOKENIZER})
+    try:
+        pre, post = proc.make_pi05_pre_post_processors(policy.config, dataset_stats=stats)
+    finally:
+        proc.TokenizerProcessorStep = TokenizerProcessorStep
+    assert any(getattr(s, "tokenizer_name", None) == TOKENIZER for s in pre.steps)
     return policy.to(device), pre, post
 
 
