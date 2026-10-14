@@ -33,6 +33,9 @@ model:
   dropout: 0.1
   per_step_norm: false      # AR targets scaled per horizon step (precise near-term; see E4b v1)
   qk_norm: true             # required for stable training (see docs/EXPERIMENTS.md, E1 v1)
+  mlp: gelu                 # gelu | swiglu   (E17 architecture ablation)
+  norm: layernorm           # layernorm | rmsnorm
+  init: default             # default | xavier (xavier-normal + 1/sqrt(2L) residual projections)
   head_hidden: 1024
   head_depth: 3
   flow_steps: 10

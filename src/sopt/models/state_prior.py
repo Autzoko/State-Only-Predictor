@@ -65,7 +65,8 @@ class StatePrior(nn.Module):
         self.normalizer = Normalizer(stats, per_step=bool(cfg.get("per_step_norm", False)))
         self.embed = nn.Linear(P * D, cfg.d_model)
         self.backbone = Transformer(
-            cfg.d_model, cfg.n_layers, cfg.n_heads, cfg.mlp_ratio, cfg.dropout, cfg.get("qk_norm", False)
+            cfg.d_model, cfg.n_layers, cfg.n_heads, cfg.mlp_ratio, cfg.dropout, cfg.get("qk_norm", False),
+            cfg.get("mlp", "gelu"), cfg.get("norm", "layernorm"), cfg.get("init", "default"),
         )  # checkpoints from before qk_norm existed were trained without it
         if self.objective == "masked":
             self.mask_token = nn.Parameter(torch.zeros(cfg.d_model))
