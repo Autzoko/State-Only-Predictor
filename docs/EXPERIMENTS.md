@@ -814,3 +814,12 @@ k5，每任务 50 个初始状态：
 | LM 模块先验 | 75.1 / 68.6 / 69.4 | 71.0 ± 3.6 |
 - 预训练指标好了约 0.5–1%（训练曲线几乎重合）；下游 lm vs 原 S：112 vs 97，p=0.33，不显著；lm vs scratch p=2e-11。
 - 结论：和 E11 的模型规模结果一致，**骨干结构不是瓶颈**。保持原模块不变（已有的 E7/E12/E13/E14 结果都基于原模块，不需要重跑）；新选项留作可选配置。论文里可以作为"结构消融"一行：SwiGLU / RMSNorm / xavier 初始化 ≈ 原模块，增益来自状态预训练本身。
+
+### 2026-10-14 E13 更多 suite（seed 0，每组 500 个配对 episode）
+| suite | 设置 | none | expert_scratch | expert_droid | droid vs none | droid vs scratch |
+|---|---|---|---|---|---|---|
+| libero_10 | k5（18799808） | 44.6 | 50.8 | 50.4 | 84 vs 55，p=0.017 | 64 vs 66，p=0.93 |
+| libero_goal | 全部示范（18801445，排除 ep82 后 427 条示范） | 89.8 | 92.0 | **94.4** | 45 vs 22，p=0.007 | 35 vs 23，p=0.15 |
+- libero_10 k5：加入历史（无论是否预训练）提升约 6 点（scratch vs none p=0.009），这里的增益来自**历史本身**，而不是 DROID 预训练。这和长时程任务需要知道"进行到哪一步"一致。
+- libero_goal 全部示范：DROID 版显著优于 none（+4.6），对 scratch 的优势不显著。
+- 标准 suite 汇总（seed 0）：droid vs none 显著为正的有 object k5、goal 全部示范、libero_10 k5；不显著的有 spatial 全部示范、object 全部示范、libero_10 全部示范；显著为负的只有 spatial k5。补 seed 后再下结论。
