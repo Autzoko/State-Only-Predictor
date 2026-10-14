@@ -21,7 +21,7 @@ export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS
 S=${SEED:-0}; K=${K:-0}; KS=$([ "$K" -gt 0 ] && echo _k$K); PRIOR=outputs/e13_ar_flow_f100_s_ee/best.pt
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE k=$K seed=$S start=$(date -Is)"
 python scripts/prepare_libero_std.py --suite $SUITE --sopt-data $SOPT_DATA --workers 24 > logs/prep_$SUITE.log 2>&1
-echo "prep exit $? $(date -Is)"; tail -n 1 logs/prep_$SUITE.log
+rc=$?; echo "prep exit $rc $(date -Is)"; tail -n 1 logs/prep_$SUITE.log; [ $rc = 0 ] || exit 1
 export HF_HUB_OFFLINE=1
 run() { local name=e13_${SUITE}_$1${KS}_s$S
   [ -f outputs/$name/final.pt ] || CUDA_VISIBLE_DEVICES=$2 python scripts/vla_train.py --suite $SUITE --prior $PRIOR \
