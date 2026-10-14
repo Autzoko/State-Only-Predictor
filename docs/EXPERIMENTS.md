@@ -827,3 +827,8 @@ k5，每任务 50 个初始状态：
 ### 2026-10-14 E13 libero_goal k5（18801771，seed 0，500 个配对 episode）：**显著提升**
 - none 75.0 / expert_scratch 76.8 / expert_droid **80.6**；droid vs none 62 vs 34，p=0.006；droid vs scratch 50 vs 31，p=0.045；scratch vs none p=0.40。
 - 这是标准 suite 中第二个预训练本身（droid vs scratch）也显著的设置（另一个是 object k5）。
+
+### 2026-10-14 E14 seed 0（18777256，cn268，59179b1）：π0.5-DROID 整体成功率异常偏低，**结果暂不解读**
+- none 17.1 / expert_scratch 17.7 / expert_droid 19.1（每组 350 个 episode）。同样协议下 SmolVLA 的 none 是 61.2，π0.5 却低得多，而且几乎所有任务都很低（SmolVLA 的 cream cheese 任务 74%，π0.5 是 0%）。
+- 训练 loss 在 2 万步时为 0.004（SmolVLA 是 0.006），说明能拟合训练数据，问题出在闭环阶段：要么训练和推理不一致，要么在 35 条示范上严重过拟合（π0.5 只训练 action expert，VLM 冻结）。
+- 诊断（18802574，`scripts/vla_openloop.py`）：在训练示范和同任务的另外 5 条未训练示范上，比较开环动作误差，SmolVLA 作对照。在诊断出结果之前，不提交 seed 1、2。
