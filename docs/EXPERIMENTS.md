@@ -752,3 +752,30 @@ k5，每任务 50 个初始状态：
 | DROID 先验（EE-only，e13） | 75.7 / 69.1 / 68.0 | **71.0 ± 4.2** |
 - ee_prior 对比 joint_prior：109 vs 95，p=0.36（无显著差异）；对比 scratch：p=1e-11；对比 BC：p=2e-6。
 - 结论：在 LIBERO-90 上，去掉关节信息的 SOPT 先验依然有效。所以标准 suite（E13）上没有增益，**不太可能是 EE-only 表示本身造成的**，更可能是标准 suite 的数据特点（任务短、初始状态分布窄、基线已经很高）或坐标换算的问题。E15（SmolVLA + EE-only，Jubail）会在 VLA 上再验证一次。
+
+### 2026-10-14 E12 三个 seed 汇总：SOPT + FastWAM **显著提升**（Jubail 18771995 / 18774817 / 18776675；k5，3 个 seed × 350 个配对 episode，`scripts/agg_e12.py 0 1 2`）
+| 分支 | 各 seed | 均值 |
+|---|---|---|
+| none | 49.7 / 55.4 / 55.1 | 53.4 ± 3.2 |
+| expert_scratch | 56.0 / 52.9 / 56.9 | 55.2 ± 2.1 |
+| expert_droid | 66.9 / 65.1 / 63.1 | **65.0 ± 1.9** |
+- droid vs none：223 vs 101，p=1e-11；droid vs scratch：p=5e-9；scratch vs none：p=0.26（不显著）。增益来自 DROID 预训练，而不是额外的历史输入或参数量。
+
+### 2026-10-14 E15 结果：在 SmolVLA 上，EE-only 先验与含关节先验**效果相同**（Jubail 18787774，cn016，9589990；`scripts/agg_e15.py`）
+| 分支 | 各 seed | 均值 |
+|---|---|---|
+| none（E5） | 58.9 / 58.3 / 66.6 | 61.2 ± 4.6 |
+| expert_scratch（E7） | 62.0 / 56.9 / 64.9 | 61.2 ± 4.1 |
+| expert_droid 含关节（E7） | 68.6 / 64.3 / 65.1 | 66.0 ± 2.3 |
+| expert_droid EE-only（E15） | 69.1 / 63.7 / 63.7 | **65.5 ± 3.1** |
+- ee vs joint：44 vs 49，p=0.68；ee vs none：p=0.003；ee vs scratch：p=0.002。
+- 结论（与 E15b 一致）：EE-only 先验本身没有问题。所以 E13 libero_spatial 上没有增益，原因在 suite 本身，而不在先验的表示方式。
+
+### 2026-10-14 E13 更多 suite（seed 0，每个 500 个配对 episode）
+| suite | 设置 | none | expert_scratch | expert_droid | droid vs none |
+|---|---|---|---|---|---|
+| libero_object | k5（18794424） | 77.6 | 78.6 | **84.2** | 78 vs 45，p=0.004（vs scratch p=0.009） |
+| libero_10 | 全部示范（18799492） | 65.6 | 70.2 | 63.2 | 77 vs 89，p=0.39（droid 比 scratch 低，p=0.005） |
+- libero_object k5：SOPT 显著提升（+6.6）；全部示范时不显著（91.8 vs 92.6，接近上限）。
+- libero_10 全部示范：DROID 先验没有带来提升，反而不如从零训练的 SOPT。libero_10 是长时程任务（最多 520 步），96 帧历史（6.4 s）只能看到其中一小段，从零训练的历史编码器可能更适合学到这个 suite 特有的阶段信息。只有一个 seed，需要补 seed。
+- libero_goal（18799465 / 18799491）在数据准备阶段失败：HF 缓存里的 `wrist_image/episode_000082.mp4` 损坏（InvalidDataError）。逐个解码检查了已缓存的 262 个视频，只有这一个坏了。已删除并重新下载，之后重新提交。
