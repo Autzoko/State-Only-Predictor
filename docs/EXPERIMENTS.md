@@ -792,3 +792,10 @@ k5，每任务 50 个初始状态：
 | libero_10 | 379 | 8689 | 7.15 | 16.65 | 0.429 | 全部示范 −2.4（单 seed） |
 - 先验在所有域上都把匀速外推的误差降低到 0.43–0.48 倍，各 suite 和 LIBERO-90 相当，甚至略好。所以**坐标换算没有问题，也不存在明显的域失配**：先验对标准 suite 的运动同样"懂"。下游增益随 suite 变化，不能用先验拟合得好不好来解释。
 - 另一个噪声参考：spatial 的 none 分支在 k5 时 83.0，比全部示范时的 78.2 还高。数据更多反而更差，说明单 seed 的 suite 级差异有 ±4 点左右的噪声，E13 的单 seed 结论都需要补 seed（已在排队）。
+
+### 2026-10-14 E17 启动：语言模型式的模块是否更好（127 tmux `sopt_e17`，fb3d1bf，`scripts/remote/e17_queue.sh`）
+- 原来的 S 模块：pre-LN，LayerNorm，GELU MLP，RoPE，QK-norm（RMSNorm），PyTorch 默认初始化。
+- E17 的改法：GELU 换成 SwiGLU（隐藏层乘 2/3，参数量对齐：977 万 vs 978 万），LayerNorm 换成 RMSNorm（含最终的 norm），初始化换成 xavier-normal、偏置置零、残差输出投影按 1/sqrt(2L) 缩放。RoPE 和 QK-norm 原来就有，保持不变。
+- 改动是配置选项（`model.mlp / norm / init`），默认值等于原来的模块，旧 checkpoint 照常加载（已验证）。
+- 训练配方和 `e2_ar_flow_f100_s` 完全一致（S，ar_flow，100% DROID，40k 步，相同的训练/验证划分），然后在 TrunkBC 上每个任务 5 条示范、3 个 seed、每任务 50 个初始状态评估，用 `scripts/agg_e17.py` 和 E4b 的 droid 先验配对比较。预训练只做 1 个 seed。
+- 预期：E11 中模型放大约 10 倍下游都没变，所以这次大概率没有显著差异；如果确实没有，就和 E11 一起说明"结构不敏感，数据才是关键"。
