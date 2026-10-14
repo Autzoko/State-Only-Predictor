@@ -34,6 +34,9 @@ SUITES = {
     "libero_10": ("IPEC-COMMUNITY/libero_10_no_noops_1.0.0_lerobot", "e1a223d30b896c1613f270a2bfc63d382b3de7e1"),
 }
 MAX_STEPS = {"libero_spatial": 220, "libero_object": 280, "libero_goal": 300, "libero_10": 520}  # OpenVLA protocol
+# Episodes whose upstream video is corrupt (sha256 matches the hub's LFS hash, so re-downloading cannot fix it):
+# dropped from the usable episode list. Training demos only; evaluation uses the simulator's init states.
+CORRUPT = {"libero_goal": {82}}  # wrist_image/episode_000082.mp4: InvalidDataError on decode
 TOOL = np.array([0.0, 0.0, 0.0965])
 _c, _s = np.cos(np.radians(-45.0)), np.sin(np.radians(-45.0))
 RZ = np.array([[_c, -_s, 0.0], [_s, _c, 0.0], [0.0, 0.0, 1.0]])  # R_ee = R_flange @ RZ
@@ -71,7 +74,7 @@ def build(suite: str, out: str | Path, workers: int = 16) -> pd.DataFrame:
     repo, rev = SUITES[suite]
     out = Path(out)
     if (out / "episodes.parquet").exists():
-        return pd.read_parquet(out / "episodes.parquet")
+        return usable(suite, pd.read_parquet(out / "episodes.parquet"))
     out.mkdir(parents=True, exist_ok=True)
     fs = HfFileSystem()
     files = sorted(fs.glob(f"datasets/{repo}@{rev}/data/chunk-*/episode_*.parquet"))
@@ -96,7 +99,11 @@ def build(suite: str, out: str | Path, workers: int = 16) -> pd.DataFrame:
     np.save(out / "features.npy", np.concatenate([r[0] for r in res]))
     np.save(out / "actions.npy", np.concatenate([r[1] for r in res]))
     eps.to_parquet(out / "episodes.parquet", index=False)
-    return eps
+    return usable(suite, eps)
+
+
+def usable(suite: str, eps: pd.DataFrame) -> pd.DataFrame:
+    return eps[~eps["episode_index"].isin(CORRUPT.get(suite, ()))].reset_index(drop=True)
 
 
 class StdRaw:
@@ -104,7 +111,7 @@ class StdRaw:
 
     def __init__(self, root: str | Path):
         root = Path(root)
-        self.eps = pd.read_parquet(root / "episodes.parquet")
+        self.eps = usable(root.name, pd.read_parquet(root / "episodes.parquet"))
         self.features = np.load(root / "features.npy")
         self.actions = np.load(root / "actions.npy")
 
