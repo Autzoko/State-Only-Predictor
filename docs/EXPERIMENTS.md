@@ -847,3 +847,14 @@ k5，每任务 50 个初始状态：
 - 处理方案：
   1. 用现有的 seed 0 checkpoint 在 n_exec 25 下重新评测三个分支（50 个初始状态，18802803）。三个分支用同样的设置，所以配对比较仍然有效。n_exec 是根据 none 分支的 10 个初始状态选出来的，同一个设置用于所有分支，报告时两个 n_exec 都列出。
   2. **E14b**：lr 1e-4（与 SmolVLA 相同），其他设置不变，评测时 n_exec 取 10 和 25。三个分支用同样的配方，SOPT 的对比依然公平。
+
+### 2026-10-15 E14 seed 0 在 n_exec 25 下重新评测（18802803，cn010，同一批 checkpoint，`scripts/agg_e14.py --x 25 0`）
+| n_exec | none | expert_scratch | expert_droid | droid vs none | droid vs scratch |
+|---|---|---|---|---|---|
+| 10 | 17.1 | 17.7 | 19.1 | 36 vs 29，p=0.46 | p=0.58 |
+| 25 | 26.3 | 25.4 | **30.0** | 45 vs 32，p=0.17 | 49 vs 33，p=0.10 |
+- 方向和 SmolVLA、FastWAM 一致（droid > none ≈ scratch），但单个 seed 不显著，而且整体水平偏低，因为 π0.5 欠拟合（诊断 1）。最终结论看 E14b（lr 1e-4，18802970，已开始运行）。
+
+### 2026-10-15 E13 libero_spatial k5 补充 seed 1（18802280）：负结果**复现了**
+- 2 个 seed（1000 个配对 episode）：none 81.8 / expert_scratch 79.8 / expert_droid 79.2；droid vs none 54 vs 80，p=0.03；droid vs scratch p=0.65；scratch vs none p=0.057。
+- 两个带历史的分支都比 none 低约 2–2.6 点，DROID 预训练本身没有带来额外损失，问题出在**加入运动历史**。libero_spatial 的 10 个任务动作几乎相同（都是拿起黑碗放到盘子上），区别只在于是哪个碗（只能靠视觉区分）。推测：历史条件让策略更多依赖"运动惯性"而不是视觉，导致在选哪个碗上更容易出错。可以用失败归类（trace）来检验：找错物体的比例是否上升。
