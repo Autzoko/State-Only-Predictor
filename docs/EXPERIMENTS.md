@@ -778,4 +778,4 @@ k5，每任务 50 个初始状态：
 | libero_10 | 全部示范（18799492） | 65.6 | 70.2 | 63.2 | 77 vs 89，p=0.39（droid 比 scratch 低，p=0.005） |
 - libero_object k5：SOPT 显著提升（+6.6）；全部示范时不显著（91.8 vs 92.6，接近上限）。
 - libero_10 全部示范：DROID 先验没有带来提升，反而不如从零训练的 SOPT。libero_10 是长时程任务（最多 520 步），96 帧历史（6.4 s）只能看到其中一小段，从零训练的历史编码器可能更适合学到这个 suite 特有的阶段信息。只有一个 seed，需要补 seed。
-- libero_goal（18799465 / 18799491）在数据准备阶段失败：HF 缓存里的 `wrist_image/episode_000082.mp4` 损坏（InvalidDataError）。逐个解码检查了已缓存的 262 个视频，只有这一个坏了。已删除并重新下载，之后重新提交。
+- libero_goal（18799465 / 18799491）在数据准备阶段失败：HF 缓存里的 `wrist_image/episode_000082.mp4` 损坏（InvalidDataError）。逐个解码检查了已缓存的 262 个视频，只有这一个坏了。进一步核查发现，用 curl 重新下载后的文件 sha256 = b3788859…，和 HF 上记录的 LFS 哈希一致，说明**上游数据本身已损坏**。处理方式：在 `sopt/data/libero_std.py` 中设 `CORRUPT = {"libero_goal": {82}}`，把这条示范从可用列表中排除（goal 剩 427 条，10 个任务都在；其他 suite 不变，spatial 仍是 432 条，已有结果可复现）。这条只是训练示范，评测用的是仿真器的初始状态，所以不影响评测。另外，e13 sbatch 改为数据准备失败就直接退出。已重新排队：goal、goal k5、spatial k5 seed 1、object k5 seed 1。
