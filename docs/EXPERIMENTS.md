@@ -823,3 +823,7 @@ k5，每任务 50 个初始状态：
 - libero_10 k5：加入历史（无论是否预训练）提升约 6 点（scratch vs none p=0.009），这里的增益来自**历史本身**，而不是 DROID 预训练。这和长时程任务需要知道"进行到哪一步"一致。
 - libero_goal 全部示范：DROID 版显著优于 none（+4.6），对 scratch 的优势不显著。
 - 标准 suite 汇总（seed 0）：droid vs none 显著为正的有 object k5、goal 全部示范、libero_10 k5；不显著的有 spatial 全部示范、object 全部示范、libero_10 全部示范；显著为负的只有 spatial k5。补 seed 后再下结论。
+
+### 2026-10-14 E13 libero_goal k5（18801771，seed 0，500 个配对 episode）：**显著提升**
+- none 75.0 / expert_scratch 76.8 / expert_droid **80.6**；droid vs none 62 vs 34，p=0.006；droid vs scratch 50 vs 31，p=0.045；scratch vs none p=0.40。
+- 这是标准 suite 中第二个预训练本身（droid vs scratch）也显著的设置（另一个是 object k5）。
