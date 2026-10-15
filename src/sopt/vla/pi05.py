@@ -44,10 +44,20 @@ class SOPTCond(nn.Module):
         nn.init.zeros_(self.mlp[-1].weight)
         nn.init.zeros_(self.mlp[-1].bias)
         self.cond = None
+        self.cond_drop = 0.0  # E19: P(drop the SOPT feature) per training sample
 
     def set(self, ctx: torch.Tensor) -> None:
         """ctx: (B, 96, 17) raw SOPT features on the 15 Hz grid."""
-        self.cond = self.mlp(self.prior.encode(ctx.float())[:, -1])
+        from sopt.vla.smolvla import _drop
+
+        self.cond = _drop(self.mlp(self.prior.encode(ctx.float())[:, -1]), self.cond_drop, self.training)
+
+
+def set_cond_drop(policy, p: float) -> None:
+    if hasattr(policy, "sopt"):
+        policy.sopt.cond_drop = p
+    else:
+        assert p == 0, "SOPT dropout needs an expert_* arm"
 
 
 def _condition_expert(model, sopt: SOPTCond) -> None:

@@ -58,18 +58,35 @@ class MotionStateProj(nn.Module):
             nn.init.zeros_(self.expert_cond[-1].weight)
             nn.init.zeros_(self.expert_cond[-1].bias)
         self.cond = None  # (B, expert_hidden), set by forward when use_motion == 'expert'
+        self.cond_drop = 0.0  # E19: P(drop the SOPT feature) per training sample
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
         """state: (B, C * 17) flattened history -> (B, N + 1, hidden)."""
         x = state.float().view(state.shape[0], self.prior.cfg.ctx_len, self.prior.D)
         cur = self.cur_proj(self.prior.normalizer.norm(x[:, -1]))[:, None]
         if self.use_motion == "expert":
-            self.cond = self.expert_cond(self.prior.encode(x)[:, -1])
+            self.cond = _drop(self.expert_cond(self.prior.encode(x)[:, -1]), self.cond_drop, self.training)
             return cur
         if not self.use_motion:
             return cur
         motion = self.motion_proj(self.prior.encode(x))  # (B, C / patch, hidden)
         return torch.cat([motion, cur.to(motion.dtype)], dim=1)
+
+
+def _drop(cond: torch.Tensor, p: float, training: bool) -> torch.Tensor:
+    """E19 SOPT dropout: in training, zero the SOPT feature of each sample with probability p (the policy must also
+    work without it, i.e. keep using vision); at evaluation the feature is always on."""
+    if not training or p <= 0:
+        return cond
+    keep = (torch.rand(cond.shape[0], 1, device=cond.device) >= p).to(cond.dtype)
+    return cond * keep
+
+
+def set_cond_drop(policy, p: float) -> None:
+    if getattr(policy.model.state_proj, "use_motion", None) == "expert":
+        policy.model.state_proj.cond_drop = p
+    else:
+        assert p == 0, "SOPT dropout needs an expert_* arm"
 
 
 def _condition_expert(model) -> None:

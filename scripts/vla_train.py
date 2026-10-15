@@ -72,6 +72,7 @@ def main():
     p.add_argument("--suite", default="libero90", help="libero90 (E4b tasks) or a standard suite, e.g. libero_spatial")
     p.add_argument("--prior", default=DROID_PRIOR, help="SOPT checkpoint (config / normalization / droid weights)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
+    p.add_argument("--cond-drop", type=float, default=0.0, help="E19: P(drop the SOPT feature) per training sample")
     args = p.parse_args()
     V = vla_module(args.vla)
     assert args.arm in V.ARMS, (args.arm, V.ARMS)
@@ -109,6 +110,7 @@ def main():
         state_stats = stats_of(np.concatenate([raw.episode(r)[0] for r in sel.itertuples()]))
         policy, pre, _ = V.build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=chunk,
                                         state_stats=state_stats)
+    V.set_cond_drop(policy, args.cond_drop)
     params = [q for q in policy.parameters() if q.requires_grad]
     groups = V.param_groups(policy, args.lr) if hasattr(V, "param_groups") else [{"params": params, "scale": 1.0}]
     assert sum(len(g["params"]) for g in groups) == len(params)
