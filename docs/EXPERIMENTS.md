@@ -918,3 +918,13 @@ Pooled McNemar：DROID vs LIBERO-only 166 vs 80，p=4e-8；LIBERO-only vs scratc
 stats_all（cluster bootstrap over (seed, task)，Holm）：DROID vs scratch +4.2 [+1.2, +7.2]，p=1.7e-5（Holm 3.5e-5）——稳健；DROID vs BC +2.0 [−1.8, +6.0]，McNemar p=0.04，CI 含 0——不稳健。
 按子集：7 个 dev 任务 BC 58.0 / scratch 58.0 / DROID 64.7（+6.7，与 DEV 结论一致）；10 个新任务 78.7 / 75.1 / 77.5（DROID ≈ BC，> scratch +2.4）。
 解读：新 10 任务基线更高（~79%，天花板更近），且 7 个 dev 任务曾被用于开发期的选择，"DROID trunk > BC" 在干净的新任务上没有复现；"DROID 预训练 > 同结构随机初始化" 在两个子集上都成立。论文主张应以 pretrain-vs-scratch 与 host+SOPT-vs-host 为主，TrunkBC-vs-BC 只作为辅助。
+
+### E23 分析：增益集中在难任务（headroom），交叉 seed 验证
+按任务计算 DROID trunk 相对 BC 的增益与 BC 基线成功率的相关：全 seed r=−0.62（BC<70% 的 6 个任务 +11.3，70–90% 的 9 个 −1.9）。
+为排除回归均值（同一基线出现在两侧），用一个 seed 定义难度、另外两个 seed 测增益：
+| 难度来自 | r | 难任务 DROID−BC | 易任务 DROID−BC | 难任务 DROID−scratch | 易任务 DROID−scratch |
+|---|---|---|---|---|---|
+| s0（增益用 s1,s2） | −0.40 | +9.6 (n=7) | −2.0 | +4.9 | +4.1 |
+| s1（增益用 s0,s2） | −0.54 | +10.4 (n=5) | +0.4 | +2.8 | +4.1 |
+| s2（增益用 s0,s1） | −0.55 | +7.4 (n=7) | −5.2 | +8.0 | +1.8 |
+结论：SOPT 相对普通 BC 的收益集中在策略本来容易失败的任务（基线 <70%），简单任务上无收益；预训练相对随机初始化在难易两类任务上都为正。这解释了 E23 dev（偏难，基线 58%）与 new（偏易，基线 79%）子集的差异。论文中按预先定义的难度分层（用独立 seed 定难度）报告，避免事后挑选。之后对各 host 用同样的交叉 seed 分析（难度来自 none arm）。
