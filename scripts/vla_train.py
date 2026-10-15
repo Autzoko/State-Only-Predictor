@@ -41,7 +41,7 @@ def to_lerobot(V, policy, b: dict, tasks: list[str], device) -> dict:
 
 def stats_of(x: np.ndarray) -> dict:
     return {"mean": x.mean(0), "std": np.maximum(x.std(0), 1e-3), "q01": np.quantile(x, 0.01, axis=0),
-            "q99": np.quantile(x, 0.99, axis=0)}
+            "q99": np.quantile(x, 0.99, axis=0), "min": x.min(0), "max": np.maximum(x.max(0), x.min(0) + 1e-3)}
 
 
 def lr_at(step, total, peak, warmup=1000, final=2.5e-6):
@@ -60,7 +60,7 @@ def make_prior(arm: str, prior: str = DROID_PRIOR) -> StatePrior:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--vla", default="smolvla", choices=["smolvla", "pi05", "xvla"])
+    p.add_argument("--vla", default="smolvla", choices=["smolvla", "pi05", "xvla", "diffusion"])
     p.add_argument("--arm", required=True)
     p.add_argument("--run", required=True)
     p.add_argument("--k", type=int, default=5, help="demos per task (0 = all)")
@@ -108,8 +108,9 @@ def main():
         policy, pre, _ = V.build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=chunk)
     else:  # current-state quantiles over the training frames
         state_stats = stats_of(np.concatenate([raw.episode(r)[0] for r in sel.itertuples()]))
+        kw = {"tasks": tasks} if getattr(V, "NEEDS_TASKS", False) else {}
         policy, pre, _ = V.build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=chunk,
-                                        state_stats=state_stats)
+                                        state_stats=state_stats, **kw)
     V.set_cond_drop(policy, args.cond_drop)
     params = [q for q in policy.parameters() if q.requires_grad]
     groups = V.param_groups(policy, args.lr) if hasattr(V, "param_groups") else [{"params": params, "scale": 1.0}]
