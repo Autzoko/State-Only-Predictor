@@ -906,3 +906,15 @@ k5，每任务 50 个初始状态：
 Pooled McNemar：DROID vs LIBERO-only 166 vs 80，p=4e-8；LIBERO-only vs scratch p=0.89；DROID→LIBERO vs DROID p=0.088（n.s.，方差更小）；DROID→LIBERO vs scratch p=4e-13。
 结论：同域少量状态预训练 = 没预训练；增益来自大规模跨场景的 DROID 运动数据。在目标域状态上再微调只带来小幅、不显著的提升。
 基础设施：此后 127 不再跑 SOPT 计算（让给他人）；小模型实验迁到实验室 DGX Spark（`scripts/dgx/`，冒烟测试 158374 通过，GB10 TrunkBC ~19 it/s），E23 TrunkBC 17 任务 = DGX 作业 158381；E19 LIBERO-90 改到 Jubail 队列（127 上的 seed0 中途杀掉，无 checkpoint）。
+
+## E23 TrunkBC 17 任务结果（2026-10-15，DGX Spark 作业 158381，k5 × 50 init × 3 seeds，850 ep/run）
+
+| arm | per seed | mean ± sd |
+|---|---|---|
+| BC (MLP) | 72.2 / 71.5 / 66.8 | 70.2 ± 2.9 |
+| scratch trunk | 69.2 / 65.9 / 69.2 | 68.1 ± 1.9 |
+| DROID trunk | 72.8 / 70.9 / 72.9 | 72.2 ± 1.1 |
+
+stats_all（cluster bootstrap over (seed, task)，Holm）：DROID vs scratch +4.2 [+1.2, +7.2]，p=1.7e-5（Holm 3.5e-5）——稳健；DROID vs BC +2.0 [−1.8, +6.0]，McNemar p=0.04，CI 含 0——不稳健。
+按子集：7 个 dev 任务 BC 58.0 / scratch 58.0 / DROID 64.7（+6.7，与 DEV 结论一致）；10 个新任务 78.7 / 75.1 / 77.5（DROID ≈ BC，> scratch +2.4）。
+解读：新 10 任务基线更高（~79%，天花板更近），且 7 个 dev 任务曾被用于开发期的选择，"DROID trunk > BC" 在干净的新任务上没有复现；"DROID 预训练 > 同结构随机初始化" 在两个子集上都成立。论文主张应以 pretrain-vs-scratch 与 host+SOPT-vs-host 为主，TrunkBC-vs-BC 只作为辅助。
