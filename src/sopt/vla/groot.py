@@ -73,7 +73,7 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     from lerobot.policies.groot.processor_groot import make_groot_pre_post_processors
 
     assert arm in ARMS, arm
-    snapshot_download(BACKBONE_PROCESSOR[0], revision=BACKBONE_PROCESSOR[1])  # must be cached (offline nodes)
+    snapshot_download(BACKBONE_PROCESSOR[0], revision=BACKBONE_PROCESSOR[1], allow_patterns=["*.json", "*.txt"])  # processor only, cached (offline nodes)
     cfg = GrootConfig(base_model_path=snapshot_download(BASE, revision=REVISION), embodiment_tag="new_embodiment", chunk_size=chunk,
                       n_action_steps=chunk, use_relative_actions=False, use_bf16=True, device=device)
     cfg.input_features = {k: PolicyFeature(type=FeatureType.VISUAL, shape=(3, 256, 256)) for k in IMAGE_KEYS}

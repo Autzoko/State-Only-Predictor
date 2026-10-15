@@ -88,7 +88,7 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     cfg.empty_cameras = 1
     cfg.num_image_views = 3
     cfg.chunk_size = cfg.n_action_steps = chunk
-    cfg.tokenizer_name = snapshot_download(TOKENIZER[0], revision=TOKENIZER[1])
+    cfg.tokenizer_name = snapshot_download(TOKENIZER[0], revision=TOKENIZER[1], allow_patterns=["*.json", "*.txt"])  # tokenizer only (offline nodes)
     cfg.freeze_vision_encoder = cfg.freeze_language_encoder = False
     cfg.train_policy_transformer = cfg.train_soft_prompts = True
     cfg.dtype = "float32"  # fp32 master weights; compute under bf16 autocast
