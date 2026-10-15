@@ -38,7 +38,8 @@ def main():
     V = vt.vla_module(ck["meta"].get("vla", "smolvla"))
     prior = vt.make_prior(ck["arm"], ck["meta"].get("prior", vt.DROID_PRIOR))
     extra = {"state_stats": ck["state_stats"]} if ck.get("state_stats") is not None else {}
-    policy, pre, post = V.build_policy(prior, ck["arm"], ck["action_stats"], chunk=vt.CHUNK, **extra)
+    chunk = ck["meta"].get("chunk", vt.CHUNK)
+    policy, pre, post = V.build_policy(prior, ck["arm"], ck["action_stats"], chunk=chunk, **extra)
     V.load_trainable(policy, args.ckpt)
     policy.eval()
     sd = Path(args.sopt_data)
@@ -52,7 +53,7 @@ def main():
     res = {}
     for name, sel in [("train", k5), ("heldout", held)]:
         ds = PolicyDataset(raw, sel.reset_index(drop=True), sd / "processed/libero90_frames256", vt.CTX, 32,
-                           act_chunk=vt.CHUNK, shift=0)
+                           act_chunk=chunk, shift=0)
         rng = np.random.default_rng(0)
         idx = rng.choice(len(ds), size=min(args.n, len(ds)), replace=False)
         errs, grip = [], []

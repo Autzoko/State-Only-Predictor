@@ -47,7 +47,7 @@ def main():
     V = vt.vla_module(ck["meta"].get("vla", "smolvla"))
     prior = vt.make_prior(arm, ck["meta"].get("prior", vt.DROID_PRIOR))
     extra = {"state_stats": ck["state_stats"]} if ck.get("state_stats") is not None else {}
-    policy, pre, post = V.build_policy(prior, arm, ck["action_stats"], chunk=vt.CHUNK, **extra)
+    policy, pre, post = V.build_policy(prior, arm, ck["action_stats"], chunk=ck["meta"].get("chunk", vt.CHUNK), **extra)
     V.load_trainable(policy, args.ckpt)
     policy.eval()
     if suite == "libero90":
