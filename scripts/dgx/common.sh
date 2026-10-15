@@ -10,7 +10,9 @@ VENV=$W/venv REPO=$W/repo-${COMMIT:?set COMMIT}
 ENVPACK=$SHARE/env/venv-py311-cu130.tgz
 export SOPT_DATA=$W/data HF_HOME=$W/hf PYTHONNOUSERSITE=1 TOKENIZERS_PARALLELISM=false
 export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
-mkdir -p "$W"
+# shared lab account: keep every ~/.cache, ~/.libero etc. (e.g. hf_libero assets) under our node-local dir
+export HOME=$W/home
+mkdir -p "$W" "$HOME"
 
 setup_env() {  # same absolute path on every node, so the packed venv is relocatable by construction
   if [[ ! -f $VENV/.complete && -f $ENVPACK ]]; then rm -rf "$VENV" "$W/python"; tar -C "$W" -xzf "$ENVPACK"; fi
