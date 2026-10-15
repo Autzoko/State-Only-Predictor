@@ -25,7 +25,8 @@
 2. **E13 标准 suite 补到 3 个 seed**：先补 k5（spatial / object / goal / libero_10），再补全部示范。每个作业约 2 h，共约 14 个作业。和 E14b 共用两个名额，约 2–3 天。
 3. **E18 预训练数据来源**（127，运行中）：只用 LIBERO-90 训练任务的状态 vs DROID vs DROID + LIBERO。回答"为什么要用大规模、跨场景的数据"。
 4. **spatial 失败归类**：带 trace 重新评测 spatial k5 的 checkpoint，把失败归类扩展到 spatial 的物体，检验"拿错碗"的比例是否在加入历史后上升（对应 B1）。
-5. **统一统计脚本**（见第 2 节）。
+5. **统一统计脚本**（已完成：`scripts/stats_all.py`）。按 (seed, task) 分簇的 bootstrap 显示：7 个任务时部分"加 SOPT vs 不加"的比较在任务层面置信区间含 0，"预训练 vs 从零训练"则全部稳健。
+6. **扩大 LIBERO-90 评测任务数**（7 → 15 个以上）：加入 val split 中指令唯一的任务（SOPT 主先验只用 DROID，这些任务从未见过；下游不用它们做任何选择），主宿主（TrunkBC / SmolVLA / FastWAM）重跑 3 个 seed。这是让主表在任务层面站稳的关键一步。
 
 ### P1：显著加强论文
 6. **执行鲁棒性测试**（只做评测，成本低，和 C5 直接相关）：用现有的 checkpoint（SmolVLA E7、FastWAM E12）在仿真中加入

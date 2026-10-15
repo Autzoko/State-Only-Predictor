@@ -876,3 +876,11 @@ k5，每任务 50 个初始状态：
 - 每个宿主的 SOPT 接入方式相同：96 帧历史 → SOPT 最后一个 token 的特征 → 零初始化 MLP → 加到宿主的动作 token（或全局条件）上。所有分支除 SOPT 外完全相同。
 - 工程：`vla_train.py` 支持各 VLA 自己的 chunk 长度（`CHUNK`）、betas、分层学习率（`param_groups`）、任务列表（`NEEDS_TASKS`）和 `--cond-drop`；SmolVLA / π0.5 的行为不变。127 的 `SOPT_VLA_ENV`（LeRobot 0.6.2）补装了 diffusers 0.41；Jubail 的 pydeps 补装了 dm-tree，diffusers 用已有的 0.39（同一宿主的所有分支都在同一环境中运行）。
 - Jubail 提交改成读队列文件的方式（每次名额空出来就提交队首）。
+
+### 2026-10-15 统一统计（`scripts/stats_all.py` + `configs/paper_manifest.json` → `docs/PAPER_STATS.md`）
+- 每组比较同时报告配对 McNemar（以 episode 为单位）和 **(seed, task) 簇 bootstrap 95% 置信区间**（10k 次），主要比较做 Holm 校正。
+- **重要发现**：LIBERO-90 协议只有 7 个任务，按任务分簇后置信区间明显变宽。以 McNemar 判断显著的比较中，部分在任务层面并不稳健：
+  - 稳健（CI 不含 0）：所有"droid vs scratch"（TrunkBC +8.5 [4.4, 12.7]、DINOv2 全部示范 +8.7、SmolVLA k5 +4.8 [1.1, 8.6]、SmolVLA 全部示范 +5.1 [2.5, 7.8]、FastWAM +9.8 [5.2, 14.8]）；FastWAM droid vs none +11.6 [7.9, 15.3]；SmolVLA k5 droid vs none +4.8 [0.2, 9.2]（勉强）；DINOv2 全部示范 droid vs bc +5.2 [1.1, 9.8]。
+  - 不稳健（CI 含 0）：TrunkBC droid vs bc +5.4 [−0.8, 11.9]（McNemar p=4e-4）；SmolVLA 全部示范 droid vs none +2.8 [−0.5, 6.0]（Holm p=0.064）；DINOv2 k5 droid vs bc。
+  - 解读："预训练 vs 同结构从零训练"这一结论在任务层面稳健；"加 SOPT vs 不加历史"的增益在不同任务之间差异较大，7 个任务不足以给出窄的置信区间。
+- 改进方向（写入 PAPER_PLAN）：扩大评测任务数。LIBERO-90 的 val split 还有指令唯一的任务，SOPT 从未见过（主先验只用 DROID），可以和标准 suite 的 40 个任务一起，把簇数从 7 提到 15+，使任务层面的结论站得住。
