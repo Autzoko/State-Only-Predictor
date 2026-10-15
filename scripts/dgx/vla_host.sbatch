@@ -2,7 +2,7 @@
 # SmolVLA (E23) or Diffusion Policy (E21) on the 17-task LIBERO-90 protocol on ONE DGX Spark node: the three arms of a
 # seed run one after another on the same node (same hardware within a seed); recipe and run names identical to
 # scripts/slurm/e23_smolvla.sbatch / e21_dp.sbatch. Finished runs are synced to $SHARE/outputs and skipped on resubmission.
-#   bash scripts/dgx/submit.sh scripts/dgx/vla_host.sbatch --export=ALL,ENV_KIND=vla,HOST=smolvla,SEED=0
+#   ENV_KIND=vla HOST=smolvla SEED=0 bash scripts/dgx/submit.sh scripts/dgx/vla_host.sbatch   (env passes via --export=ALL)
 #SBATCH -p spark
 #SBATCH -N 1
 #SBATCH --gres=gpu:1
