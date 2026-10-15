@@ -20,7 +20,9 @@ from torch import nn
 
 from sopt.models.state_prior import StatePrior
 
-BASE = "nvidia/GR00T-N1.7-3B"
+BASE, REVISION = "nvidia/GR00T-N1.7-3B", "2fc962b973bccdd5d8ce4f67cc63b264d6886495"
+# processor (tokenizer / image + video processors) of the backbone; gated repo, cached with the account's token
+BACKBONE_PROCESSOR = ("nvidia/Cosmos-Reason2-2B", "9ce19a195e423419c349abfc86fd07178b230561")
 IMAGE_KEYS = ("observation.images.image", "observation.images.image2")
 ARMS = ("none", "expert_scratch", "expert_droid")
 OPT = {"lr": 1e-4, "weight_decay": 1e-5, "clip": 1.0, "betas": (0.95, 0.999)}
@@ -71,7 +73,8 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     from lerobot.policies.groot.processor_groot import make_groot_pre_post_processors
 
     assert arm in ARMS, arm
-    cfg = GrootConfig(base_model_path=snapshot_download(BASE), embodiment_tag="new_embodiment", chunk_size=chunk,
+    snapshot_download(BACKBONE_PROCESSOR[0], revision=BACKBONE_PROCESSOR[1])  # must be cached (offline nodes)
+    cfg = GrootConfig(base_model_path=snapshot_download(BASE, revision=REVISION), embodiment_tag="new_embodiment", chunk_size=chunk,
                       n_action_steps=chunk, use_relative_actions=False, use_bf16=True, device=device)
     cfg.input_features = {k: PolicyFeature(type=FeatureType.VISUAL, shape=(3, 256, 256)) for k in IMAGE_KEYS}
     cfg.input_features["observation.state"] = PolicyFeature(type=FeatureType.STATE, shape=(prior.D,))
