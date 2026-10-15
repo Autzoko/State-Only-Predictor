@@ -37,7 +37,7 @@ setup_env() {  # same absolute path on every node, so the packed venv is relocat
       "$py" -c "from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy; import diffusers" || return 1
     fi
     touch "$VENV/.complete"
-    tar -C "$W" -czf "$ENVPACK.part" "$(basename "$VENV")" python && mv "$ENVPACK.part" "$ENVPACK"
+    tar -C "$W" -czf "$ENVPACK.part" "$(basename "$VENV")" $(cd "$W" && ls -d python 2>/dev/null) && mv "$ENVPACK.part" "$ENVPACK"
   fi
   export PATH=$VENV/bin:$PATH
 }
