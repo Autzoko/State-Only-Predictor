@@ -862,3 +862,17 @@ k5，每任务 50 个初始状态：
 ### 2026-10-15 E13 libero_object k5 补充 seed 1（18810466）：seed 0 的显著增益**没有复现**
 - seed 1：none 83.6 / scratch 82.8 / droid 81.6。合并 2 个 seed（1000 个配对 episode）：none 80.6 / scratch 80.7 / droid 82.9；droid vs none 126 vs 103，p=0.15；droid vs scratch p=0.14。方向为正，但不显著。
 - 这说明单 seed 的 suite 级结论很不可靠：seed 0 的 none 只有 77.6，偏低。spatial、object 的 seed 2 已在排队或运行中（18812643 spatial s2 正在运行）。
+
+### 2026-10-15 扩展宿主和"在更多场景都变好"（E18–E22 启动）
+目标：(1) 更多主流宿主，覆盖完整的"动作知识"谱系；(2) 让 SOPT 在标准 suite 上至少不变差。
+
+| 编号 | 内容 | 位置 | 对照 |
+|---|---|---|---|
+| E18 | 预训练数据来源：只用 LIBERO-90 训练任务的状态（e4a scratch_kall，2,725 条示范）vs DROID+LIBERO（e4a ft_kall）vs 只用 DROID | 127 TrunkBC k5，3 个 seed | E4b |
+| E19 | SOPT dropout：训练时以概率 0.5 置零 SOPT 特征（迫使策略同时依赖视觉），评估时始终开启。SmolVLA expert_droid | LIBERO-90（127，`SOPT_VLA_ENV`）+ libero_spatial（Jubail），各 3 个 seed | E7 / E13 |
+| E20 | **X-VLA-0.9B**（Florence-2 + soft-prompt flow transformer；预训练数据 = DROID/RoboMind/AgiBot，**不含 LIBERO**，arXiv 2510.10274）。按 LeRobot 推荐配方全参数微调（VLM 用 0.1× lr），domain 0（**不用** LIBERO 的 soft prompt 3），chunk 30 | Jubail | none / scratch / droid |
+| E21 | **Diffusion Policy**（ResNet-18 ImageNet + 1-D U-Net，无机器人预训练；任务用 one-hot 环境状态表示），SOPT 特征加到 U-Net 的全局条件上（零初始化），30k 步，bs 64，DDIM 100 训练 / 10 推理步 | Jubail | 同上 |
+| E22 | **GR00T N1.7-3B**（Cosmos-Reason2 / Qwen3-VL + DiT 动作头），用 `new_embodiment` tag（不用可能带 LIBERO 信息的 `libero_sim` 投影） | 权重下载中 | 同上 |
+- 每个宿主的 SOPT 接入方式相同：96 帧历史 → SOPT 最后一个 token 的特征 → 零初始化 MLP → 加到宿主的动作 token（或全局条件）上。所有分支除 SOPT 外完全相同。
+- 工程：`vla_train.py` 支持各 VLA 自己的 chunk 长度（`CHUNK`）、betas、分层学习率（`param_groups`）、任务列表（`NEEDS_TASKS`）和 `--cond-drop`；SmolVLA / π0.5 的行为不变。127 的 `SOPT_VLA_ENV`（LeRobot 0.6.2）补装了 diffusers 0.41；Jubail 的 pydeps 补装了 dm-tree，diffusers 用已有的 0.39（同一宿主的所有分支都在同一环境中运行）。
+- Jubail 提交改成读队列文件的方式（每次名额空出来就提交队首）。
