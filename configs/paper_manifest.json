@@ -224,19 +224,19 @@
    "name": "MAIN pi0.5-DROID, LIBERO-90-17 k5",
    "arms": {
     "none": [
-     "e14_pi05_none_k5_t17_s0",
-     "e14_pi05_none_k5_t17_s1",
-     "e14_pi05_none_k5_t17_s2"
+     "e14_pi05_none_k5_lr1e-4_t17_s0",
+     "e14_pi05_none_k5_lr1e-4_t17_s1",
+     "e14_pi05_none_k5_lr1e-4_t17_s2"
     ],
     "expert_scratch": [
-     "e14_pi05_expert_scratch_k5_t17_s0",
-     "e14_pi05_expert_scratch_k5_t17_s1",
-     "e14_pi05_expert_scratch_k5_t17_s2"
+     "e14_pi05_expert_scratch_k5_lr1e-4_t17_s0",
+     "e14_pi05_expert_scratch_k5_lr1e-4_t17_s1",
+     "e14_pi05_expert_scratch_k5_lr1e-4_t17_s2"
     ],
     "expert_droid": [
-     "e14_pi05_expert_droid_k5_t17_s0",
-     "e14_pi05_expert_droid_k5_t17_s1",
-     "e14_pi05_expert_droid_k5_t17_s2"
+     "e14_pi05_expert_droid_k5_lr1e-4_t17_s0",
+     "e14_pi05_expert_droid_k5_lr1e-4_t17_s1",
+     "e14_pi05_expert_droid_k5_lr1e-4_t17_s2"
     ]
    },
    "pairs": [
