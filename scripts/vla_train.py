@@ -69,7 +69,8 @@ def main():
     p.add_argument("--lr", type=float, default=None, help="default: the VLA's recipe (sopt.vla.<vla>.OPT)")
     p.add_argument("--workers", type=int, default=6)
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--suite", default="libero90", help="libero90 (E4b tasks) or a standard suite, e.g. libero_spatial")
+    p.add_argument("--suite", default="libero90",
+                   help="libero90 (7 E4b tasks), libero90_17 (E23: + 10 val-split tasks) or a standard suite")
     p.add_argument("--prior", default=DROID_PRIOR, help="SOPT checkpoint (config / normalization / droid weights)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--cond-drop", type=float, default=0.0, help="E19: P(drop the SOPT feature) per training sample")
@@ -82,10 +83,12 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     device = torch.device("cuda")
     sopt_data = Path(args.sopt_data)
-    if args.suite == "libero90":
+    if args.suite in ("libero90", "libero90_17"):
         raw = Raw20(sopt_data / "processed/libero90_raw20")
-        tasks = json.loads((REPO_ROOT / "configs/e4b_tasks.json").read_text())
-        sel = select_episodes(raw.eps[raw.eps["split"] == "test"], tasks, args.k or None)
+        tf = "configs/e4b_tasks.json" if args.suite == "libero90" else "configs/libero90_17_tasks.json"
+        tasks = json.loads((REPO_ROOT / tf).read_text())
+        sel = select_episodes(raw.eps[raw.eps["split"].isin(["test", "val"])], tasks, args.k or None)
+        assert sel["task"].nunique() == len(tasks), "missing tasks"
         frames = sopt_data / "processed/libero90_frames256"
         build_frame_cache(sel, frames, workers=args.workers, size=256)
     else:  # standard benchmark suite: all its tasks, EE-only state (see sopt/data/libero_std.py)

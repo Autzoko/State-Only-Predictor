@@ -48,6 +48,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--kind", choices=["idm", "prior", "bc", "trunkbc", "motiondec", "kfmotor"], required=True)
     p.add_argument("--run", required=True)
+    p.add_argument("--tasks", default="configs/e4b_tasks.json", help="task list (E23: configs/libero90_17_tasks.json)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--k", type=int, default=0, help="demos per task (0 = all)")
     p.add_argument("--init", default="scratch", help="prior checkpoint or 'scratch'")
@@ -69,7 +70,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     device = torch.device("cuda")
     raw = Raw20(sopt_data / "processed/libero90_raw20")
-    tasks = json.loads((REPO_ROOT / "configs/e4b_tasks.json").read_text())
+    tasks = json.loads((REPO_ROOT / args.tasks).read_text())
     meta = {"git": git_rev(), **vars(args)}
 
     if args.kind == "idm":
@@ -83,7 +84,9 @@ def main():
         extra = {"k": 4, "stats": stats}
         bs = 512
     else:
-        sel = select_episodes(raw.eps[raw.eps["split"] == "test"], tasks, args.k or None)
+        # E4b: 7 test-split tasks; E23: + 10 val-split tasks (configs/libero90_17_tasks.json). Never the train split
+        # (IDM / E4a). Selection within a task is unchanged, so the 7-task runs are reproduced exactly.
+        sel = select_episodes(raw.eps[raw.eps["split"].isin(["test", "val"])], tasks, args.k or None)
         assert sel["task"].nunique() == len(tasks), "missing tasks"
         frames = sopt_data / "processed/libero90_frames"
         build_frame_cache(sel, frames, workers=args.workers)

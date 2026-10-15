@@ -52,7 +52,7 @@ def main():
     policy, pre, post = V.build_policy(prior, arm, ck["action_stats"], chunk=ck["meta"].get("chunk", vt.CHUNK), **extra)
     V.load_trainable(policy, args.ckpt)
     policy.eval()
-    if suite == "libero90":
+    if suite in ("libero90", "libero90_17"):
         venv, feat = TaskVecEnv(args.sopt_data, tasks), features_20hz
         args.max_steps = args.max_steps or 400
     else:  # EE-only features: joints hidden exactly as in training (sopt/data/libero_std.py)

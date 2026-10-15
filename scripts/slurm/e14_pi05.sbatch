@@ -20,8 +20,8 @@ cd /scratch/ll5582/SOPT
 export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=/scratch/ll5582/SOPT/pydeps:$PWD/src
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache HF_HUB_OFFLINE=1
 export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS_NUM_THREADS=4
-S=${SEED:-0}; STEPS=${STEPS:-20000}; TAG=${TAG:-}; NEXECS=${NEXECS:-10}; LRARG=${LR:+--lr $LR}
-echo "host=$(hostname) commit=$(git rev-parse --short HEAD) seed=$S steps=$STEPS start=$(date -Is)"
+SUITE=${SUITE:-libero90}; ST=$([ "$SUITE" = libero90_17 ] && echo _t17); S=${SEED:-0}; STEPS=${STEPS:-20000}; TAG=${TAG:-}; NEXECS=${NEXECS:-10}; LRARG=${LR:+--lr $LR}
+echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE seed=$S steps=$STEPS start=$(date -Is)"
 if [ "$S" = 0 ] && [ ! -f outputs/e14_smoke/rollouts.json ] && [ -z "${EVAL_ONLY:-}" ]; then
   python scripts/vla_train.py --vla pi05 --arm expert_droid --k 5 --seed 0 --run e14_smoke --steps 30 --bs 32 \
     --workers 8 > logs/e14_smoke.log 2>&1 && \
@@ -30,8 +30,8 @@ if [ "$S" = 0 ] && [ ! -f outputs/e14_smoke/rollouts.json ] && [ -z "${EVAL_ONLY
   rc=$?; echo "smoke exit $rc $(date -Is)"; nvidia-smi --query-gpu=memory.used --format=csv
   [ $rc = 0 ] || exit 1
 fi
-run() { local name=e14_pi05_$1_k5${TAG}_s$S
-  [ -f outputs/$name/final.pt ] || CUDA_VISIBLE_DEVICES=$2 python scripts/vla_train.py --vla pi05 --arm $1 --k 5 \
+run() { local name=e14_pi05_$1_k5${TAG}${ST}_s$S
+  [ -f outputs/$name/final.pt ] || CUDA_VISIBLE_DEVICES=$2 python scripts/vla_train.py --vla pi05 --arm $1 --k 5 --suite $SUITE \
     --seed $S --run $name --steps $STEPS --bs 32 --workers 8 $LRARG > logs/$name.log 2>&1
   echo "$name train exit $? $(date -Is)"
   for n in $NEXECS; do local x=$([ "$n" = 10 ] || echo _x$n)

@@ -53,14 +53,17 @@ def main():
     p.add_argument("--workers", type=int, default=6)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
+    p.add_argument("--suite", default="libero90", choices=["libero90", "libero90_17"], help="7 E4b tasks / E23 17 tasks")
     args = p.parse_args()
     seed_everything(args.seed)
     out = REPO_ROOT / "outputs" / args.run
     out.mkdir(parents=True, exist_ok=True)
     sopt_data = Path(args.sopt_data)
     raw = Raw20(sopt_data / "processed/libero90_raw20")
-    tasks = json.loads((REPO_ROOT / "configs/e4b_tasks.json").read_text())
-    sel = select_episodes(raw.eps[raw.eps["split"] == "test"], tasks, args.k or None)
+    tf = "configs/e4b_tasks.json" if args.suite == "libero90" else "configs/libero90_17_tasks.json"
+    tasks = json.loads((REPO_ROOT / tf).read_text())
+    sel = select_episodes(raw.eps[raw.eps["split"].isin(["test", "val"])], tasks, args.k or None)
+    assert sel["task"].nunique() == len(tasks), "missing tasks"
     frames = sopt_data / "processed/libero90_frames256"
     build_frame_cache(sel, frames, workers=args.workers, size=256)
     ds = PolicyDataset(raw, sel, frames, CTX, 32, act_chunk=CHUNK, shift=0)
