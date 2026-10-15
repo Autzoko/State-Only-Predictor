@@ -4,7 +4,7 @@ variants. We use the fresh `new_embodiment` projections (never the `libero_sim` 
 
 Recipe = LeRobot / Isaac-GR00T fine-tuning defaults, identical for every arm: backbone (LLM + vision) frozen,
 projector + DiT + VL layer norm trainable; lr 1e-4, betas (0.95, 0.999), weight decay 1e-5 (not on biases / norms),
-grad clip 1.0, bf16 compute; chunk 16 (as in LeRobot's new-embodiment example), absolute (= LIBERO delta) actions,
+grad clip 1.0, bf16 compute; VLM image preprocessing on the GPU (torch path, center crop); chunk 16 (as in LeRobot's new-embodiment example), absolute (= LIBERO delta) actions,
 min-max normalized state (current 17-d SOPT feature) and actions.
 Arms: `none`; `expert_scratch` / `expert_droid` add the SOPT last-token feature of the 96-frame history to every
 action token right after the action encoder through a zero-initialized MLP (at init they equal `none`).
@@ -90,6 +90,12 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
             p.data = p.data.float()
     stats = {"action": _mm(action_stats), "observation.state": _mm(state_stats)}
     pre, post = make_groot_pre_post_processors(policy.config, dataset_stats=stats)
+    # The base checkpoint's processor_config sets use_albumentations=True, i.e. per-frame cv2/numpy preprocessing on
+    # the CPU (~12 s/step at bs 32, GPU idle). Use LeRobot's torch path instead: same crop/resize geometry
+    # (crop 230 -> 256, shortest edge 256), run on the GPU, deterministic center crop; identical for every arm.
+    vlm = [s for s in pre.steps if type(s).__name__ == "GrootN17VLMEncodeStep"]
+    assert len(vlm) == 1, pre.steps
+    vlm[0].use_albumentations = False
     return policy.to(device), pre, post
 
 
