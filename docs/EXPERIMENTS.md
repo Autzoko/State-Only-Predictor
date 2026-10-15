@@ -858,3 +858,7 @@ k5，每任务 50 个初始状态：
 ### 2026-10-15 E13 libero_spatial k5 补充 seed 1（18802280）：负结果**复现了**
 - 2 个 seed（1000 个配对 episode）：none 81.8 / expert_scratch 79.8 / expert_droid 79.2；droid vs none 54 vs 80，p=0.03；droid vs scratch p=0.65；scratch vs none p=0.057。
 - 两个带历史的分支都比 none 低约 2–2.6 点，DROID 预训练本身没有带来额外损失，问题出在**加入运动历史**。libero_spatial 的 10 个任务动作几乎相同（都是拿起黑碗放到盘子上），区别只在于是哪个碗（只能靠视觉区分）。推测：历史条件让策略更多依赖"运动惯性"而不是视觉，导致在选哪个碗上更容易出错。可以用失败归类（trace）来检验：找错物体的比例是否上升。
+
+### 2026-10-15 E13 libero_object k5 补充 seed 1（18810466）：seed 0 的显著增益**没有复现**
+- seed 1：none 83.6 / scratch 82.8 / droid 81.6。合并 2 个 seed（1000 个配对 episode）：none 80.6 / scratch 80.7 / droid 82.9；droid vs none 126 vs 103，p=0.15；droid vs scratch p=0.14。方向为正，但不显著。
+- 这说明单 seed 的 suite 级结论很不可靠：seed 0 的 none 只有 77.6，偏低。spatial、object 的 seed 2 已在排队或运行中（18812643 spatial s2 正在运行）。
