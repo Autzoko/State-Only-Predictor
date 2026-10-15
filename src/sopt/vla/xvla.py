@@ -88,6 +88,9 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     cfg.empty_cameras = 1
     cfg.num_image_views = 3
     cfg.chunk_size = cfg.n_action_steps = chunk
+    # The base config pads the instruction to 1024 BART tokens, which overflows the policy transformer's 512
+    # positions (30 action + 3x50 image + 1024 text); 64 is LeRobot's default and covers every LIBERO instruction.
+    cfg.tokenizer_max_length = 64
     cfg.tokenizer_name = snapshot_download(TOKENIZER[0], revision=TOKENIZER[1], allow_patterns=["*.json", "*.txt"])  # tokenizer only (offline nodes)
     cfg.freeze_vision_encoder = cfg.freeze_language_encoder = False
     cfg.train_policy_transformer = cfg.train_soft_prompts = True
