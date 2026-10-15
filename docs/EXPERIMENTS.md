@@ -940,3 +940,24 @@ McNemar：droid vs none 78 vs 101 p=0.10；droid vs scratch 95 vs 78 p=0.22；sc
 - 单 seed：GR00T 上 SOPT 插件**没有带来提升**（−2.7，不显著）；随机初始化的同结构插件显著变差（−4.7），DROID 先验部分抵消了这一损失。逐任务差异方向不一致（例如 book/back compartment +20，cream cheese box/basket −20），单 seed 噪声大。
 - 可能原因（待 seed 1/2 确认后再诊断）：GR00T 基线已经较高（82%，所有 host 中最高），且其 DiT 动作头已经以 proprio 为条件；把额外特征加到动作 token 上对其是一种扰动（scratch 显著下降说明接口本身有成本）。
 - 处理：按预先规定照常跑完 seed 1/2 并纳入主表，不因单 seed 结果更改协议或剔除该 host。若三 seed 仍为负，论文中如实报告为"高基线 host 上无收益"，并与 headroom 分析一起讨论。
+
+## E14b π0.5-DROID lr 1e-4（2026-10-16，Jubail 18802970，cn010，d2bd367；7 dev 任务，k5，seed 0，350 ep/arm）
+| n_exec | none | expert_scratch | expert_droid | droid vs none | droid vs scratch |
+|---|---|---|---|---|---|
+| 10 | 49.4 | 49.1 | **56.6** | 52 vs 27，**p=0.007** | 55 vs 29，**p=0.006** |
+| 25 | 43.7 | 47.4 | 49.1 | 46 vs 27，p=0.034 | p=0.57 |
+- lr 从 2.5e-5 提到 1e-4 后，π0.5 基线从 17.1 升到 49.4（欠拟合问题基本解决）；n_exec 10 优于 25，与诊断 2 在低 lr 下的结论相反，说明那时的抖动来自欠拟合。
+- SOPT（DROID）对 none 和对 scratch 都显著，且 scratch ≈ none：增益来自 DROID 先验而非额外参数。
+- 决定：π0.5 以 lr 1e-4、n_exec 10（与其他 host 相同的预设值）进入 17 任务主表，seed 0/1/2 已排入 Jubail 队列（每个 ~24h）。
+
+## E21 Diffusion Policy 17 任务 seed 0（2026-10-15，Jubail 18818112；k5，30k steps，n_exec 10，850 ep/run）
+| arm | all 17 | 7 dev | 10 new |
+|---|---|---|---|
+| none | 73.6 | 64.6 | 80.0 |
+| expert_scratch | 69.5 | 62.9 | 74.2 |
+| expert_droid | **76.1** | 64.3 | **84.4** |
+McNemar：droid vs none 90 vs 69 p=0.11；droid vs scratch 103 vs 47 **p=6e-6**；scratch vs none 59 vs 94 **p=0.006**。
+- 与 GR00T 相同的模式：随机初始化插件显著变差，DROID 先验把它拉回并超过基线（+2.5，单 seed 不显著）。增益集中在 10 个新任务（+4.4）。
+
+## E20 X-VLA 17 任务 seed 0 冒烟失败（18818090）与修复（f42fb42）
+- `ValueError: Sequence length 1204 exceeds max_len_seq=512`：`lerobot/xvla-base` 的 config 把指令补齐到 1024 个 BART token（30 动作 + 3×50 图像 + 1024 文本）。改为 LeRobot 默认的 64（17 个任务指令最长 17 个 token），对三个 arm 相同。已重新排在队首。
