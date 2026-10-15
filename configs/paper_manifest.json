@@ -1,7 +1,315 @@
 {
  "comparisons": [
   {
-   "name": "T1 TrunkBC (ResNet-18), LIBERO-90 k5",
+   "name": "MAIN TrunkBC (ResNet-18), LIBERO-90-17 k5",
+   "arms": {
+    "bc": [
+     "e23_bc_k5_t17_s0",
+     "e23_bc_k5_t17_s1",
+     "e23_bc_k5_t17_s2"
+    ],
+    "scratch": [
+     "e23_trunk_scratch_k5_t17_s0",
+     "e23_trunk_scratch_k5_t17_s1",
+     "e23_trunk_scratch_k5_t17_s2"
+    ],
+    "droid": [
+     "e23_trunk_droid_k5_t17_s0",
+     "e23_trunk_droid_k5_t17_s1",
+     "e23_trunk_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "droid",
+     "bc"
+    ],
+    [
+     "droid",
+     "scratch"
+    ],
+    [
+     "scratch",
+     "bc"
+    ]
+   ],
+   "primary": [
+    [
+     "droid",
+     "bc"
+    ],
+    [
+     "droid",
+     "scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN SmolVLA, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e23_smolvla_none_k5_t17_s0",
+     "e23_smolvla_none_k5_t17_s1",
+     "e23_smolvla_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e23_smolvla_expert_scratch_k5_t17_s0",
+     "e23_smolvla_expert_scratch_k5_t17_s1",
+     "e23_smolvla_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e23_smolvla_expert_droid_k5_t17_s0",
+     "e23_smolvla_expert_droid_k5_t17_s1",
+     "e23_smolvla_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN FastWAM, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e12_wam_none_k5_t17_s0",
+     "e12_wam_none_k5_t17_s1",
+     "e12_wam_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e12_wam_expert_scratch_k5_t17_s0",
+     "e12_wam_expert_scratch_k5_t17_s1",
+     "e12_wam_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e12_wam_expert_droid_k5_t17_s0",
+     "e12_wam_expert_droid_k5_t17_s1",
+     "e12_wam_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN X-VLA, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e20_xvla_none_k5_t17_s0",
+     "e20_xvla_none_k5_t17_s1",
+     "e20_xvla_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e20_xvla_expert_scratch_k5_t17_s0",
+     "e20_xvla_expert_scratch_k5_t17_s1",
+     "e20_xvla_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e20_xvla_expert_droid_k5_t17_s0",
+     "e20_xvla_expert_droid_k5_t17_s1",
+     "e20_xvla_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN Diffusion Policy, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e21_dp_none_k5_t17_s0",
+     "e21_dp_none_k5_t17_s1",
+     "e21_dp_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e21_dp_expert_scratch_k5_t17_s0",
+     "e21_dp_expert_scratch_k5_t17_s1",
+     "e21_dp_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e21_dp_expert_droid_k5_t17_s0",
+     "e21_dp_expert_droid_k5_t17_s1",
+     "e21_dp_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN pi0.5-DROID, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e14_pi05_none_k5_t17_s0",
+     "e14_pi05_none_k5_t17_s1",
+     "e14_pi05_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e14_pi05_expert_scratch_k5_t17_s0",
+     "e14_pi05_expert_scratch_k5_t17_s1",
+     "e14_pi05_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e14_pi05_expert_droid_k5_t17_s0",
+     "e14_pi05_expert_droid_k5_t17_s1",
+     "e14_pi05_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN GR00T N1.7, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e22_groot_none_k5_t17_s0",
+     "e22_groot_none_k5_t17_s1",
+     "e22_groot_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e22_groot_expert_scratch_k5_t17_s0",
+     "e22_groot_expert_scratch_k5_t17_s1",
+     "e22_groot_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e22_groot_expert_droid_k5_t17_s0",
+     "e22_groot_expert_droid_k5_t17_s1",
+     "e22_groot_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "DEV(7 tasks) TrunkBC (ResNet-18), LIBERO-90 k5",
    "arms": {
     "bc": [
      "e4b_bc_k5",
@@ -32,20 +340,10 @@
      "scratch",
      "bc"
     ]
-   ],
-   "primary": [
-    [
-     "droid",
-     "bc"
-    ],
-    [
-     "droid",
-     "scratch"
-    ]
    ]
   },
   {
-   "name": "T1 DINOv2-S BC, LIBERO-90 all demos",
+   "name": "DEV(7 tasks) DINOv2-S BC, LIBERO-90 all demos",
    "arms": {
     "bc": [
      "e8_dino_bc_all_s0",
@@ -76,20 +374,10 @@
      "scratch",
      "bc"
     ]
-   ],
-   "primary": [
-    [
-     "droid",
-     "bc"
-    ],
-    [
-     "droid",
-     "scratch"
-    ]
    ]
   },
   {
-   "name": "T1 DINOv2-S BC, LIBERO-90 k5",
+   "name": "DEV(7 tasks) DINOv2-S BC, LIBERO-90 k5",
    "arms": {
     "bc": [
      "e8_dino_bc_k5_s0",
@@ -120,20 +408,10 @@
      "scratch",
      "bc"
     ]
-   ],
-   "primary": [
-    [
-     "droid",
-     "bc"
-    ],
-    [
-     "droid",
-     "scratch"
-    ]
    ]
   },
   {
-   "name": "T1 SmolVLA, LIBERO-90 k5",
+   "name": "DEV(7 tasks) SmolVLA, LIBERO-90 k5",
    "arms": {
     "none": [
      "e5_vla_none_k5",
@@ -164,20 +442,10 @@
      "expert_scratch",
      "none"
     ]
-   ],
-   "primary": [
-    [
-     "expert_droid",
-     "none"
-    ],
-    [
-     "expert_droid",
-     "expert_scratch"
-    ]
    ]
   },
   {
-   "name": "T1 SmolVLA, LIBERO-90 all demos",
+   "name": "DEV(7 tasks) SmolVLA, LIBERO-90 all demos",
    "arms": {
     "none": [
      "e7b_vla_none_all_s0",
@@ -208,20 +476,10 @@
      "expert_scratch",
      "none"
     ]
-   ],
-   "primary": [
-    [
-     "expert_droid",
-     "none"
-    ],
-    [
-     "expert_droid",
-     "expert_scratch"
-    ]
    ]
   },
   {
-   "name": "T1 FastWAM, LIBERO-90 k5",
+   "name": "DEV(7 tasks) FastWAM, LIBERO-90 k5",
    "arms": {
     "none": [
      "e12_wam_none_k5_s0",
@@ -252,20 +510,10 @@
      "expert_scratch",
      "none"
     ]
-   ],
-   "primary": [
-    [
-     "expert_droid",
-     "none"
-    ],
-    [
-     "expert_droid",
-     "expert_scratch"
-    ]
    ]
   },
   {
-   "name": "T1 pi0.5-DROID (lr 1e-4), LIBERO-90 k5",
+   "name": "DEV(7 tasks) pi0.5-DROID (lr 1e-4), LIBERO-90 k5",
    "arms": {
     "none": [
      "e14_pi05_none_k5_lr1e-4_s0",
@@ -296,20 +544,10 @@
      "expert_scratch",
      "none"
     ]
-   ],
-   "primary": [
-    [
-     "expert_droid",
-     "none"
-    ],
-    [
-     "expert_droid",
-     "expert_scratch"
-    ]
    ]
   },
   {
-   "name": "T1 X-VLA, LIBERO-90 k5",
+   "name": "DEV(7 tasks) X-VLA, LIBERO-90 k5",
    "arms": {
     "none": [
      "e20_xvla_none_k5_s0",
@@ -340,20 +578,10 @@
      "expert_scratch",
      "none"
     ]
-   ],
-   "primary": [
-    [
-     "expert_droid",
-     "none"
-    ],
-    [
-     "expert_droid",
-     "expert_scratch"
-    ]
    ]
   },
   {
-   "name": "T1 Diffusion Policy, LIBERO-90 k5",
+   "name": "DEV(7 tasks) Diffusion Policy, LIBERO-90 k5",
    "arms": {
     "none": [
      "e21_dp_none_k5_s0",
@@ -384,20 +612,10 @@
      "expert_scratch",
      "none"
     ]
-   ],
-   "primary": [
-    [
-     "expert_droid",
-     "none"
-    ],
-    [
-     "expert_droid",
-     "expert_scratch"
-    ]
    ]
   },
   {
-   "name": "T1 GR00T N1.7, LIBERO-90 k5",
+   "name": "DEV(7 tasks) GR00T N1.7, LIBERO-90 k5",
    "arms": {
     "none": [
      "e22_groot_none_k5_s0",
@@ -427,16 +645,6 @@
     [
      "expert_scratch",
      "none"
-    ]
-   ],
-   "primary": [
-    [
-     "expert_droid",
-     "none"
-    ],
-    [
-     "expert_droid",
-     "expert_scratch"
     ]
    ]
   },

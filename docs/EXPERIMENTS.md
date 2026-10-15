@@ -884,3 +884,11 @@ k5，每任务 50 个初始状态：
   - 不稳健（CI 含 0）：TrunkBC droid vs bc +5.4 [−0.8, 11.9]（McNemar p=4e-4）；SmolVLA 全部示范 droid vs none +2.8 [−0.5, 6.0]（Holm p=0.064）；DINOv2 k5 droid vs bc。
   - 解读："预训练 vs 同结构从零训练"这一结论在任务层面稳健；"加 SOPT vs 不加历史"的增益在不同任务之间差异较大，7 个任务不足以给出窄的置信区间。
 - 改进方向（写入 PAPER_PLAN）：扩大评测任务数。LIBERO-90 的 val split 还有指令唯一的任务，SOPT 从未见过（主先验只用 DROID），可以和标准 suite 的 40 个任务一起，把簇数从 7 提到 15+，使任务层面的结论站得住。
+
+### 2026-10-15 E23：主表改用 17 个任务的 LIBERO-90 协议（`configs/libero90_17_tasks.json`）
+- 任务 = 原来的 7 个 test-split 任务 + 10 个 val-split 任务（指令在 LIBERO-90 的 90 个场景中唯一，可以直接在仿真中评估）。val split 只在 E4a 的 LIBERO 后训练中用来做模型选择；主先验只用 DROID，下游从未在这些任务上做过任何选择，所以对主先验来说完全没见过。
+- **定位**：原来的 7 任务协议在开发过程中被反复使用（包括选择 n_exec、诊断等），因此作为**开发集**（论文附录）；17 任务协议作为**主表**，所有宿主（TrunkBC / SmolVLA / FastWAM / X-VLA / Diffusion Policy / π0.5 / GR00T）都在上面用 3 个 seed 重跑。这样同时解决两个问题：簇数从 7 增加到 17（任务层面的置信区间更窄），并避免"在开发集上反复调整"的质疑。
+- 代码：`vla_train.py --suite libero90_17`、`wam_train.py --suite libero90_17`、`e4b_train.py --tasks configs/libero90_17_tasks.json`；episode 从 test+val split 中选取，任务内的选择规则不变（7 任务的 run 可以完全复现）。Jubail 上已预先缓存 17 个任务 k5（85 条示范）的 256 px 帧。运行名后缀为 `_t17`。
+- 排队：Jubail 按 X-VLA → SmolVLA → DP → E19 spatial → FastWAM → … 的顺序，每个宿主 3 个 seed；127 上 E19 完成后跑 TrunkBC 17（`sopt_e23t`）。
+- GR00T N1.7：权重已下载（6.5 GB），但分词器和图像预处理器在需要授权的 `nvidia/Cosmos-Reason2-2B` 仓库中（401）。需要账号接受许可并提供 HF token；在此之前暂停，不用公开的 Qwen3-VL 处理器替代（无法验证分词完全一致）。
+- `configs/paper_manifest.json`：17 任务的 MAIN 表在前（Holm 只对 MAIN 的主要比较做校正），7 任务结果标为 DEV。
