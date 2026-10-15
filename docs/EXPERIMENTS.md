@@ -928,3 +928,4 @@ stats_all（cluster bootstrap over (seed, task)，Holm）：DROID vs scratch +4.
 | s1（增益用 s0,s2） | −0.54 | +10.4 (n=5) | +0.4 | +2.8 | +4.1 |
 | s2（增益用 s0,s1） | −0.55 | +7.4 (n=7) | −5.2 | +8.0 | +1.8 |
 结论：SOPT 相对普通 BC 的收益集中在策略本来容易失败的任务（基线 <70%），简单任务上无收益；预训练相对随机初始化在难易两类任务上都为正。这解释了 E23 dev（偏难，基线 58%）与 new（偏易，基线 79%）子集的差异。论文中按预先定义的难度分层（用独立 seed 定难度）报告，避免事后挑选。之后对各 host 用同样的交叉 seed 分析（难度来自 none arm）。
+- 推广到各 host（`scripts/headroom.py`，同样交叉 seed）：TrunkBC 在 DEV 7 任务上同样是 headroom 型（r −0.61…−0.80，难任务 DROID−BC +9…+19，易任务 ≈0）；但**作为插件加到 host 上时增益不依赖难度**——SmolVLA k5 难/易任务 DROID−none ≈ +1.5…+7 / +3…+9（r 为正或≈0），FastWAM k5 难 +10.6…+14.6 / 易 +4.5…+13。即：替换动作骨干（TrunkBC vs BC）的收益只在难任务出现；把 SOPT 作为额外条件加到现成 host 上是全面的提升。仅 7 任务，样本小；17 任务 host 结果出来后复查。
