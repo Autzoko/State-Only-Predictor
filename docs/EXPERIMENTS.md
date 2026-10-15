@@ -892,3 +892,17 @@ k5，每任务 50 个初始状态：
 - 排队：Jubail 按 X-VLA → SmolVLA → DP → E19 spatial → FastWAM → … 的顺序，每个宿主 3 个 seed；127 上 E19 完成后跑 TrunkBC 17（`sopt_e23t`）。
 - GR00T N1.7：权重已下载（6.5 GB），但分词器和图像预处理器在需要授权的 `nvidia/Cosmos-Reason2-2B` 仓库中（401）。需要账号接受许可并提供 HF token；在此之前暂停，不用公开的 Qwen3-VL 处理器替代（无法验证分词完全一致）。
 - `configs/paper_manifest.json`：17 任务的 MAIN 表在前（Holm 只对 MAIN 的主要比较做校正），7 任务结果标为 DEV。
+
+## E18 结果（2026-10-15，127，TrunkBC k5，7 任务 × 50 init × 3 seeds）：收益来自 DROID，不是"任何状态预训练"
+
+| trunk 初始化 | per seed | mean ± sd |
+|---|---|---|
+| BC (MLP) | 64.0 / 62.9 / 65.7 | 64.2 ± 1.4 |
+| scratch | 61.1 / 62.9 / 59.4 | 61.1 ± 1.7 |
+| LIBERO-90 状态预训练（e4a_ar_flow_scratch_kall，仅 LIBERO train 任务） | 62.9 / 61.7 / 59.7 | 61.4 ± 1.6 |
+| DROID 预训练（E4b trunk_droid） | 70.9 / 71.7 / 66.3 | 69.6 ± 2.9 |
+| DROID → LIBERO 微调（e4a_ar_flow_ft_kall） | 72.6 / 72.0 / 71.1 | 71.9 ± 0.7 |
+
+Pooled McNemar：DROID vs LIBERO-only 166 vs 80，p=4e-8；LIBERO-only vs scratch p=0.89；DROID→LIBERO vs DROID p=0.088（n.s.，方差更小）；DROID→LIBERO vs scratch p=4e-13。
+结论：同域少量状态预训练 = 没预训练；增益来自大规模跨场景的 DROID 运动数据。在目标域状态上再微调只带来小幅、不显著的提升。
+基础设施：此后 127 不再跑 SOPT 计算（让给他人）；小模型实验迁到实验室 DGX Spark（`scripts/dgx/`，冒烟测试 158374 通过，GB10 TrunkBC ~19 it/s），E23 TrunkBC 17 任务 = DGX 作业 158381；E19 LIBERO-90 改到 Jubail 队列（127 上的 seed0 中途杀掉，无 checkpoint）。
