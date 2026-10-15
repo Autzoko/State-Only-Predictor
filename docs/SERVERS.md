@@ -28,3 +28,10 @@
 2. 首次部署：`git clone https://github.com/Autzoko/State-Only-Predictor.git SOPT && bash SOPT/scripts/setup_env.sh`（环境装在同级目录 `SOPT_ENV`，不进共享的 conda env 列表）。
 3. 数据只在 127 上构建（`prepare_droid.py` 只读取 state 列，不下载视频，原始文件不落盘），然后把 `processed/droid/` rsync 到其他机器。
 4. 训练：`source scripts/remote/env.sh`，然后运行 `GPU=0 scripts/remote/run_bg.sh <run_name> --config ...`（tmux 后台）。
+
+## 实验室 DGX Spark 集群（2026-10-15 起，替代 127 跑小模型）
+
+- 127 需要让给其他人：E18 跑完后 127 不再跑 SOPT 计算，只作为跳板（`ssh NYUAIRLAB-127` → `ssh dgx-login`，共享账号 `cvpr`）。
+- 用户指定的目录：`/media/cvpr/langtian/SOPT`（CIFS 共享盘，计算节点可见；不支持 symlink/chmod）。`data/`（LIBERO-90 processed + frames）、`ckpt/`（e2 prior、e4b_idm）、`env/`（打包的 venv）、`outputs/`（结果）、`logs/`。
+- 节点 GB10 aarch64、每节点 1 GPU。作业在节点本地 `/var/tmp/langtian/sopt` 运行：按 commit clone 仓库、解包 env、拷数据，结束后把 run 同步回共享盘（`scripts/dgx/common.sh`）。
+- 提交：dgx-login 上 `cd ~/langtian/SOPT && bash scripts/dgx/submit.sh scripts/dgx/<job>.sbatch`（`git pull` 后按 HEAD 提交）。一次只跑 1 个作业。
