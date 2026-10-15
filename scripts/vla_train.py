@@ -60,7 +60,7 @@ def make_prior(arm: str, prior: str = DROID_PRIOR) -> StatePrior:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--vla", default="smolvla", choices=["smolvla", "pi05", "xvla", "diffusion"])
+    p.add_argument("--vla", default="smolvla", choices=["smolvla", "pi05", "xvla", "diffusion", "groot"])
     p.add_argument("--arm", required=True)
     p.add_argument("--run", required=True)
     p.add_argument("--k", type=int, default=5, help="demos per task (0 = all)")
