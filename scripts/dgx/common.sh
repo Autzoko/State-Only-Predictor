@@ -6,8 +6,12 @@
 set -uo pipefail
 SHARE=/media/cvpr/langtian/SOPT
 W=/var/tmp/langtian/sopt
-VENV=$W/venv REPO=$W/repo-${COMMIT:?set COMMIT}
-ENVPACK=$SHARE/env/venv-py311-cu130.tgz
+REPO=$W/repo-${COMMIT:?set COMMIT}
+# ENV_KIND=base: torch + LIBERO (TrunkBC etc.); ENV_KIND=vla: + LeRobot (pinned as SOPT_VLA_ENV on 127) for SmolVLA / DP
+ENV_KIND=${ENV_KIND:-base}
+if [[ $ENV_KIND = vla ]]; then VENV=$W/venv-vla PY=3.12 ENVPACK=$SHARE/env/venv-vla-py312-cu130.tgz
+else VENV=$W/venv PY=3.11 ENVPACK=$SHARE/env/venv-py311-cu130.tgz; fi
+LEROBOT="lerobot[smolvla] @ git+https://github.com/huggingface/lerobot@3f2c29ef7e44b1ddccbcda3b6a63939e53639e9e"
 export SOPT_DATA=$W/data HF_HOME=$W/hf PYTHONNOUSERSITE=1 TOKENIZERS_PARALLELISM=false
 export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
 # shared lab account: keep every ~/.cache, ~/.libero etc. (e.g. hf_libero assets) under our node-local dir
@@ -15,18 +19,24 @@ export HOME=$W/home
 mkdir -p "$W" "$HOME"
 
 setup_env() {  # same absolute path on every node, so the packed venv is relocatable by construction
-  if [[ ! -f $VENV/.complete && -f $ENVPACK ]]; then rm -rf "$VENV" "$W/python"; tar -C "$W" -xzf "$ENVPACK"; fi
+  if [[ ! -f $VENV/.complete && -f $ENVPACK ]]; then rm -rf "$VENV"; tar -C "$W" -xzf "$ENVPACK"; fi
   if [[ ! -f $VENV/.complete ]]; then
-    rm -rf "$VENV" "$W/uv"
+    rm -rf "$VENV"
     export UV_HTTP_TIMEOUT=300 UV_PYTHON_INSTALL_DIR=$W/python UV_CACHE_DIR=$W/uv-cache
-    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$W/uv" UV_NO_MODIFY_PATH=1 sh
-    "$W/uv/uv" venv --python 3.11 "$VENV"
-    "$W/uv/uv" pip install --python "$VENV/bin/python" torch torchvision --index-url https://download.pytorch.org/whl/cu130
-    # as SOPT_ENV on 127 (scripts/setup_env.sh + the LIBERO extras)
-    "$W/uv/uv" pip install --python "$VENV/bin/python" numpy pandas pyarrow "omegaconf>=2.3" huggingface_hub pytest \
+    [[ -x $W/uv/uv ]] || curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$W/uv" UV_NO_MODIFY_PATH=1 sh
+    local uv="$W/uv/uv" py="$VENV/bin/python"
+    "$uv" venv --python $PY "$VENV"
+    "$uv" pip install --python "$py" torch torchvision --index-url https://download.pytorch.org/whl/cu130
+    "$uv" pip freeze --python "$py" | grep -E "^torch(vision)?==" > "$W/torch-pin.txt"  # keep the CUDA aarch64 build
+    # as SOPT_ENV / SOPT_VLA_ENV on 127 (scripts/setup_env.sh + the LIBERO extras [+ LeRobot, diffusers for DP])
+    "$uv" pip install --python "$py" -c "$W/torch-pin.txt" numpy pandas pyarrow "omegaconf>=2.3" huggingface_hub pytest \
       "hf-libero==0.1.4" "robosuite==1.4.0" "mujoco==3.8.1" av pyyaml
+    if [[ $ENV_KIND = vla ]]; then
+      "$uv" pip install --python "$py" -c "$W/torch-pin.txt" "$LEROBOT" "diffusers==0.41.*"
+      "$py" -c "from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy; import diffusers" || return 1
+    fi
     touch "$VENV/.complete"
-    tar -C "$W" -czf "$ENVPACK.part" venv python && mv "$ENVPACK.part" "$ENVPACK"
+    tar -C "$W" -czf "$ENVPACK.part" "$(basename "$VENV")" python && mv "$ENVPACK.part" "$ENVPACK"
   fi
   export PATH=$VENV/bin:$PATH
 }
