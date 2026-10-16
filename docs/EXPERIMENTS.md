@@ -1033,3 +1033,13 @@ LIBERO-90 17 个主表任务的全部示范（771 条，13130 个窗口，stride
 | expert_droid | **64.0** | **58.3** | **68.0** |
 McNemar：droid vs none 110 vs 81 **p=0.042**；droid vs scratch 121 vs 76 **p=0.0017**。
 - 与 7 任务 E7（66.0 vs 61.2，p=0.0008）一致；10 个 new 任务上方向相同（+3.2），scratch 插件不带来收益（与 FastWAM 不同）。seed 1/2 在 DGX 队列中。
+
+## E20 X-VLA 17 任务 seed 1（2026-10-16，Jubail 18820646，cb81c9f）及 seed 0+1 汇总
+| arm | s0 | s1 | 均值 | 7 dev | 10 new |
+|---|---|---|---|---|---|
+| none | 72.2 | 70.5 | 71.4 | 65.0 | 75.8 |
+| expert_scratch | 71.3 | 71.2 | 71.2 | 64.4 | 76.0 |
+| expert_droid | 69.9 | 67.6 | **68.8** | 62.3 | 73.3 |
+合并 McNemar（1700 ep/arm）：droid vs none 137 vs 181 **p=0.016（droid 更差）**；droid vs scratch 146 vs 188 **p=0.025（droid 更差）**；scratch vs none p=0.95。
+- 两个 seed 方向一致、dev/new 都是负的：X-VLA 是目前唯一 SOPT 显著有害的宿主。scratch 插件与 none 持平，说明问题不在"额外输入"本身，而在 DROID 先验的特征与 X-VLA 的表示冲突。
+- 待查假设：(1) X-VLA 预训练已包含 DROID 及其 proprio 输入，SOPT 信息冗余且以加法注入干扰了已对齐的动作 token；(2) SOPT 以宿主 lr 微调对这个宿主过大；(3) X-VLA 的动作空间/归一化与 SOPT 特征尺度不匹配。seed 2 仍在 Jubail 队列中；论文中如实报告为负例。
