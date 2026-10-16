@@ -10,6 +10,14 @@ EE-only (cfg.ee_only): joint angles are invisible to the model (normalized joint
 zeroed), so the prior only uses gripper + flange pose and transfers to datasets without joint states (standard
 LIBERO suites, other robots). The 17-d layout is kept so augmentation / normalization code is unchanged.
 
+Auxiliary objectives (E25, AR objectives only; weights default 0 so old checkpoints / configs are unchanged):
+  aux_event  every token also predicts, from its own feature, the time to the next gripper open/close event
+             within its H-frame future (H if none, as a fraction of H) and the gripper value 0.27 s after that
+             event (where the fingers settle: an object in hand stops them early). Labels come from the states.
+  jepa       every token predicts the features of the next H / P tokens computed by an EMA copy of the
+             embedding + backbone (latent future prediction, layer-normed targets, smooth L1); call
+             `ema_update()` after every optimizer step.
+
 Goal conditioning (cfg.goal_cond, post-training): a goal state (EE pose + gripper) is encoded relative to the
 anchor frame and added to the token features entering the head. The backbone stays goal-agnostic, so each
 token can carry its own goal without leaking goals across tokens, and the zero-initialized last layer makes
@@ -18,6 +26,8 @@ post-training start exactly at the pretrained model. Goal types: 0 none, 1 endpo
 """
 
 from __future__ import annotations
+
+import copy
 
 import torch
 import torch.nn.functional as F
@@ -77,6 +87,19 @@ class StatePrior(nn.Module):
             self.head = FlowHead(cfg.d_model, H * D, cfg.head_hidden, cfg.head_depth, cfg.flow_steps)
         else:
             raise ValueError(f"unknown objective {self.objective}")
+        self.aux_event = float(cfg.get("aux_event", 0.0))
+        self.jepa = float(cfg.get("jepa", 0.0))
+        if (self.aux_event or self.jepa) and self.objective == "masked":
+            raise ValueError("aux_event / jepa are implemented for the AR objectives")
+        if self.aux_event:
+            self.event_head = nn.Sequential(nn.LayerNorm(cfg.d_model), nn.Linear(cfg.d_model, cfg.d_model), nn.GELU(),
+                                            nn.Linear(cfg.d_model, 2))
+        if self.jepa:
+            self.jepa_head = nn.Sequential(nn.LayerNorm(cfg.d_model), nn.Linear(cfg.d_model, 2 * cfg.d_model),
+                                           nn.GELU(), nn.Linear(2 * cfg.d_model, (H // P) * cfg.d_model))
+            self.ema = nn.ModuleDict({"embed": copy.deepcopy(self.embed), "backbone": copy.deepcopy(self.backbone)})
+            self.ema.requires_grad_(False)
+            self.jepa_momentum = float(cfg.get("jepa_momentum", 0.996))
         self.goal_cond = bool(cfg.get("goal_cond", False))
         if self.goal_cond:
             self.goal_proj = nn.Sequential(
@@ -100,9 +123,12 @@ class StatePrior(nn.Module):
         return x
 
     def _patchify(self, xn: torch.Tensor, mask: torch.Tensor):
+        return self._patchify_with(self.embed, xn, mask)
+
+    def _patchify_with(self, embed: nn.Module, xn: torch.Tensor, mask: torch.Tensor):
         xn = self._hide_joints(xn)
         B, T, D = xn.shape
-        tokens = self.embed(xn.reshape(B, T // self.P, self.P * D))
+        tokens = embed(xn.reshape(B, T // self.P, self.P * D))
         valid = mask.reshape(B, T // self.P, self.P).all(-1)
         valid[:, 0] = True
         return tokens, valid
@@ -127,6 +153,43 @@ class StatePrior(nn.Module):
         return torch.multinomial(self.goal_probs, B, replacement=True).to(device)
 
     # ---- training -----------------------------------------------------------------------------
+    @torch.no_grad()
+    def ema_update(self) -> None:
+        if not self.jepa:
+            return
+        m = self.jepa_momentum
+        for src, dst in ((self.embed, self.ema["embed"]), (self.backbone, self.ema["backbone"])):
+            for p, q in zip(src.parameters(), dst.parameters()):
+                q.lerp_(p.detach(), 1 - m)
+
+    def _event_loss(self, h, x, anchors, fut):
+        """Per token: (time to the next gripper event within the future, as a fraction of H; normalized gripper
+        value 4 frames after it, or at the end of the future if there is none)."""
+        H, G = self.H, GRIPPER.start
+        g_now = x[:, anchors, G] > 0.5  # (B, N)
+        g_fut = x[:, fut, G]  # (B, N, H)
+        change = (g_fut > 0.5) != g_now[..., None]
+        has = change.any(-1)
+        first = change.float().argmax(-1)  # first changed frame (0 if none)
+        tau = torch.where(has, first + 1, torch.full_like(first, H)).float() / H
+        after = torch.where(has, (first + 4).clamp(max=H - 1), torch.full_like(first, H - 1))
+        g_after = g_fut.gather(-1, after[..., None])[..., 0]
+        g_after = (g_after - self.normalizer.mean[G]) / self.normalizer.std[G]
+        pred = self.event_head(h).float()
+        return F.smooth_l1_loss(pred, torch.stack([tau, g_after], -1), reduction="none").sum(-1)  # (B, N)
+
+    def _jepa_loss(self, h, xn, mask):
+        """Each context token predicts the EMA encoder's features of the next H / P tokens (of the full window)."""
+        C, P, K = self.cfg.ctx_len, self.P, self.H // self.P
+        with torch.no_grad():
+            tok, valid = self._patchify_with(self.ema["embed"], xn, mask)
+            tgt = self.ema["backbone"](tok, valid, causal=True)
+            tgt = F.layer_norm(tgt.float(), tgt.shape[-1:])
+        N = C // P
+        idx = torch.arange(N, device=xn.device)[:, None] + 1 + torch.arange(K, device=xn.device)  # (N, K)
+        tgt = tgt[:, idx]  # (B, N, K, d)
+        pred = self.jepa_head(h).float().view(*h.shape[:2], K, -1)
+        return F.smooth_l1_loss(pred, tgt, reduction="none").mean((-1, -2))  # (B, N)
     def loss(
         self, x: torch.Tensor, mask: torch.Tensor, input_noise: float = 0.0, kf: torch.Tensor | None = None
     ) -> dict[str, torch.Tensor]:
@@ -147,6 +210,7 @@ class StatePrior(nn.Module):
         anchors = torch.arange(P - 1, C, P, device=x.device)  # last frame of each patch
         fut = anchors[:, None] + 1 + torch.arange(H, device=x.device)  # (N, H)
         target = self._hide_joints((x[:, fut] - x[:, anchors][:, :, None]) / self.normalizer.chunk_scale(H))
+        h_enc = h  # auxiliary heads read the goal-agnostic backbone feature (what downstream hosts receive)
         if self.goal_cond:
             B, N = h.shape[:2]
             gtype = self._sample_goal_types(B, x.device)[:, None].expand(B, N)
@@ -154,7 +218,17 @@ class StatePrior(nn.Module):
             h = h + self.goal_embedding(goal, x[:, anchors], gtype)
         per_token = self.head.loss(h, target.flatten(-2))
         w = mask[:, anchors].float()  # padded futures repeat the last frame = "robot at rest"
-        return {"loss": (per_token * w).sum() / w.sum().clamp(min=1)}
+        out = {"flow": (per_token * w).sum() / w.sum().clamp(min=1)}
+        loss = out["flow"]
+        if self.aux_event:
+            wf = mask[:, fut].all(-1).float()  # events need a real (unpadded) future
+            out["event"] = (self._event_loss(h_enc, x, anchors, fut) * wf).sum() / wf.sum().clamp(min=1)
+            loss = loss + self.aux_event * out["event"]
+        if self.jepa:
+            out["jepa"] = (self._jepa_loss(h_enc, xn, mask) * w).sum() / w.sum().clamp(min=1)
+            loss = loss + self.jepa * out["jepa"]
+        out["loss"] = loss
+        return out
 
     def _sample_patch_mask(self, B: int, N: int, device) -> torch.Tensor:
         """True = masked. Either the last H/P patches (forecasting) or ~`mask_ratio` of patches in short spans:

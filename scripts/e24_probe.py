@@ -14,7 +14,8 @@ temporal. We probe that feature (and baselines) for temporal quantities that a s
 Feature sets: cur (normalized current frame, what hosts already have), hand (cur + velocity / acceleration /
 1 s of gripper / 1-2 s EE displacement), raw (the whole normalized 96x17 history, flattened), rand (same SOPT
 architecture, random init, 3 seeds), droid (DROID-pretrained prior), droid_ee (EE-only prior, E13/E15), and
-ft:<run> (the SOPT encoder *after* downstream fine-tuning inside a host, read from its checkpoint).
+ft:<run> (the SOPT encoder *after* downstream fine-tuning inside a host, read from its checkpoint), and
+--extra name=ckpt priors (E25 pretraining variants; a longer-context prior gets its full ctx_len of history).
 
 Data: LIBERO-90 demos of the 17 main-table tasks (split test + val), windows built exactly like the policy inputs;
 probes are fit on 70% of the episodes and scored on the other 30% (split by episode hash, stratified by task).
@@ -161,6 +162,8 @@ def main():
     p.add_argument("--prior", default="outputs/e2_ar_flow_f100_s/best.pt")
     p.add_argument("--prior-ee", default="outputs/e13_ar_flow_f100_s_ee/best.pt")
     p.add_argument("--ft", nargs="*", default=[], help="downstream runs whose fine-tuned SOPT encoder is probed")
+    p.add_argument("--extra", nargs="*", default=[], help="name=checkpoint: more priors (E25 variants; any ctx_len)")
+    p.add_argument("--no-rand", action="store_true", help="skip the random-init encoders")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--stride", type=int, default=8, help="anchor stride in 20 Hz frames")
     p.add_argument("--threads", type=int, default=8)
@@ -171,19 +174,25 @@ def main():
     raw = Raw20(Path(args.sopt_data) / "processed/libero90_raw20")
     tasks = json.loads((REPO_ROOT / "configs/libero90_17_tasks.json").read_text())
     sel = select_episodes(raw.eps[raw.eps["split"].isin(["test", "val"])], tasks, None)
-    ctx, Y, ep, task, test = build(raw, sel, ref.cfg.ctx_len, args.stride)
+    extra = {n: load_checkpoint(REPO_ROOT / c)[0] for n, c in (e.split("=", 1) for e in args.extra)}
+    C = ref.cfg.ctx_len
+    C_max = max([C] + [m.cfg.ctx_len for m in extra.values()])
+    ctx_full, Y, ep, task, test = build(raw, sel, C_max, args.stride)  # longer-context priors see more history
+    ctx = np.ascontiguousarray(ctx_full[:, -C:])
     train = ~test
     print(f"episodes {len(sel)} windows {len(ctx)} (test {test.mean():.2f})", flush=True)
     ctx_n = ref.normalizer.norm(torch.from_numpy(ctx)).numpy().astype(np.float64)
 
     feats = {"cur": ctx_n[:, -1], "hand": hand_features(ctx_n), "raw": ctx_n.reshape(len(ctx_n), -1)}
-    for s in range(3):
+    for s in range(0 if args.no_rand else 3):
         torch.manual_seed(s)
         rnd = StatePrior(ref.cfg, {k: v.numpy() for k, v in ref.normalizer.state_dict().items()})
         feats[f"rand{s}"] = encode(rnd, ctx)
     feats["droid"] = encode(ref, ctx)
     if args.prior_ee and (REPO_ROOT / args.prior_ee).exists():
         feats["droid_ee"] = encode(load_checkpoint(REPO_ROOT / args.prior_ee)[0], ctx)
+    for n, m in extra.items():
+        feats[n] = encode(m, np.ascontiguousarray(ctx_full[:, -m.cfg.ctx_len:]))
     for run in args.ft:
         feats[f"ft:{run}"] = encode(load_finetuned(ref, REPO_ROOT / "outputs" / run / "final.pt"), ctx)
 

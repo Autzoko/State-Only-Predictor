@@ -95,8 +95,8 @@ def run(cfg) -> Path:
     (out / "meta.json").write_text(json.dumps(meta, indent=2))
     print(json.dumps(meta), flush=True)
 
-    decay = [p for n, p in model.named_parameters() if p.ndim >= 2]
-    no_decay = [p for n, p in model.named_parameters() if p.ndim < 2]
+    decay = [p for n, p in model.named_parameters() if p.ndim >= 2 and p.requires_grad]
+    no_decay = [p for n, p in model.named_parameters() if p.ndim < 2 and p.requires_grad]
     opt = torch.optim.AdamW(
         [{"params": decay, "weight_decay": cfg.train.weight_decay}, {"params": no_decay, "weight_decay": 0.0}],
         lr=cfg.train.lr, betas=(0.9, 0.95),
@@ -156,17 +156,19 @@ def run(cfg) -> Path:
             for g in opt.param_groups:
                 g["lr"] = lr_at(step, cfg.train)
             with torch.autocast(device.type, dtype=torch.bfloat16, enabled=amp):
-                loss = fwd(x, mask, cfg.aug.input_noise, kf)["loss"]
+                losses = fwd(x, mask, cfg.aug.input_noise, kf)
+            loss = losses["loss"]
             opt.zero_grad(set_to_none=True)
             loss.backward()
             gnorm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.train.grad_clip)
             opt.step()
+            model.ema_update()  # E25 jepa target encoder (no-op otherwise)
             step += 1
 
             if step % cfg.train.log_every == 0:
                 dt = time.time() - t0
-                logger.log(step, loss=loss.item(), grad_norm=gnorm.item(), lr=opt.param_groups[0]["lr"],
-                           steps_per_s=cfg.train.log_every / dt)
+                logger.log(step, **{k: v.item() for k, v in losses.items()}, grad_norm=gnorm.item(),
+                           lr=opt.param_groups[0]["lr"], steps_per_s=cfg.train.log_every / dt)
                 print(f"step {step} loss {loss.item():.4f} ({cfg.train.log_every / dt:.1f} it/s)", flush=True)
                 t0 = time.time()
             if step % cfg.train.eval_every == 0 or step == cfg.train.max_steps:
