@@ -961,3 +961,13 @@ McNemar：droid vs none 90 vs 69 p=0.11；droid vs scratch 103 vs 47 **p=6e-6**�
 
 ## E20 X-VLA 17 任务 seed 0 冒烟失败（18818090）与修复（f42fb42）
 - `ValueError: Sequence length 1204 exceeds max_len_seq=512`：`lerobot/xvla-base` 的 config 把指令补齐到 1024 个 BART token（30 动作 + 3×50 图像 + 1024 文本）。改为 LeRobot 默认的 64（17 个任务指令最长 17 个 token），对三个 arm 相同。已重新排在队首。
+
+## E22 GR00T 17 任务 seed 1（2026-10-16，Jubail 18819658）及 seed 0+1 汇总
+| arm | s0 | s1 | 均值 | 7 dev（2 seed） | 10 new（2 seed） |
+|---|---|---|---|---|---|
+| none | 81.9 | 79.6 | 80.8 | 79.3 | 81.8 |
+| expert_scratch | 77.2 | 79.9 | 78.5 | 74.1 | 81.6 |
+| expert_droid | 79.2 | **84.4** | 81.8 | 78.1 | 84.3 |
+合并 McNemar（1700 配对 episode）：droid vs none 190 vs 173 p=0.40；droid vs scratch 198 vs 143 **p=0.003**；scratch vs none 135 vs 173 **p=0.035**。
+- seed 1 方向与 seed 0 相反（droid +4.8），说明 GR00T 上 seed 间差异大，s0 的负结果不稳定。两 seed 合并：DROID 先验相对同结构随机初始化显著更好，相对 none 持平略高。等 seed 2。
+- X-VLA 修复后冒烟通过（18819790，82a9891），训练 1.62 it/s（20k 步约 3.4 h）。
