@@ -980,3 +980,12 @@ McNemar：droid vs none 90 vs 69 p=0.11；droid vs scratch 103 vs 47 **p=6e-6**�
 | expert_droid | **54.4** | **50.3** | 57.2 |
 McNemar：droid vs none 182 vs 74 **p=1e-11**；droid vs scratch 119 vs 84 **p=0.017**；scratch vs none 155 vs 82 **p=2e-6**。
 - 与 7 任务 E12 一致：SOPT 对 FastWAM 提升最大（+12.8）。但 17 任务上随机初始化的插件也显著提升（+8.6，7 任务上只有 +1.8），说明 FastWAM 的部分收益来自"额外的本体历史输入"本身；DROID 先验相对 scratch 的额外增益集中在 dev 任务（+10.3），new 任务上两者持平。
+
+## E20 X-VLA 17 任务 seed 0（2026-10-16，Jubail 18819790，f42fb42 修复后；k5，20k steps，n_exec 10，850 ep/run）
+| arm | all 17 | 7 dev | 10 new |
+|---|---|---|---|
+| none | 72.2 | 68.3 | 75.0 |
+| expert_scratch | 71.3 | 62.9 | 77.2 |
+| expert_droid | 69.9 | 64.3 | 73.8 |
+McNemar：droid vs none 68 vs 88 p=0.13；droid vs scratch p=0.40；scratch vs none p=0.57。
+- 单 seed 无收益（−2.3，不显著）。X-VLA 的预训练数据本身包含 DROID（290K episode 中的一部分），且使用 proprio 输入；SOPT 提供的 DROID 运动知识对它可能是冗余的。π0.5-DROID 同样在 DROID 上训练过却有显著增益（E14b），二者差异待 seed 1/2 后再分析。seed 1 已提交（18820646）。
