@@ -971,3 +971,12 @@ McNemar：droid vs none 90 vs 69 p=0.11；droid vs scratch 103 vs 47 **p=6e-6**�
 合并 McNemar（1700 配对 episode）：droid vs none 190 vs 173 p=0.40；droid vs scratch 198 vs 143 **p=0.003**；scratch vs none 135 vs 173 **p=0.035**。
 - seed 1 方向与 seed 0 相反（droid +4.8），说明 GR00T 上 seed 间差异大，s0 的负结果不稳定。两 seed 合并：DROID 先验相对同结构随机初始化显著更好，相对 none 持平略高。等 seed 2。
 - X-VLA 修复后冒烟通过（18819790，82a9891），训练 1.62 it/s（20k 步约 3.4 h）。
+
+## E12 FastWAM 17 任务 seed 0（2026-10-16，Jubail 18818286；k5，n_exec 10，850 ep/run）
+| arm | all 17 | 7 dev | 10 new |
+|---|---|---|---|
+| none | 41.6 | 36.3 | 45.4 |
+| expert_scratch | 50.2 | 40.0 | 57.4 |
+| expert_droid | **54.4** | **50.3** | 57.2 |
+McNemar：droid vs none 182 vs 74 **p=1e-11**；droid vs scratch 119 vs 84 **p=0.017**；scratch vs none 155 vs 82 **p=2e-6**。
+- 与 7 任务 E12 一致：SOPT 对 FastWAM 提升最大（+12.8）。但 17 任务上随机初始化的插件也显著提升（+8.6，7 任务上只有 +1.8），说明 FastWAM 的部分收益来自"额外的本体历史输入"本身；DROID 先验相对 scratch 的额外增益集中在 dev 任务（+10.3），new 任务上两者持平。
