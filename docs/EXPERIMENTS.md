@@ -1023,3 +1023,13 @@ LIBERO-90 17 个主表任务的全部示范（771 条，13130 个窗口，stride
 | base | 同配方、预训练 seed 1 | 预训练本身的随机波动（判断变体差异是否超出噪声） |
 - 预先规定的判定：在 7 个 dev 任务上相对 e23_trunk_droid 提升 ≥ 2 点且配对 McNemar p < 0.05，且超过 base 对照的差异；10 个 new 任务上方向一致才算通过。通过的变体再在宿主（DP / SmolVLA）上确认。
 - 调度：DGX 一次一个作业，与 SmolVLA s1/s2 交替（event → SmolVLA s1 → jepa → base → SmolVLA s2 → speed → ctx192）。每个约 2–3 h，主表的关键路径是 Jubail 上的 π0.5（3 × ~24 h），所以不推迟主表完成时间。127 恢复前无法提交。
+- 2026-10-16 更新：127 恢复后发现 DGX 共享盘上没有 DROID 状态数据（`/media/cvpr/langtian/SOPT/data/processed/droid` 不存在），已从 127 的 `~/langtian/SOPT_DATA/processed/droid` rsync 过去（3.4 GB，仅文件传输）。为不让 E25 因缺数据空转，队列改为 SmolVLA s1 → event → jepa → base → SmolVLA s2 → speed → ctx192。
+
+## E23 SmolVLA 17 任务 seed 0（2026-10-16，DGX Spark 作业 158432；k5，n_exec 10，850 ep/run）
+| arm | all 17 | 7 dev | 10 new |
+|---|---|---|---|
+| none | 60.6 | 54.6 | 64.8 |
+| expert_scratch | 58.7 | 49.7 | 65.0 |
+| expert_droid | **64.0** | **58.3** | **68.0** |
+McNemar：droid vs none 110 vs 81 **p=0.042**；droid vs scratch 121 vs 76 **p=0.0017**。
+- 与 7 任务 E7（66.0 vs 61.2，p=0.0008）一致；10 个 new 任务上方向相同（+3.2），scratch 插件不带来收益（与 FastWAM 不同）。seed 1/2 在 DGX 队列中。
