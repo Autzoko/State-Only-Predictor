@@ -1060,3 +1060,12 @@ X-VLA 与其他宿主的结构差异（可能的算法原因）：
 4. **x0 预测 + 单一 transformer**：动作 token 与视觉/文本 token 在同一个 24 层 transformer 中双向注意，没有独立的 action expert / AdaLN；其他 flow 宿主预测速度场。
 - 逐任务（2 seeds）：droid 的损失集中在需要精确视觉定位的抓放任务（黄白杯 −13、奶油奶酪→托盘 −10、右侧摩卡壶 −10），抽屉/书本类持平或略升；成功 episode 步数不变（141 vs 144）。
 - 主假设（待 E20d 验证）：在全量微调、强记忆的宿主上，SOPT 历史提供了"识别是哪条示范、走到哪一步"的捷径，模型更依赖历史回放、更少依赖视觉 → 新初始位置下抓取失误。E20d 预测：droid 组训练集误差最低但留出示范误差更高；对图像互换的敏感度低于 none；对 SOPT 置零/互换的敏感度高。DP / GR00T 作为对照。
+
+## E21 DP 17 任务 seed 1（2026-10-16，Jubail 18821704）及 seed 0+1 汇总
+| arm | s0 | s1 | 均值 | 7 dev | 10 new |
+|---|---|---|---|---|---|
+| none | 73.6 | 71.4 | 72.5 | 64.6 | 78.1 |
+| expert_scratch | 69.5 | 67.9 | 68.7 | 60.0 | 74.8 |
+| expert_droid | 76.1 | 77.3 | **76.7** | **68.0** | **82.8** |
+合并 McNemar（1700 ep/arm）：droid vs none 206 vs 135 **p=1.4e-4**；droid vs scratch 235 vs 99 **p=7e-14**；scratch vs none 126 vs 191 p=3e-4（scratch 更差）。
+- seed 0 时 droid vs none 不显著（p=0.11），两个 seed 合并后显著；dev 与 new 方向一致（+3.4 / +4.7）。
