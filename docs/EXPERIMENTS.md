@@ -1043,3 +1043,20 @@ McNemar：droid vs none 110 vs 81 **p=0.042**；droid vs scratch 121 vs 76 **p=0
 合并 McNemar（1700 ep/arm）：droid vs none 137 vs 181 **p=0.016（droid 更差）**；droid vs scratch 146 vs 188 **p=0.025（droid 更差）**；scratch vs none p=0.95。
 - 两个 seed 方向一致、dev/new 都是负的：X-VLA 是目前唯一 SOPT 显著有害的宿主。scratch 插件与 none 持平，说明问题不在"额外输入"本身，而在 DROID 先验的特征与 X-VLA 的表示冲突。
 - 待查假设：(1) X-VLA 预训练已包含 DROID 及其 proprio 输入，SOPT 信息冗余且以加法注入干扰了已对齐的动作 token；(2) SOPT 以宿主 lr 微调对这个宿主过大；(3) X-VLA 的动作空间/归一化与 SOPT 特征尺度不匹配。seed 2 仍在 Jubail 队列中；论文中如实报告为负例。
+
+### E20 分析：X-VLA 负结果是实现问题还是算法问题（2026-10-16，代码审查 + 已有日志；E20d 诊断作业排在 Jubail 队首）
+代码审查（对照 LeRobot 0.6.2 `policies/xvla/{modeling_xvla,soft_transformer,action_hub}.py`）未发现实现错误：
+- 注入点：`SoftPromptedTransformer.forward` 中 `action_encoder`（DomainAwareLinear，输入 = [带噪动作 20, proprio 20, 时间 32] 拼接）每次前向只调用一次，在拼接视觉/文本 token 和 pos_emb 之前；包装函数签名 `(x, domain_id)` 一致，批大小断言在训练和 10 步去噪中都成立。
+- 零初始化：MLP 最后一层权重/偏置为 0，初始时三组完全等价（E20d `--init-check` 再做数值验证）。
+- 保存/加载：`save_trainable` 保存所有 requires_grad 参数（含 sopt.prior、sopt.mlp）和 normalizer buffer；`load_trainable` 断言训练参数全部在 ckpt 中且无多余键。评估前 `policy.eval()` 覆盖 sopt 子模块。
+- 三组训练用的 85 条示范完全相同（meta.json），日志中除 robosuite 宏文件提示外无 warning / missing key。
+- 优化：SOPT 与 X-VLA 策略 transformer 同组（lr 1e-4，VLM 0.1×），与 SmolVLA / DP / GR00T 的 SOPT 学习率相同；clip 10 与 SmolVLA / DP 相同。
+- X-VLA 损失对 chunk 末尾的 padding 步也计算（LeRobot 原实现忽略 `action_is_pad`），三组一致，不是 SOPT 特有。
+
+X-VLA 与其他宿主的结构差异（可能的算法原因）：
+1. **全量微调**：X-VLA 是唯一连 VLM（Florence-2）一起训练的宿主（0.1× lr，可训练 891M）；SmolVLA 冻结 VLM，π0.5 只训 action expert，GR00T 冻结 backbone，FastWAM 冻结视频专家。
+2. **严重过拟合**：训练损失（x0 预测的 MSE，归一化单位）最后 2k 步 X-VLA 0.0017 vs DP 0.0066 vs GR00T 0.013；85 条示范训练 ~48 个 epoch 后几乎背下。droid 组训练损失始终最低（1–2k 步 0.059/0.063 vs none 0.075/0.069），但闭环最差 → 典型的"训练更好、泛化更差"。
+3. **本体输入已在同一位置**：X-VLA 的 none 组本身就把当前 proprio 拼进每个动作 token 的输入投影；SOPT 加在同一处，等于在已有本体通道上再加一份历史。
+4. **x0 预测 + 单一 transformer**：动作 token 与视觉/文本 token 在同一个 24 层 transformer 中双向注意，没有独立的 action expert / AdaLN；其他 flow 宿主预测速度场。
+- 逐任务（2 seeds）：droid 的损失集中在需要精确视觉定位的抓放任务（黄白杯 −13、奶油奶酪→托盘 −10、右侧摩卡壶 −10），抽屉/书本类持平或略升；成功 episode 步数不变（141 vs 144）。
+- 主假设（待 E20d 验证）：在全量微调、强记忆的宿主上，SOPT 历史提供了"识别是哪条示范、走到哪一步"的捷径，模型更依赖历史回放、更少依赖视觉 → 新初始位置下抓取失误。E20d 预测：droid 组训练集误差最低但留出示范误差更高；对图像互换的敏感度低于 none；对 SOPT 置零/互换的敏感度高。DP / GR00T 作为对照。
