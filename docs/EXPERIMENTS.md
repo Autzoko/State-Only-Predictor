@@ -1168,3 +1168,12 @@ dev / new 拆分（agg_split）：
 - **E27**（同一作业，`scripts/e27_host_probe.py`）：在宿主动作解码器的输入上，对 E24 的时间目标做线性探针（k5 训练示范上拟合，留出示范上评分）。
   - host(none)+SOPT 相对 host(none) 的 R² 增量 = SOPT 带来的、宿主原本没有的信息。
 - 按用户要求排在 Jubail 现有队列之后。E28 干预（SOPT dropout / 历史扰动 / 门控注入）根据 E26 / E27 结果再定。
+
+## E12 FastWAM 17 任务 seed 2（2026-10-17，Jubail 18827134）及 3 seed 汇总
+| | s0 / s1 / s2 | 均值 ± SD | dev 7 | new 10 |
+|---|---|---|---|---|
+| none | 41.6 / 44.1 / 44.8 | 43.5 ± 1.7 | 37.0 | 48.1 |
+| +SOPT scratch | 50.2 / 48.2 / 50.8 | 49.8 ± 1.4 | 42.1 | 55.1 |
+| +SOPT DROID | 54.4 / 55.2 / 54.0 | **54.5 ± 0.6** | 50.6 | 57.3 |
+- DROID vs none：525:245，**p=2.7e-24**；DROID vs scratch：403:282，p=4.3e-6；scratch vs none：411:252，p=7.0e-10。
+- FastWAM 是唯一一个**光加历史（scratch）就显著提升**的宿主（+6.3）。这符合 `HOST_ANALYSIS.md` 的统一解释：基线视觉通路越弱，历史的价值越大。DROID 预训练在此基础上再加 +4.7。
