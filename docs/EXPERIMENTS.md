@@ -1157,3 +1157,14 @@ dev / new 拆分（agg_split）：
 
 - DP、FastWAM 的收益随 seed 增加更显著；GR00T 3 seed 完全打平；X-VLA 的负效应在 3 seed 下稳定（−2.5，两边同向），与 E20d 诊断"实现正确、闭环特有"一致。
 - 剩余：FastWAM s2（18827134 运行中）、π0.5 lr1e-4 s1（18828640 运行中）/ s2（排队），SmolVLA s2（DGX 158608 运行中）。
+
+## E26 / E27 计划：强宿主为什么不受益（2026-10-17；完整分析与预注册判据见 `docs/HOST_ANALYSIS.md`）
+- 三个候选解释：H1 冗余（强视觉宿主能从画面推断阶段 / 进度）、H2 接口耦合（GR00T 组件代价 −1.8；X-VLA 范数比 0.48）、H3 copycat / 因果混淆（开环更好、闭环更差；加 SOPT 后对视觉的依赖下降）。
+- **E26**（`scripts/slurm/e26_trace.sbatch`）：X-VLA / GR00T / π0.5 / DP × none / scratch / droid，seed 0，17 任务 × 50 init。
+  - 重新评测，记录仿真轨迹（`--trace 4`）和每步动作（`--act-log`，本次新增）。
+  - 用 `scripts/e26_taxonomy.py` 做 17 任务通用的失败归类：目标物体和抓取距离由全部 run 的成功 episode 统一标定；另算 frozen / grip_cycles / jerk_ratio。
+  - 做配对分析：SOPT 新造成了哪些失败、修复了哪些失败。
+  - 同时检查重新评测的成功率能否复现原始 rollouts。
+- **E27**（同一作业，`scripts/e27_host_probe.py`）：在宿主动作解码器的输入上，对 E24 的时间目标做线性探针（k5 训练示范上拟合，留出示范上评分）。
+  - host(none)+SOPT 相对 host(none) 的 R² 增量 = SOPT 带来的、宿主原本没有的信息。
+- 按用户要求排在 Jubail 现有队列之后。E28 干预（SOPT dropout / 历史扰动 / 门控注入）根据 E26 / E27 结果再定。

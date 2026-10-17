@@ -30,6 +30,7 @@ def main():
     p.add_argument("--max-steps", type=int, default=None, help="default: 400 (libero90) / OpenVLA per-suite limits")
     p.add_argument("--n-exec", type=int, default=10, help="actions executed per predicted chunk")
     p.add_argument("--trace", type=int, default=0, help="log simulator state every N steps (failure taxonomy)")
+    p.add_argument("--act-log", action="store_true", help="E26: log every executed action (chunk-boundary metrics)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     args = p.parse_args()
     import importlib.util
@@ -67,7 +68,7 @@ def main():
         obs = venv.reset(init)
         hist = [[feat(o["q"][None], o["fingers"][None])[0]] for o in obs]
         active = {i: True for i in range(len(tasks))}
-        chunks, traces = {}, {i: [] for i in range(len(tasks))}
+        chunks, traces, alog = {}, {i: [] for i in range(len(tasks))}, {i: [] for i in range(len(tasks))}
         for t in range(args.max_steps):
             live = [i for i in active if active[i]]
             if not live:
@@ -86,6 +87,8 @@ def main():
             for i in live:
                 a = chunks[i][t % args.n_exec]
                 actions[i] = np.concatenate([np.clip(a[:6], -1, 1), dataset_to_sim_gripper(np.array([float(a[6] > 0.5)]))])
+                if args.act_log:
+                    alog[i].append([round(float(x), 3) for x in a[:7]])
             if args.trace and t % args.trace == 0:
                 for i in live:
                     traces[i].append(trace_row(t, obs[i], actions[i]))
@@ -95,15 +98,17 @@ def main():
                 if success:
                     active[i] = False
                     rows.append({"task": tasks[i], "init": init, "success": True, "steps": t + 1,
-                                 **({"trace": traces[i]} if args.trace else {})})
+                                 **({"trace": traces[i]} if args.trace else {}),
+                                 **({"acts": alog[i]} if args.act_log else {})})
         rows += [{"task": tasks[i], "init": init, "success": False, "steps": args.max_steps,
-                  **({"trace": traces[i]} if args.trace else {})} for i in active if active[i]]
+                  **({"trace": traces[i]} if args.trace else {}),
+                  **({"acts": alog[i]} if args.act_log else {})} for i in active if active[i]]
         sr = np.mean([r["success"] for r in rows])
         print(f"init {init}: running success {sr:.3f} ({time.time() - t0:.0f}s)", flush=True)
     venv.close()
     per_task = {t: float(np.mean([r["success"] for r in rows if r["task"] == t])) for t in tasks}
     summary = {"ckpt": args.ckpt, "arm": arm, "vla": ck["meta"].get("vla", "smolvla"), "suite": suite, "max_steps": args.max_steps, "success_rate": float(np.mean([r["success"] for r in rows])),
-               "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "wall_s": time.time() - t0,
+               "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "trace_every": args.trace, "wall_s": time.time() - t0,
                "episodes": rows}
     Path(args.out).write_text(json.dumps(summary, indent=2))
     print(json.dumps({k: v for k, v in summary.items() if k != "episodes"}, indent=2))
