@@ -43,8 +43,13 @@ setup_env() {  # same absolute path on every node, so the packed venv is relocat
 }
 
 setup_repo() {
-  [[ -d $REPO/.git ]] || git clone -q https://github.com/Autzoko/State-Only-Predictor.git "$REPO"
-  git -C "$REPO" fetch -q origin && git -C "$REPO" checkout -q "$COMMIT" || return 1
+  local i
+  for i in 1 2 3; do  # GitHub clones from the nodes occasionally drop mid-transfer (job 158606)
+    [[ -d $REPO/.git ]] || git clone -q https://github.com/Autzoko/State-Only-Predictor.git "$REPO" || rm -rf "$REPO"
+    [[ -d $REPO/.git ]] && git -C "$REPO" fetch -q origin && git -C "$REPO" checkout -q "$COMMIT" && break
+    sleep 30
+  done
+  [[ $(git -C "$REPO" rev-parse HEAD 2>/dev/null) = "$COMMIT" ]] || return 1
   export PYTHONPATH=$REPO/src
   mkdir -p "$W/outputs" "$SOPT_DATA"
   [[ -e $REPO/outputs ]] || ln -s "$W/outputs" "$REPO/outputs"
