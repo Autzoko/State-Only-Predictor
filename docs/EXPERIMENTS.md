@@ -1088,3 +1088,12 @@ X-VLA 与其他宿主的结构差异（可能的算法原因）：
 - **"视觉依赖下降"不是 X-VLA 特有**：加 DROID 先验后，换图带来的误差在三个宿主上都大幅下降（X-VLA 1.55→0.95，DP 1.13→0.64，GR00T 1.50→0.57）；对 SOPT 互换的敏感度 X-VLA（+0.24）也不高于 DP（+0.28）、GR00T（+0.53）。
 - 唯一突出的差异：X-VLA 中 SOPT 特征相对动作 token 的范数比 0.48，是 GR00T（0.20）的 2.4 倍——X-VLA 的动作 token 来自单个 DomainAwareLinear 投影（范数小），SOPT 在其中占比更大。
 - 结论：负结果不是实现错误，也不是开环可见的过拟合，而是**闭环特有**的问题——开环更准的策略在自身 rollout 产生的历史（偏离示范分布）下表现更差。GR00T 开环收益最大但闭环无收益，同样说明开环指标不能预测闭环收益。下一步需要闭环层面的诊断（失败分类 trace，以及降低 SOPT 依赖的干预：SOPT dropout / 冻结 VLM）。
+
+## E14 π0.5-DROID 17 任务 seed 0（2026-10-17，Jubail 18820621，cb81c9f；lr 1e-4，k5，n_exec 10，850 ep/run）
+| arm | all 17 | 7 dev | 10 new |
+|---|---|---|---|
+| none | 57.6 | 51.1 | 62.2 |
+| expert_scratch | 56.5 | 45.7 | 64.0 |
+| expert_droid | 56.6 | 48.0 | 62.6 |
+McNemar：droid vs none 91 vs 100 p=0.56；droid vs scratch p=1.0；scratch vs none p=0.49。
+- **7 任务 E14b 的显著收益（56.6 vs 49.4，p=0.007）在 17 任务上没有复现**：同样的 7 个 dev 任务上 droid 48.0 vs none 51.1。差别在于训练任务数（7 → 17，示范 35 → 85）：none 在 dev 任务上基本不变（49.4 → 51.1），droid 下降（56.6 → 48.0）。单 seed，待 s1/s2；与 E5 SmolVLA（seed 0 收益不复现）类似，提示单 seed 的宿主结论不可靠。
