@@ -1106,3 +1106,12 @@ McNemar：droid vs none 91 vs 100 p=0.56；droid vs scratch p=1.0；scratch vs n
 | expert_droid | 64.0 | 67.4 | **65.7** | **60.4** | **69.4** |
 合并 McNemar（1700 ep/arm）：droid vs none 241 vs 150 **p=4.9e-6**；droid vs scratch 260 vs 139 **p=1.4e-9**；scratch vs none p=0.096。
 - 与 7 任务 E7 一致且更强；dev / new 方向一致（+5.8 / +5.0）。E25 event 已在 DGX 开始（158598）。
+
+## E25 event 结果（2026-10-17，DGX 158598，7b19dac；预训练 32 min + TrunkBC 3 seeds，整作业 1.6 h）
+| | all 17 | 7 dev | 10 new |
+|---|---|---|---|
+| e23_trunk_droid（参照） | 72.2 | 64.7 | 77.5 |
+| e25_trunk_event | **74.0**（+1.8，269:223 p=0.042） | 67.0（+2.4，114:89 p=0.092） | 78.9（+1.4，p=0.24） |
+探针 R²（droid → event）：t_grip 0.80 → **0.86**，t_next 0.53 → 0.56，t_still 0.07 → 0.14，prog 0.94 → 0.95；acc 0.90 → 0.81，fut 0.5 s 0.85 → 0.83。
+- 辅助目标按预期把"夹爪事件时间"写进了表示，闭环方向为正、dev / new 一致。
+- **按预注册标准未通过**：dev +2.4 达到幅度门槛，但 p=0.09 > 0.05；且需与 base 对照（预训练换 seed 的波动）比较后才能判断。先不推进到宿主，等 base 结果。
