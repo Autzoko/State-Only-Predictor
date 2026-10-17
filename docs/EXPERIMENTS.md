@@ -1097,3 +1097,12 @@ X-VLA 与其他宿主的结构差异（可能的算法原因）：
 | expert_droid | 56.6 | 48.0 | 62.6 |
 McNemar：droid vs none 91 vs 100 p=0.56；droid vs scratch p=1.0；scratch vs none p=0.49。
 - **7 任务 E14b 的显著收益（56.6 vs 49.4，p=0.007）在 17 任务上没有复现**：同样的 7 个 dev 任务上 droid 48.0 vs none 51.1。差别在于训练任务数（7 → 17，示范 35 → 85）：none 在 dev 任务上基本不变（49.4 → 51.1），droid 下降（56.6 → 48.0）。单 seed，待 s1/s2；与 E5 SmolVLA（seed 0 收益不复现）类似，提示单 seed 的宿主结论不可靠。
+
+## E23 SmolVLA 17 任务 seed 1（2026-10-17，DGX 158465）及 seed 0+1 汇总
+| arm | s0 | s1 | 均值 | 7 dev | 10 new |
+|---|---|---|---|---|---|
+| none | 60.6 | 60.1 | 60.4 | 54.6 | 64.4 |
+| expert_scratch | 58.7 | 58.5 | 58.6 | 49.7 | 64.8 |
+| expert_droid | 64.0 | 67.4 | **65.7** | **60.4** | **69.4** |
+合并 McNemar（1700 ep/arm）：droid vs none 241 vs 150 **p=4.9e-6**；droid vs scratch 260 vs 139 **p=1.4e-9**；scratch vs none p=0.096。
+- 与 7 任务 E7 一致且更强；dev / new 方向一致（+5.8 / +5.0）。E25 event 已在 DGX 开始（158598）。
