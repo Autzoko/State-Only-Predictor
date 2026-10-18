@@ -1235,3 +1235,13 @@ dev / new 拆分（agg_split）：
   - 长上下文变体用 `data.left_pad = ctx − 96`：每个窗口仍有 ≥96 帧真实历史，episode 和锚点与 ctx96 完全相同，只是多出更早的历史。这与 LIBERO rollout 早期用第一帧填充历史的方式一致。ctx192 尚未提交，已改为同样设置。
   - DGX 队列：speed → ctx192 → ctx48 → ctx384。
   - 宿主层面（SET=history）：GR00T expert_droid / xattn_droid 换用长上下文先验，等 DGX 产出先验后排队。
+
+## E19 libero_spatial 结果（2026-10-18，Jubail 18831408；SmolVLA expert_droid + SOPT dropout 0.5，k5，3 seed，`scripts/agg_e19.py libero_spatial`）
+| | s0 / s1 / s2 | 均值 |
+|---|---|---|
+| none | 83.0 / 80.6 / 77.0 | 80.2 ± 3.0 |
+| +SOPT DROID | 79.2 / 79.2 / 80.2 | 79.5 ± 0.6 |
+| +SOPT DROID，dropout 0.5 | 78.8 / 78.4 / 78.6 | 78.6 ± 0.2 |
+- dropout vs none：84:108，p=0.097；dropout vs droid：82:96，p=0.33。
+- SOPT dropout **没有**带来改善。而 spatial 上 3 seed 合并后本来就没有负效应（droid vs none p=0.54），所以 E19 原本要修复的问题已不存在；这一组结果只说明 dropout 0.5 在 spatial 上不提升。
+- 对 E31 的含义：单纯按样本丢弃 SOPT 不是有效的正则。E31 完整版仍保留 dropout 0.3 作为一个组件，但"不加正则"的对照组会直接给出它是否有用。
