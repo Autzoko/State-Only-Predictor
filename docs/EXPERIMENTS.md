@@ -1218,3 +1218,20 @@ dev / new 拆分（agg_split）：
 - E31：双路交叉注意力 + 学习门控（以动作 token 隐状态和去噪时间为条件）+ 模态 dropout + SOPT 低学习率；对照组为加法注入、AdaLN 注入（10-16 提出，未跑过）、固定门控、无 dropout。先在 GR00T 上跑，1 seed 筛选。
 - E32：以夹爪事件分段的阶段记忆，用 DROID 状态做段级预训练（段级 JEPA + 下一关键帧）；评测看两阶段任务和 libero_10。
 - DROID 统计（本地，元数据 + next_event）：轨迹中位 14.7 s，41% 超过 17 s；22% 有 ≥2 次抓放循环；40% 的松开之后还有后续抓取；明确"放进抽屉再关上"的 572 条。现有预训练窗口只有 8.5 s，学不到阶段结构。
+
+## E31 / E33 实现并排队（2026-10-18，按用户要求：AdaLN、交叉注意力、更长历史消融）
+- **E31（Jubail，`scripts/slurm/e31_groot.sbatch`，GR00T，17 任务，k5，seed 0，与 e22_groot_{none,expert_droid}_s0 配对）**
+  - `src/sopt/vla/groot.py` 新增两种接法：
+    - `adaln_*`：SOPT 特征经零初始化 MLP 加到 DiT 的时间步嵌入上，通过 AdaLayerNorm 调制每一层和输出层；
+    - `xattn_*`：每隔 4 个 block（视觉语言交叉注意力层）后加一路运动交叉注意力，读取全部 SOPT 历史 token。这一路有独立的 softmax，输出投影零初始化，由门控 σ(W[h, temb]) 加权，门以 token 的隐状态和去噪时间为条件；`--cond-drop` 按样本整路关闭（模态 dropout）。
+  - `vla_train.py` 新增 `--prior-lr-mult`（SOPT 编码器学习率倍数）；历史长度改为跟随先验的 ctx_len，写入 meta，`vla_eval.py` 读取。
+  - SET=screen 三组：adaln_droid、xattn_droid + dropout 0.3 + SOPT lr ×0.1、xattn_droid 不加正则。
+  - 作业开头做两项检查，任一失败即中止：
+    - 零初始化等价检查：新建的 adaln / xattn 策略与 none 逐元素相同，`vla_diag.py --init-arms`；
+    - 每种接法 30 步冒烟训练 + 1 个初始状态的评测。
+  - 排在 Jubail 队列 E26 之后。scratch 对照（SET=scratch）和补 seed 在筛选后决定。
+- **E33 历史长度消融**
+  - DGX 预训练：ctx48（3.2 s）/ ctx96（现有）/ ctx192（12.8 s）/ ctx384（25.6 s），每个接 TrunkBC 17 任务 × 3 seed，加探针（含新的 stage 目标）。
+  - 长上下文变体用 `data.left_pad = ctx − 96`：每个窗口仍有 ≥96 帧真实历史，episode 和锚点与 ctx96 完全相同，只是多出更早的历史。这与 LIBERO rollout 早期用第一帧填充历史的方式一致。ctx192 尚未提交，已改为同样设置。
+  - DGX 队列：speed → ctx192 → ctx48 → ctx384。
+  - 宿主层面（SET=history）：GR00T expert_droid / xattn_droid 换用长上下文先验，等 DGX 产出先验后排队。

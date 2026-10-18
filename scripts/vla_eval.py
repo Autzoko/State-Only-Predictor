@@ -62,6 +62,7 @@ def main():
         venv = TaskVecEnv(args.sopt_data, tasks, suite=suite)
         feat = lambda q, f: hide_joints(features_20hz(q, f))  # noqa: E731
         args.max_steps = args.max_steps or MAX_STEPS[suite]
+    C = ck["meta"].get("ctx", CTX)  # history length the policy was trained with (E33)
     rows, t0 = [], time.time()
     for init in range(args.n_init):
         torch.manual_seed(init)
@@ -74,7 +75,7 @@ def main():
             if not live:
                 break
             if t % args.n_exec == 0:
-                ctx = np.stack([interp_frames(np.stack(hist[i]), context_indices(len(hist[i]) - 1, CTX)) for i in live])
+                ctx = np.stack([interp_frames(np.stack(hist[i]), context_indices(len(hist[i]) - 1, C)) for i in live])
                 imgs = [np.stack([obs[i]["agent"], obs[i]["wrist"]]) for i in live]
                 img = torch.from_numpy(np.stack(imgs)).permute(0, 1, 4, 2, 3).float().div(255).to(device)
                 with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):

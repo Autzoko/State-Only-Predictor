@@ -76,7 +76,8 @@ def predict(V, policy, pre, post, b, tasks, mode, seed):
                 policy.sopt.cond = torch.zeros_like(policy.sopt.cond)
             elif mode == "sopt_swap":
                 policy.sopt.set(ctx.roll(1, 0))
-        cond = policy.sopt.cond.float() if hasattr(policy, "sopt") else None
+        cond = getattr(getattr(policy, "sopt", None), "cond", None)  # (E31 xattn arms keep a token memory instead)
+        cond = cond.float() if cond is not None else None
         torch.manual_seed(seed)
         act = policy.predict_action_chunk(pre(batch))
     return post(act.float()).cpu().numpy(), cond
@@ -106,6 +107,7 @@ def main():
     p.add_argument("--n", type=int, default=256, help="frames per split")
     p.add_argument("--n-exec", type=int, default=10)
     p.add_argument("--init-check", action="store_true")
+    p.add_argument("--init-arms", nargs="*", default=["expert_droid"], help="arms whose fresh policy must equal none")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     args = p.parse_args()
     vt = load_vt()
@@ -169,7 +171,7 @@ def main():
     if args.init_check:  # zero-init: a fresh expert_droid policy must reproduce `none` exactly
         ck = torch.load(args.ckpts[0], map_location="cpu", weights_only=False)
         out = {}
-        for arm in ("none", "expert_droid"):
+        for arm in ("none", *args.init_arms):
             ck2 = {**ck, "arm": arm}
             V, policy, pre, post, _ = build(vt, ck2, None)
             pool = raw.eps[raw.eps["split"].isin(["test", "val"])]
@@ -179,8 +181,8 @@ def main():
             out[arm], _ = predict(V, policy, pre, post, b, ck["tasks"], "normal", seed=7)
             del policy
             torch.cuda.empty_cache()
-        diff = float(np.abs(out["none"] - out["expert_droid"]).max())
-        results["init_check"] = {"vla": ck["meta"]["vla"], "max_abs_diff_none_vs_fresh_droid": diff}
+        diff = {a: float(np.abs(out["none"] - out[a]).max()) for a in args.init_arms}
+        results["init_check"] = {"vla": ck["meta"]["vla"], "max_abs_diff_none_vs_fresh": diff}
         Path(args.out).write_text(json.dumps(results, indent=2))
         print("init check", results["init_check"], flush=True)
 

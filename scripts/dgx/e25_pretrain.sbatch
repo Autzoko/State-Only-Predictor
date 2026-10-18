@@ -7,6 +7,9 @@
 #   jepa    model.jepa=1.0        (latent prediction of the next H / P tokens of an EMA target encoder)
 #   speed   data.speed_aug=[0.5,2.0] data.speed_aug_prob=0.8  (default 0.8-1.25, p 0.5)
 #   ctx192  model.ctx_len=192     (12.8 s of history instead of 6.4 s; downstream uses the prior's ctx_len)
+# E33 history-length ablation (with ctx192): ctx48 (3.2 s), ctx384 (25.6 s). Longer contexts use data.left_pad =
+# ctx_len - 96, so every window still has >= 96 real context frames: the same episodes / anchors as ctx96, only older
+# history added (padded with the first frame = robot at rest, exactly how LIBERO rollouts pad early history).
 # Selection is pre-registered on the 7 dev tasks (scripts/agg_split.py); the 10 new tasks only confirm.
 #   VARIANT=event bash scripts/dgx/submit.sh scripts/dgx/e25_pretrain.sbatch      (from dgx-login)
 #SBATCH -p spark
@@ -24,7 +27,9 @@ case $V in
   event) OV="model.aux_event=0.5" ;;
   jepa) OV="model.jepa=1.0" ;;
   speed) OV="data.speed_aug=[0.5,2.0] data.speed_aug_prob=0.8" ;;
-  ctx192) OV="model.ctx_len=192" ;;
+  ctx192) OV="model.ctx_len=192 data.left_pad=96" ;;
+  ctx48) OV="model.ctx_len=48" ;;
+  ctx384) OV="model.ctx_len=384 data.left_pad=288" ;;
   *) echo "unknown VARIANT $V"; exit 1 ;;
 esac
 echo "job $SLURM_JOB_ID node $(hostname) $(date -Is) commit $COMMIT variant $V ($OV)"

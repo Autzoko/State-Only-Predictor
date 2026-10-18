@@ -53,7 +53,7 @@ def lr_at(step, total, peak, warmup=1000, final=2.5e-6):
 
 def make_prior(arm: str, prior: str = DROID_PRIOR) -> StatePrior:
     ref, _ = load_checkpoint(REPO_ROOT / prior)  # same config + normalization for every arm
-    if arm in ("droid", "expert_droid"):
+    if arm == "droid" or arm.endswith("_droid"):  # expert_droid / adaln_droid / xattn_droid (E31)
         return ref
     return StatePrior(ref.cfg, {k: v.numpy() for k, v in ref.normalizer.state_dict().items()})
 
@@ -74,6 +74,7 @@ def main():
     p.add_argument("--prior", default=DROID_PRIOR, help="SOPT checkpoint (config / normalization / droid weights)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--cond-drop", type=float, default=0.0, help="E19: P(drop the SOPT feature) per training sample")
+    p.add_argument("--prior-lr-mult", type=float, default=1.0, help="E31: lr multiplier of the SOPT encoder weights")
     args = p.parse_args()
     V = vla_module(args.vla)
     assert args.arm in V.ARMS, (args.arm, V.ARMS)
@@ -103,26 +104,37 @@ def main():
         build_frame_cache(sel, frames, workers=args.workers, size=256, repo=SUITES[args.suite][0],
                           revision=SUITES[args.suite][1])
     chunk = getattr(V, "CHUNK", CHUNK)  # the VLA's native chunk length (X-VLA: 30)
-    ds = PolicyDataset(raw, sel, frames, CTX, 32, act_chunk=chunk, shift=0)
     A = np.concatenate([raw.episode(r)[1] for r in sel.itertuples()])
     action_stats = stats_of(A)
     if args.vla == "smolvla":  # E5 / E7 / E13 (unchanged: mean / std only)
         action_stats, state_stats = {k: action_stats[k] for k in ("mean", "std")}, None
-        policy, pre, _ = V.build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=chunk)
+        prior = make_prior(args.arm, args.prior)
+        policy, pre, _ = V.build_policy(prior, args.arm, action_stats, chunk=chunk)
     else:  # current-state quantiles over the training frames
         state_stats = stats_of(np.concatenate([raw.episode(r)[0] for r in sel.itertuples()]))
         kw = {"tasks": tasks} if getattr(V, "NEEDS_TASKS", False) else {}
-        policy, pre, _ = V.build_policy(make_prior(args.arm, args.prior), args.arm, action_stats, chunk=chunk,
-                                        state_stats=state_stats, **kw)
+        prior = make_prior(args.arm, args.prior)
+        policy, pre, _ = V.build_policy(prior, args.arm, action_stats, chunk=chunk, state_stats=state_stats, **kw)
+    ctx_len = prior.cfg.ctx_len  # history length = the prior's (E33: 96 default; longer-context priors see more)
+    ds = PolicyDataset(raw, sel, frames, ctx_len, 32, act_chunk=chunk, shift=0)
     V.set_cond_drop(policy, args.cond_drop)
     params = [q for q in policy.parameters() if q.requires_grad]
     groups = V.param_groups(policy, args.lr) if hasattr(V, "param_groups") else [{"params": params, "scale": 1.0}]
     assert sum(len(g["params"]) for g in groups) == len(params)
+    if args.prior_lr_mult != 1.0:  # E31: protect the pretrained SOPT encoder (E24: fine-tuning erodes acc 0.90 -> 0.78)
+        pid = {id(q) for n, q in policy.named_parameters() if ".prior." in f".{n}" and q.requires_grad}
+        split = []
+        for g in groups:
+            a, b = [q for q in g["params"] if id(q) not in pid], [q for q in g["params"] if id(q) in pid]
+            split += [{**g, "params": a}] if a else []
+            split += [{**g, "params": b, "scale": g["scale"] * args.prior_lr_mult}] if b else []
+        groups = split
+        assert sum(len(g["params"]) for g in groups) == len(params) and pid
     opt = torch.optim.AdamW(groups, lr=args.lr, betas=V.OPT.get("betas", (0.9, 0.95)), eps=1e-8,
                             weight_decay=V.OPT["weight_decay"])
     dl = DataLoader(ds, args.bs, shuffle=True, drop_last=True, num_workers=args.workers, persistent_workers=True,
                     pin_memory=True)
-    meta = {"git": git_rev(), **vars(args), "chunk": chunk, "episodes": sel["episode_index"].tolist(), "samples": len(ds),
+    meta = {"git": git_rev(), **vars(args), "chunk": chunk, "ctx": ctx_len, "episodes": sel["episode_index"].tolist(), "samples": len(ds),
             "trainable_M": sum(q.numel() for q in params) / 1e6}
     (out / "meta.json").write_text(json.dumps(meta, indent=2))
     print(json.dumps({k: v for k, v in meta.items() if k != "episodes"}), flush=True)

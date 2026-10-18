@@ -8,6 +8,14 @@ grad clip 1.0, bf16 compute; VLM image preprocessing on the GPU (torch path, cen
 min-max normalized state (current 17-d SOPT feature) and actions.
 Arms: `none`; `expert_scratch` / `expert_droid` add the SOPT last-token feature of the 96-frame history to every
 action token right after the action encoder through a zero-initialized MLP (at init they equal `none`).
+E31 interfaces (docs/HOST_ANALYSIS.md section 10), same zero-init guarantee:
+  adaln_*   the SOPT feature is added to the DiT's timestep embedding, which modulates every block through AdaLayerNorm
+            (and the output norm): conditioning of every layer instead of one input bias.
+  xattn_*   a motion cross-attention branch after every 4th DiT block (vision-language cross-attention blocks): action
+            tokens attend to *all* SOPT history tokens (own softmax, so they are not diluted among the VL tokens),
+            output projection zero-initialized, mixed in by a learned per-token gate sigma(W [h, temb]) that sees the
+            token's VL-informed state and the denoising time -> the policy learns when to rely on the motion prior.
+            --cond-drop drops the whole branch per training sample (modality dropout: the VL path must stay competent).
 """
 
 from __future__ import annotations
@@ -24,7 +32,8 @@ BASE, REVISION = "nvidia/GR00T-N1.7-3B", "2fc962b973bccdd5d8ce4f67cc63b264d68864
 # processor (tokenizer / image + video processors) of the backbone; gated repo, cached with the account's token
 BACKBONE_PROCESSOR = ("nvidia/Cosmos-Reason2-2B", "9ce19a195e423419c349abfc86fd07178b230561")
 IMAGE_KEYS = ("observation.images.image", "observation.images.image2")
-ARMS = ("none", "expert_scratch", "expert_droid")
+ARMS = ("none", "expert_scratch", "expert_droid", "adaln_scratch", "adaln_droid", "xattn_scratch", "xattn_droid")
+XATTN_EVERY = 4
 OPT = {"lr": 1e-4, "weight_decay": 1e-5, "clip": 1.0, "betas": (0.95, 0.999)}
 CHUNK = 16
 
@@ -44,6 +53,83 @@ class SOPTCond(nn.Module):
         from sopt.vla.smolvla import _drop
 
         self.cond = _drop(self.mlp(self.prior.encode(ctx.float())[:, -1]), self.cond_drop, self.training)
+
+
+class SOPTMemory(nn.Module):
+    """E31 xattn: all SOPT history tokens as keys / values for the motion cross-attention branches."""
+
+    def __init__(self, prior: StatePrior, dim: int, max_tokens: int = 256):
+        super().__init__()
+        self.prior = prior
+        self.proj = nn.Sequential(nn.LayerNorm(prior.cfg.d_model), nn.Linear(prior.cfg.d_model, dim))
+        self.pos = nn.Parameter(torch.zeros(1, max_tokens, dim))
+        nn.init.normal_(self.pos, std=0.02)
+        self.mem, self.keep, self.temb = None, None, None
+        self.cond_drop = 0.0
+        self.gates = []  # mean gate per branch of the last forward (diagnostics)
+
+    def set(self, ctx: torch.Tensor) -> None:
+        tok = self.prior.encode(ctx.float())
+        self.mem = self.proj(tok) + self.pos[:, : tok.shape[1]]
+        keep = torch.ones(tok.shape[0], device=tok.device)
+        if self.training and self.cond_drop > 0:
+            keep = (torch.rand_like(keep) >= self.cond_drop).float()
+        self.keep = keep
+
+
+class MotionXAttn(nn.Module):
+    def __init__(self, dim: int, heads: int = 8):
+        super().__init__()
+        self.norm = nn.LayerNorm(dim)
+        self.attn = nn.MultiheadAttention(dim, heads, batch_first=True)
+        self.out = nn.Linear(dim, dim)
+        nn.init.zeros_(self.out.weight)
+        nn.init.zeros_(self.out.bias)
+        self.gate = nn.Linear(2 * dim, 1)  # sigma(0) = 0.5 at init; the zero `out` keeps the policy == none
+        nn.init.zeros_(self.gate.weight)
+        nn.init.zeros_(self.gate.bias)
+
+    def forward(self, h: torch.Tensor, mem: SOPTMemory) -> torch.Tensor:
+        m = mem.mem.to(h.dtype)
+        a, _ = self.attn(self.norm(h), m, m, need_weights=False)
+        t = mem.temb.to(h.dtype)[:, None].expand(-1, h.shape[1], -1)
+        g = torch.sigmoid(self.gate(torch.cat([h, t], -1)))
+        mem.gates.append(g.detach().float().mean().item())
+        return h + mem.keep.to(h.dtype)[:, None, None] * g * self.out(a)
+
+
+def _dit(head):
+    dits = [m for m in head.modules() if hasattr(m, "transformer_blocks") and hasattr(m, "timestep_encoder")]
+    assert len(dits) == 1, len(dits)
+    return dits[0]
+
+
+def _condition_timestep(dit, sopt) -> None:
+    """adaln: SOPT feature + timestep embedding (B, D) -> every AdaLayerNorm and the output modulation."""
+    forward = dit.timestep_encoder.forward
+
+    def wrapped(timesteps):
+        temb = forward(timesteps)
+        assert sopt.cond is not None and sopt.cond.shape == temb.shape, (None if sopt.cond is None else sopt.cond.shape, temb.shape)
+        return temb + sopt.cond.to(temb.dtype)
+
+    dit.timestep_encoder.forward = wrapped
+
+
+def _attach_xattn(dit, mem: SOPTMemory, dim: int) -> nn.ModuleList:
+    forward = dit.timestep_encoder.forward
+
+    def capture(timesteps):  # the blocks' temb, for the gates
+        mem.temb = forward(timesteps)
+        mem.gates = []
+        return mem.temb
+
+    dit.timestep_encoder.forward = capture
+    idx = [i for i in range(len(dit.transformer_blocks)) if i % XATTN_EVERY == 0]  # even = VL cross-attention blocks
+    branches = nn.ModuleList([MotionXAttn(dim) for _ in idx])
+    for i, br in zip(idx, branches):
+        dit.transformer_blocks[i].register_forward_hook(lambda _m, _a, out, br=br: br(out, mem))
+    return branches
 
 
 def set_cond_drop(policy, p: float) -> None:
@@ -81,10 +167,19 @@ def build_policy(prior: StatePrior, arm: str, action_stats: dict, device: str = 
     cfg.output_features = {"action": PolicyFeature(type=FeatureType.ACTION, shape=(7,))}
     policy = GrootPolicy(cfg)
     head = policy._groot_model.action_head
-    if arm != "none":
+    if arm.startswith("expert_"):
         hidden = head.action_encoder.W3.W.shape[-1]
         policy.sopt = SOPTCond(prior, hidden)
         _condition_expert(head.action_encoder, policy.sopt)
+    elif arm.startswith("adaln_"):
+        dit = _dit(head)
+        policy.sopt = SOPTCond(prior, dit.timestep_encoder.timestep_embedder.linear_2.out_features)
+        _condition_timestep(dit, policy.sopt)
+    elif arm.startswith("xattn_"):
+        dit = _dit(head)
+        dim = dit.timestep_encoder.timestep_embedder.linear_2.out_features
+        policy.sopt = SOPTMemory(prior, dim)
+        policy.sopt.branches = _attach_xattn(dit, policy.sopt, dim)
     for p in policy.parameters():
         if p.requires_grad:
             p.data = p.data.float()
