@@ -42,7 +42,7 @@ from sopt.utils.config import REPO_ROOT
 
 FPS = 20.0
 CLIP_PAST, CLIP_NEXT = 6.4, 3.0
-REG = ["vel", "acc", "grip_vel", "t_grip", "t_still", "prog", "fut05", "fut10", "t_next"]
+REG = ["vel", "acc", "grip_vel", "t_grip", "t_still", "prog", "fut05", "fut10", "t_next", "stage"]
 
 
 def targets(F: np.ndarray, a: int) -> dict:
@@ -63,6 +63,7 @@ def targets(F: np.ndarray, a: int) -> dict:
         "fut05": p[i(a + 10)] - p[a],
         "fut10": p[i(a + 20)] - p[a],
         "t_next": np.array([min((nxt[0] - a) / FPS if len(nxt) else CLIP_NEXT, CLIP_NEXT)]),
+        "stage": np.array([min(len(past), 4)]),  # gripper events so far = sub-task counter (E29; non-Markovian)
     }
 
 
@@ -89,6 +90,18 @@ def hand_features(ctx_n: np.ndarray) -> np.ndarray:
     grip = x[:, -15:, GRIPPER.start]
     d1, d2 = x[:, -1, P] - x[:, -16, P], x[:, -1, P] - x[:, -31, P]
     return np.concatenate([x[:, -1], vel, acc, grip, d1, d2], axis=1)
+
+
+@torch.no_grad()
+def encode_multi(model: StatePrior, ctx: np.ndarray, k: int = 4, bs: int = 1024) -> np.ndarray:
+    """E29: what a richer read-out would hand over: last k tokens (causal backbone: each summarizes the history up to
+    its patch) + the mean over all tokens, concatenated (vs the single last token the hosts get today)."""
+    model.eval()
+    out = []
+    for i in range(0, len(ctx), bs):
+        t = model.encode(torch.from_numpy(ctx[i : i + bs]))
+        out.append(torch.cat([t[:, -k:].flatten(1), t.mean(1)], -1).numpy())
+    return np.concatenate(out).astype(np.float64)
 
 
 @torch.no_grad()
@@ -164,6 +177,7 @@ def main():
     p.add_argument("--ft", nargs="*", default=[], help="downstream runs whose fine-tuned SOPT encoder is probed")
     p.add_argument("--extra", nargs="*", default=[], help="name=checkpoint: more priors (E25 variants; any ctx_len)")
     p.add_argument("--no-rand", action="store_true", help="skip the random-init encoders")
+    p.add_argument("--multi", action="store_true", help="E29: add the multi-token read-out of every prior")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--stride", type=int, default=8, help="anchor stride in 20 Hz frames")
     p.add_argument("--threads", type=int, default=8)
@@ -193,6 +207,10 @@ def main():
         feats["droid_ee"] = encode(load_checkpoint(REPO_ROOT / args.prior_ee)[0], ctx)
     for n, m in extra.items():
         feats[n] = encode(m, np.ascontiguousarray(ctx_full[:, -m.cfg.ctx_len:]))
+    if args.multi:
+        feats["droid_mt"] = encode_multi(ref, ctx)
+        for n, m in extra.items():
+            feats[f"{n}_mt"] = encode_multi(m, np.ascontiguousarray(ctx_full[:, -m.cfg.ctx_len:]))
     for run in args.ft:
         feats[f"ft:{run}"] = encode(load_finetuned(ref, REPO_ROOT / "outputs" / run / "final.pt"), ctx)
 

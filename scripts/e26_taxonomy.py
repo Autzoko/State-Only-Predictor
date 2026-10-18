@@ -13,6 +13,10 @@ Closed-loop behaviour, per episode (the copycat / inertia signatures of history-
   frozen        failed and the EE moved < 2 cm over the last 5 s (stalled until the time limit)
   grip_cycles   close -> open transitions of the gripper command (re-grasp attempts)
   jerk_ratio    mean |a_t - a_{t-1}| (dims 0-5) at chunk boundaries / within chunks (closed-loop chunk stitching)
+  blocked       execution feedback (E29): fraction of 4-step windows where the commanded EE translation (sum of the
+                clipped actions) is large but the achieved one is < 30% of what the run's successful episodes achieve
+                per unit command (contact / obstruction / stuck) -- information no current host input carries;
+                reported with its failure-prediction AUC
 Paired analysis (same task + init): episodes where one arm succeeds and the other fails, by the failing arm's
 category -> which failure modes SOPT creates vs removes.
 
@@ -93,6 +97,27 @@ def behaviour(e, every, n_exec):
     return out
 
 
+def exec_windows(e, every):
+    """(commanded |sum a[:3]|, achieved |d eef|) per trace interval."""
+    a = np.array(e.get("acts") or [])
+    if not len(a):
+        return np.zeros((0, 2))
+    eef = np.array([r["eef"] for r in e["trace"]])
+    ts = [r["t"] for r in e["trace"]]
+    out = []
+    for j in range(len(ts) - 1):
+        c = np.clip(a[ts[j] : ts[j + 1], :3], -1, 1).sum(0)
+        out.append((np.linalg.norm(c), np.linalg.norm(eef[j + 1] - eef[j])))
+    return np.array(out).reshape(-1, 2)
+
+
+def auc(pos, neg):
+    pos, neg = np.asarray(pos), np.asarray(neg)
+    if not len(pos) or not len(neg):
+        return None
+    return float(((pos[:, None] > neg[None]).mean() + 0.5 * (pos[:, None] == neg[None]).mean()))
+
+
 def run_name(path):
     return Path(path).parent.name
 
@@ -115,8 +140,15 @@ def main():
     for name, d in runs.items():
         every, n_exec = d.get("trace_every") or 4, d.get("n_exec", 10)
         rows = {}
+        win = {(e["task"], e["init"]): exec_windows(e, every) for e in d["episodes"]}
+        ok = np.concatenate([w for e in d["episodes"] if e["success"] for w in [win[(e["task"], e["init"])]]] or [np.zeros((0, 2))])
+        ok = ok[ok[:, 0] > 0.5]
+        gain = float(np.median(ok[:, 1] / ok[:, 0])) if len(ok) else None  # achieved metres per unit command
         for e in d["episodes"]:
-            rows[(e["task"], e["init"])] = {"cat": classify(e, cal), **behaviour(e, every, n_exec)}
+            w = win[(e["task"], e["init"])]
+            big = w[w[:, 0] > 0.5] if len(w) else w
+            blk = float((big[:, 1] < 0.3 * gain * big[:, 0]).mean()) if gain and len(big) else None
+            rows[(e["task"], e["init"])] = {"cat": classify(e, cal), **behaviour(e, every, n_exec), "blocked": blk}
         per_ep[name] = rows
         c = Counter(r["cat"] for r in rows.values())
         fails = [r for r in rows.values() if r["cat"] != "success"]
@@ -127,9 +159,14 @@ def main():
                              "jerk_ratio_mean": float(np.mean(jr)) if jr else None,
                              "per_task": {t: dict(Counter(r["cat"] for (tt, _), r in rows.items() if tt == t))
                                           for t in sorted({k[0] for k in rows})}}
+        bf = [r["blocked"] for r in rows.values() if r["cat"] != "success" and r["blocked"] is not None]
+        bs = [r["blocked"] for r in rows.values() if r["cat"] == "success" and r["blocked"] is not None]
+        res["runs"][name].update({"exec_gain": gain, "blocked_fail": float(np.mean(bf)) if bf else None,
+                                  "blocked_success": float(np.mean(bs)) if bs else None, "blocked_auc_fail": auc(bf, bs)})
         r = res["runs"][name]
         print(f"{name:40s}" + "".join(f"{c[k]:13d}" for k in CATS) + f"{r['frozen_fail']:8d}"
-              + f"{(r['grip_cycles_mean'] or 0):6.2f}{(r['jerk_ratio_mean'] or 0):6.2f}")
+              + f"{(r['grip_cycles_mean'] or 0):6.2f}{(r['jerk_ratio_mean'] or 0):6.2f}"
+              + f"  blocked fail/succ {r['blocked_fail'] or 0:.3f}/{r['blocked_success'] or 0:.3f} AUC {r['blocked_auc_fail'] or 0:.2f}")
     # paired: within a host / seed group, each SOPT arm vs none
     groups = defaultdict(dict)
     for name in per_ep:

@@ -109,3 +109,21 @@ scratch 臂的结构、注入位置、训练方式与 DROID 臂完全相同，�
 - HAMLET: Switch your Vision-Language-Action Model into a History-Aware Policy. 2025. https://arxiv.org/abs/2510.00695
 - X-VLA: Soft-Prompted Transformer as Scalable Cross-Embodiment VLA. ICLR 2026. https://arxiv.org/abs/2510.10274
 - GR00T N1.5 / N1.7 model cards（NVIDIA）。N1.5 预训练含 Open X-Embodiment；N1.7 另有 DROID 后训练版本。
+
+## 8. E29：改进后的 SOPT 能补上哪些宿主没有的信息（2026-10-18 设计）
+
+§5 表中现有 SOPT 补不上的三类信息：执行反馈、更完整的读出、更长的记忆。原则是先用便宜的分析确认"这类信息确实缺、并且与失败有关"，再投入训练。
+
+### 阶段 A：分析（不新增作业，挂在已排队的作业上）
+| 编号 | 问题 | 做法 | 挂在哪个作业 | 进入阶段 B 的门槛（预注册） |
+|---|---|---|---|---|
+| A1 执行反馈 | 宿主失败时，是否常常"发了指令却没动"（接触、阻挡、卡住）？ | `e26_taxonomy.py` 新增 blocked 指标：每 4 步比较指令位移与实际 EE 位移，统计实际位移 < 30%（相对该 run 成功 episode 的正常比例）的窗口占比；报告它预测失败的 AUC | E26（Jubail 队尾） | 强宿主（GR00T / π0.5 / X-VLA）中 blocked 预测失败的 AUC ≥ 0.65，且 blocked 较高（> 成功 episode 均值 + 1 SD）的失败占 ≥ 20% |
+| A2 更完整的读出 | 只把最后一个 token 交给宿主，是否丢掉了"下一事件时间"等信息？ | `e24_probe.py --multi`：最后 4 个 token + 全部 token 均值，对比只用最后一个 token | E25 speed / ctx192 的探针步骤（DGX） | t_next 或 stage 的 R² 提升 ≥ 0.05 |
+| A3 更长的记忆 | 6.4 s 是否不够记住"做到第几步"？ | 新探针目标 stage（已发生的夹爪事件数，最多 4）；对比 ctx192（12.8 s）与 ctx96；E26 中按任务统计强宿主失败是否集中在多阶段任务（例如"放进抽屉并关上""叠碗再放进托盘"） | E25 ctx192（DGX）+ E26 | ctx192 的 stage R² 提升 ≥ 0.05，且强宿主多阶段任务的失败率高于单阶段任务 |
+
+### 阶段 B：构建（只做通过阶段 A 门槛的方向）
+先在 TrunkBC 上筛选（DGX，每个变体约 1.6 h，3 seed，与 E25 同一协议），通过后再上强宿主（优先 GR00T / π0.5，它们属于"有信息但被组件代价抵消"一类），3 seed，配对 McNemar。
+- **B1 带执行反馈的 SOPT**：微调时额外输入宿主自己已执行的动作历史（与状态历史对齐），经零初始化嵌入加到 SOPT 的输入 token 上；DROID 预训练部分不变（DROID 侧仍只用状态）。对照：同一分支 + 随机初始化的 SOPT。
+- **B2 多 token 读出**：把最后 4 个 token + 均值经零初始化 MLP 交给宿主，注入位置不变，只增加信息量。
+- **B3 长记忆**：用 ctx192 先验（或事件记忆：最近 N 次夹爪事件的位置和时间）；主要在 libero_10（长时程，E13 协议）上评估，因为 LIBERO-90 的短任务对记忆不敏感。
+- 判据与 E28 相同：总体 p<0.05 且 dev / new 同向，才算通过；3 seed 确认后才进入主表。

@@ -1186,3 +1186,10 @@ dev / new 拆分（agg_split）：
 | +SOPT DROID | 56.6 / 59.8 | 58.2 | 51.9 | 62.6 |
 - DROID vs none：184:192，p=0.72；DROID vs scratch：208:165，**p=0.030**；scratch vs none：150:201，**p=0.0075**。
 - π0.5 与 GR00T 的模式相同：光加组件就有代价（−3.0），DROID 信息补回来（+2.6），净效应为 0。在三个强宿主中，只有 X-VLA 是"组件无害、DROID 特征有害"。这支持 `HOST_ANALYSIS.md` 中 GR00T / π0.5 属于 H2（接口代价）、X-VLA 另有原因的划分。E26 会直接比较三者的失败类型。
+
+## E29 设计：改进后的 SOPT 能补上哪些宿主没有的信息（2026-10-18；详见 `docs/HOST_ANALYSIS.md` §8）
+- 阶段 A（分析，挂在已排队作业上，不新增作业）：
+  - A1 执行反馈：`e26_taxonomy.py` 新增 blocked 指标和失败预测 AUC，随 E26 运行。
+  - A2 多 token 读出：`e24_probe.py --multi`，E25 的 DGX 探针步骤已改为带 `--multi`，speed / ctx192 自动包含。
+  - A3 长记忆：`e24_probe.py` 新增 stage 目标（已发生的夹爪事件数），ctx192 对比 ctx96。
+- 阶段 B（B1 执行反馈分支 / B2 多 token 读出 / B3 长记忆）只对通过阶段 A 预注册门槛的方向执行：先 TrunkBC 筛选，再上 GR00T / π0.5。

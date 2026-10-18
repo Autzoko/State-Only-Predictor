@@ -51,7 +51,7 @@ for seed in 0 1 2; do
     echo "$r eval exit $? $(date -Is)"; }
   sync_out $r
 done
-python scripts/e24_probe.py --out $P/probe.json --no-rand --extra $V=$P/best.pt > $P.probe.log 2>&1
+python scripts/e24_probe.py --out $P/probe.json --no-rand --multi --extra $V=$P/best.pt > $P.probe.log 2>&1
 echo "probe exit $? $(date -Is)"; tail -4 $P.probe.log
 sync_out e25_$V
 echo "E25 $V DONE $(date -Is)"
