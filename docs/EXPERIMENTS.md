@@ -1177,3 +1177,12 @@ dev / new 拆分（agg_split）：
 | +SOPT DROID | 54.4 / 55.2 / 54.0 | **54.5 ± 0.6** | 50.6 | 57.3 |
 - DROID vs none：525:245，**p=2.7e-24**；DROID vs scratch：403:282，p=4.3e-6；scratch vs none：411:252，p=7.0e-10。
 - FastWAM 是唯一一个**光加历史（scratch）就显著提升**的宿主（+6.3）。这符合 `HOST_ANALYSIS.md` 的统一解释：基线视觉通路越弱，历史的价值越大。DROID 预训练在此基础上再加 +4.7。
+
+## E14 π0.5-DROID 17 任务 seed 1（2026-10-18，Jubail 18828640；lr 1e-4）及 seed 0+1 汇总
+| | s0 / s1 | 均值 | dev 7 | new 10 |
+|---|---|---|---|---|
+| none | 57.6 / 59.6 | 58.6 | 51.9 | 63.4 |
+| +SOPT scratch | 56.5 / 54.8 | 55.6 | 46.6 | 62.0 |
+| +SOPT DROID | 56.6 / 59.8 | 58.2 | 51.9 | 62.6 |
+- DROID vs none：184:192，p=0.72；DROID vs scratch：208:165，**p=0.030**；scratch vs none：150:201，**p=0.0075**。
+- π0.5 与 GR00T 的模式相同：光加组件就有代价（−3.0），DROID 信息补回来（+2.6），净效应为 0。在三个强宿主中，只有 X-VLA 是"组件无害、DROID 特征有害"。这支持 `HOST_ANALYSIS.md` 中 GR00T / π0.5 属于 H2（接口代价）、X-VLA 另有原因的划分。E26 会直接比较三者的失败类型。
