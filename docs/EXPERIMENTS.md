@@ -1283,3 +1283,14 @@ dev / new 拆分（agg_split）：
 - droid vs none：101:68，p=0.014；droid vs scratch：86:56，p=0.015；scratch vs none：83:80，p=0.88。
 - seed 1 的增益（+1.0）小于 seed 0（+5.6），但方向一致；2 seed 合并后仍显著，而且收益来自 DROID 先验本身（scratch 臂无效果）。libero_goal 是标准 suite 里唯一"同一场景、多种目标"的 suite，策略必须从语言 + 当前进展区分任务，与 SOPT 的运动阶段信息互补。
 - 为凑齐 3 seed，goal s2、libero_10 s2 追加到 Jubail 队列末尾（E31 screen 之后）。
+
+## E13 libero_10 k5 2 seed 汇总（2026-10-18，Jubail 18834462 = s1；SmolVLA，`agg_e13.py libero_10 5`）
+| | s0 / s1 | 均值 |
+|---|---|---|
+| none | 44.6 / 45.0 | 44.8 |
+| +SOPT scratch | 50.8 / 49.6 | 50.2 |
+| +SOPT DROID | 50.4 / 47.0 | 48.7 |
+- scratch vs none：149:95，p=6.6e-4；droid vs none：156:117，p=0.021；droid vs scratch：117:132，p=0.38。
+- libero_10（长时程、多数为两阶段任务）上，**SOPT 组件本身**（6.4 s 本体感觉历史 + 因果编码器，从头训练）就带来 +5.4，两个 seed 都复现；DROID 预训练没有额外收益。说明长时程任务缺的主要是"历史/进度"这个输入通道，而当前 DROID 先验的内容并不比在 k5 示范上从头学到的更好。
+- 与 17 任务结论对照：π0.5 / GR00T 在两阶段布丁任务上被 DROID SOPT 拉低，而 SmolVLA 在 libero_10 的两阶段任务上靠历史明显受益 → 阶段信息有用，问题在于强宿主的接法（E31）和先验内容（E32 段级阶段记忆、E33 更长历史）。
+- 标准 suite 当前（SmolVLA k5）：spatial 持平（3 seed，p=0.53）、object +1.7（3 seed，p=0.17）、goal +3.3（2 seed，p=0.014）、libero_10 +3.9（2 seed，p=0.021；scratch +5.4）。goal / libero_10 s2 已排队。
