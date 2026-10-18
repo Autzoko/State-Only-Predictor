@@ -1303,3 +1303,12 @@ dev / new 拆分（agg_split）：
 - A1 执行反馈门槛通过（AUC 0.73–0.89，高 blocked 失败占 40–76%）。
 - E27：宿主没有 SOPT 的局部动力学和阶段信息（H1 冗余被否定）。droid 臂把速度信息传进了解码器，但没有传入阶段信息。
 - 新增 E34（只评测）：闭合夹爪后 2 s 内关掉 SOPT 输入，用来检验这种惯性是否来自 SOPT 历史；排在 E31 之后。
+
+## E13 libero_goal k5 3 seed 汇总（2026-10-19，Jubail 18837969 = s2；SmolVLA）
+| | s0 / s1 / s2 | 均值 |
+|---|---|---|
+| none | 75.0 / 80.4 / 79.2 | 78.2 ± 2.8 |
+| +SOPT scratch | 76.8 / 79.2 / 80.8 | 78.9 ± 2.0 |
+| +SOPT DROID | 80.6 / 81.4 / 80.2 | 80.7 ± 0.6 |
+- droid vs none：139:101，p=0.017（3 seed 确认，+2.5）；droid vs scratch：120:93，p=0.075；scratch vs none：p=0.51。
+- 3 个 seed 中 droid 都 ≥ none（+5.6 / +1.0 / +1.0），seed 方差也最小。libero_goal 是标准 suite 里第一个 3 seed 确认的显著提升。
