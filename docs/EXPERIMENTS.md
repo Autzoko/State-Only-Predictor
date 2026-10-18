@@ -1245,3 +1245,13 @@ dev / new 拆分（agg_split）：
 - dropout vs none：84:108，p=0.097；dropout vs droid：82:96，p=0.33。
 - SOPT dropout **没有**带来改善。而 spatial 上 3 seed 合并后本来就没有负效应（droid vs none p=0.54），所以 E19 原本要修复的问题已不存在；这一组结果只说明 dropout 0.5 在 spatial 上不提升。
 - 对 E31 的含义：单纯按样本丢弃 SOPT 不是有效的正则。E31 完整版仍保留 dropout 0.3 作为一个组件，但"不加正则"的对照组会直接给出它是否有用。
+
+## E19 LIBERO-90 结果（2026-10-18，Jubail 18831646；SmolVLA expert_droid + SOPT dropout 0.5，k5，3 seed，`scripts/agg_e19.py libero90`）
+| | s0 / s1 / s2 | 均值 |
+|---|---|---|
+| none | 58.9 / 58.3 / 66.6 | 61.2 ± 4.6 |
+| +SOPT DROID | 68.6 / 64.3 / 65.1 | 66.0 ± 2.3 |
+| +SOPT DROID，dropout 0.5 | 66.6 / 63.7 / 61.7 | 64.0 ± 2.4 |
+- droid vs none：132:82，p=7.7e-4（E7 结论复现）；dropout vs none：123:94，p=0.057；dropout vs droid：75:96，p=0.13。
+- dropout 0.5 把 SOPT 收益从 +4.8 缩到 +2.8（方向一致但不显著）。连同 spatial 的结果，E19 结论：**按样本丢弃 SOPT 在两个 suite 上都不提升，LIBERO-90 上还削弱收益**。SmolVLA 不存在需要靠 dropout 修复的"视觉依赖丧失"问题。
+- 对 E31 的含义：xattn 的 cd0.3 + 先验 lr×0.1 组合可能同样削弱收益；screen 组里的 xattn_droid 无正则对照正好用来检验。若无正则版更好，后续 seed 与 SET=history 改用无正则版本。
