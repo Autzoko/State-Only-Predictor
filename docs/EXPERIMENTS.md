@@ -1264,3 +1264,12 @@ dev / new 拆分（agg_split）：
 | +SOPT DROID | 56.6 / 59.8 / 59.2 | 58.5 ± 1.7 | 52.2 | 62.9 |
 - droid vs none：288:277，p=0.67（无增益）；scratch vs none：246:298，p=0.029（接口代价）；droid vs scratch：317:254，p=0.009（DROID 预训练把代价补回）。和 GR00T 一样是 H2 模式（组件有代价，DROID 先验刚好抵消），3 seed 后结论不变。
 - 两阶段布丁任务（放进抽屉并关上）：droid vs none 2:18，p=4e-4（s2 又多 0:1）；scratch 6:16，p=0.053。同一物体的单阶段任务（布丁放到盘子右边）droid 8:7，无差异 → 掉分特定于阶段结构，不是物体或场景。E26 的 trace 会给出失败类型。
+
+## E13 libero_object k5 3 seed 汇总（2026-10-18，Jubail 18831951 = s2；SmolVLA，`agg_e13.py libero_object 5`）
+| | s0 / s1 / s2 | 均值 |
+|---|---|---|
+| none | 77.6 / 83.6 / 83.0 | 81.4 ± 3.3 |
+| +SOPT scratch | 78.6 / 82.8 / 87.6 | 83.0 ± 4.5 |
+| +SOPT DROID | 84.2 / 81.6 / 83.6 | 83.1 ± 1.4 |
+- droid vs none：175:149，p=0.17；scratch vs none：126:102，p=0.13；droid vs scratch：140:138，p=0.95。
+- 结论：libero_object 上 SOPT 两个臂都为正（约 +1.6），但都不显著，DROID 预训练相对 scratch 没有额外收益（object 任务的 pick-place 结构简单、上下文短，先验内容用不上）。seed 0 的 +6.6 是 none 偏低造成的。标准 suite 目前：spatial 持平（p=0.53）、object 小正（p=0.17），goal / libero_10 补 seed 中。
