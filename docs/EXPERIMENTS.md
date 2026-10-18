@@ -1193,3 +1193,22 @@ dev / new 拆分（agg_split）：
   - A2 多 token 读出：`e24_probe.py --multi`，E25 的 DGX 探针步骤已改为带 `--multi`，speed / ctx192 自动包含。
   - A3 长记忆：`e24_probe.py` 新增 stage 目标（已发生的夹爪事件数），ctx192 对比 ctx96。
 - 阶段 B（B1 执行反馈分支 / B2 多 token 读出 / B3 长记忆）只对通过阶段 A 预注册门槛的方向执行：先 TrunkBC 筛选，再上 GR00T / π0.5。
+
+## E13 libero_spatial k5 seed 2 补记（18812643）：3 seed 合并后负效应消失
+| | s0 / s1 / s2 | 均值 |
+|---|---|---|
+| none | 83.0 / 80.6 / 77.0 | 80.2 |
+| +SOPT scratch | 79.4 / 80.2 / 81.0 | 80.2 |
+| +SOPT DROID | 79.2 / 79.2 / 80.2 | 79.5 |
+- DROID vs none：100:110，p=0.53；scratch vs none：87:87，p=1.0。两个 seed 时的"spatial 上变差"（p=0.03）**没有复现**，是 none 在 s0 偏高造成的。此前基于它的"历史导致选错碗"推测失去依据。
+
+## 掉分情况的共同模式（2026-10-18，本地分析已取回的 rollouts，`scripts/analysis/drop_pattern{,2}.py`）
+对象：6 个"变差或零收益"的情况（X-VLA droid、GR00T scratch / droid、π0.5 scratch / droid、DP scratch），以及 DP / FastWAM 的正收益作对照。逐任务配对（seed × 50 init）。
+- **没有跨宿主的任务级模式**：各情况逐任务变化之间的 Spearman 相关大多 |ρ| < 0.4，符号不一致。不同宿主掉分的任务基本不同。
+- **"靠视觉区分是哪一个物体"的任务（4 个：右边的书、中间的黑碗、右边的摩卡壶、左碗叠右碗）并没有掉得更多**：X-VLA droid −3.5 vs 其余 −2.2；GR00T、π0.5 在这些任务上反而略好。任务层面不支持"视觉区分能力下降 → 抓错物体"。
+- **对视觉依赖下降本身不是掉分的标志**：E20d 中，提升的 DP 和不变的 GR00T 加 SOPT 后对视觉的依赖下降得同样多甚至更多。
+- 反复出现的个别任务：
+  - "把巧克力布丁放进上层抽屉**并关上**"（唯一的两阶段任务之一）：GR00T droid 3:17（p=0.003）、π0.5 droid 2:17（p=0.001），两个强宿主 + DROID SOPT 都显著变差；DP、FastWAM 在同一任务上提升。
+  - "奶油奶酪放进托盘"：X-VLA droid 7:31、GR00T scratch 2:10、DP scratch 4:16 变差；但 π0.5 droid 14:4、DP droid 提升。
+  - 逐任务共做了约 100 次检验，单个 p≈0.003 不能单独作为结论。布丁任务在两个独立宿主上同向（Fisher 合并 p≈5e-5）是最值得跟进的线索。
+- 对 E26 的影响：重点看 GR00T / π0.5 droid 在布丁两阶段任务上的失败类型（是否在第一阶段完成后停住或重复，即 frozen / grip_cycles），以及 X-VLA 在奶油奶酪 / 杯子两个任务上的失败类型。
