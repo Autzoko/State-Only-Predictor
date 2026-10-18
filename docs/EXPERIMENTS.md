@@ -1255,3 +1255,12 @@ dev / new 拆分（agg_split）：
 - droid vs none：132:82，p=7.7e-4（E7 结论复现）；dropout vs none：123:94，p=0.057；dropout vs droid：75:96，p=0.13。
 - dropout 0.5 把 SOPT 收益从 +4.8 缩到 +2.8（方向一致但不显著）。连同 spatial 的结果，E19 结论：**按样本丢弃 SOPT 在两个 suite 上都不提升，LIBERO-90 上还削弱收益**。SmolVLA 不存在需要靠 dropout 修复的"视觉依赖丧失"问题。
 - 对 E31 的含义：xattn 的 cd0.3 + 先验 lr×0.1 组合可能同样削弱收益；screen 组里的 xattn_droid 无正则对照正好用来检验。若无正则版更好，后续 seed 与 SET=history 改用无正则版本。
+
+## π0.5 17 任务 3 seed 汇总（2026-10-18，Jubail 18829161 = s2；lr 1e-4，k5，`agg_host.py --prefix e14_pi05 --tag _lr1e-4_t17 0 1 2`）
+| | s0 / s1 / s2 | 均值 | 7 dev | 10 new |
+|---|---|---|---|---|
+| none | 57.6 / 59.6 / 56.9 | 58.1 ± 1.4 | 50.6 | 63.3 |
+| +SOPT scratch | 56.5 / 54.8 / 56.8 | 56.0 ± 1.1 | 47.3 | 62.1 |
+| +SOPT DROID | 56.6 / 59.8 / 59.2 | 58.5 ± 1.7 | 52.2 | 62.9 |
+- droid vs none：288:277，p=0.67（无增益）；scratch vs none：246:298，p=0.029（接口代价）；droid vs scratch：317:254，p=0.009（DROID 预训练把代价补回）。和 GR00T 一样是 H2 模式（组件有代价，DROID 先验刚好抵消），3 seed 后结论不变。
+- 两阶段布丁任务（放进抽屉并关上）：droid vs none 2:18，p=4e-4（s2 又多 0:1）；scratch 6:16，p=0.053。同一物体的单阶段任务（布丁放到盘子右边）droid 8:7，无差异 → 掉分特定于阶段结构，不是物体或场景。E26 的 trace 会给出失败类型。
