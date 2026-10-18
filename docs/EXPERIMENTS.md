@@ -1281,5 +1281,5 @@ dev / new 拆分（agg_split）：
 | +SOPT scratch | 76.8 / 79.2 | 78.0 |
 | +SOPT DROID | 80.6 / 81.4 | 81.0 |
 - droid vs none：101:68，p=0.014；droid vs scratch：86:56，p=0.015；scratch vs none：83:80，p=0.88。
-- seed 1 复现了 seed 0 的增益（+1.0，方向一致），而且收益来自 DROID 先验本身（scratch 臂无效果）。libero_goal 是标准 suite 里唯一"同一场景、多种目标"的 suite，策略必须从语言 + 当前进展区分任务，与 SOPT 的运动阶段信息互补。
+- seed 1 的增益（+1.0）小于 seed 0（+5.6），但方向一致；2 seed 合并后仍显著，而且收益来自 DROID 先验本身（scratch 臂无效果）。libero_goal 是标准 suite 里唯一"同一场景、多种目标"的 suite，策略必须从语言 + 当前进展区分任务，与 SOPT 的运动阶段信息互补。
 - 为凑齐 3 seed，goal s2、libero_10 s2 追加到 Jubail 队列末尾（E31 screen 之后）。
