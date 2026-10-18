@@ -8,7 +8,7 @@ fixed before looking at arm differences and pooled over *all* traced runs given 
   grasp distance            median over those successes of the minimum EE-to-target distance
 Per failed episode (E9a rules): place_fail (target lifted > 3 cm, task not done) / grasp_miss (EE came within
 grasp distance + 6 cm, never lifted) / wrong_target (never approached, another object moved > 3 cm) / no_reach;
-articulated tasks -> artic_fail.
+articulated tasks -> artic_fail. Displacements are measured from the first settled frame (see settled()).
 Closed-loop behaviour, per episode (the copycat / inertia signatures of history-conditioned imitation, Wen et al. 2020):
   frozen        failed and the EE moved < 2 cm over the last 5 s (stalled until the time limit)
   grip_cycles   close -> open transitions of the gripper command (re-grasp attempts)
@@ -39,8 +39,18 @@ def objects(tr):
     return [k for k in tr[0]["objs"] if not k.endswith("_to_robot0_eef")]
 
 
+def settled(tr, tol=0.002, cap=5):
+    """First trace frame after which no object moves > tol between frames: objects placed above their support at reset
+    fall for the first few frames (e.g. ketchup_1 in the living-room scenes drops 0.55 m), which is not task motion."""
+    ks = objects(tr)
+    for j in range(1, min(cap, len(tr) - 1) + 1):
+        if all(np.linalg.norm(np.subtract(tr[j]["objs"][k], tr[j - 1]["objs"][k])) < tol for k in ks):
+            return j - 1
+    return min(cap, len(tr) - 1)
+
+
 def disp(tr, k):
-    p = np.array([r["objs"][k] for r in tr])
+    p = np.array([r["objs"][k] for r in tr[settled(tr):]])
     return np.linalg.norm(p - p[0], axis=1).max()
 
 
@@ -71,7 +81,7 @@ def classify(e, cal):
     if c is None or c["target"] is None or c["grasp_dist"] is None:
         return "artic_fail"
     tr, tgt = e["trace"], c["target"]
-    pos = np.array([r["objs"][tgt] for r in tr])
+    pos = np.array([r["objs"][tgt] for r in tr[settled(tr):]])
     if (pos[:, 2] - pos[0, 2]).max() > LIFT:
         return "place_fail"
     if np.linalg.norm(np.array([r["objs"][tgt + "_to_robot0_eef"] for r in tr]), axis=1).min() < c["grasp_dist"] + NEAR:
@@ -118,12 +128,13 @@ def auc(pos, neg):
     return float(((pos[:, None] > neg[None]).mean() + 0.5 * (pos[:, None] == neg[None]).mean()))
 
 
-def run_name(path):
-    return Path(path).parent.name
+def run_name(path):  # trace_n50.json -> run dir name; trace_<tag>_n50.json -> run dir name + _<tag> (E34 variants)
+    p = Path(path)
+    return p.parent.name + p.stem.replace("trace", "").replace("_n50", "")
 
 
 def arm_of(name):
-    m = re.search(r"_(none|expert_scratch|expert_droid)_", name)
+    m = re.search(r"_(none|expert_scratch|expert_droid|adaln_\w+?|xattn_\w+?)_k", name)
     return m.group(1) if m else name
 
 
@@ -131,10 +142,12 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("traces", nargs="+")
     p.add_argument("--out", required=True)
+    p.add_argument("--calibration", help="reuse the calibration of an earlier output (fixed rules across experiments)")
     args = p.parse_args()
     runs = {run_name(t): json.load(open(t)) for t in args.traces}
-    cal = calibrate([e for d in runs.values() for e in d["episodes"]])
-    res = {"calibration": cal, "runs": {}, "paired": {}}
+    cal = (json.load(open(args.calibration))["calibration"] if args.calibration
+           else calibrate([e for d in runs.values() for e in d["episodes"]]))
+    res = {"calibration": cal, "runs": {}, "paired": {}, "episodes": {}}
     per_ep = {}
     print(f"{'run':40s}" + "".join(f"{c:>13s}" for c in CATS) + f"{'frozen':>8s}{'gcyc':>6s}{'jerk':>6s}")
     for name, d in runs.items():
@@ -150,6 +163,7 @@ def main():
             blk = float((big[:, 1] < 0.3 * gain * big[:, 0]).mean()) if gain and len(big) else None
             rows[(e["task"], e["init"])] = {"cat": classify(e, cal), **behaviour(e, every, n_exec), "blocked": blk}
         per_ep[name] = rows
+        res["episodes"][name] = [{"task": t, "init": i, **r} for (t, i), r in rows.items()]
         c = Counter(r["cat"] for r in rows.values())
         fails = [r for r in rows.values() if r["cat"] != "success"]
         gc = [r["grip_cycles"] for r in rows.values() if "grip_cycles" in r]

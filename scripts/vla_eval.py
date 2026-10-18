@@ -22,6 +22,18 @@ from sopt.sim.vec_env import TaskVecEnv
 CTX = 96
 
 
+def mask_sopt(policy, keep: list[bool], device) -> None:
+    """E34: zero the SOPT input of the samples with keep = False for this prediction (after make_batch has set it).
+    xattn arms: the branch's keep mask (as in modality-dropout training); expert / adaln arms: the feature itself."""
+    s = getattr(policy, "sopt", None)
+    assert s is not None, "--sopt-mask-grasp needs a SOPT arm"
+    m = torch.tensor(keep, dtype=torch.float32, device=device)
+    if getattr(s, "keep", None) is not None:
+        s.keep = s.keep * m
+    else:
+        s.cond = s.cond * m[:, None].to(s.cond.dtype)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--ckpt", required=True)
@@ -31,6 +43,8 @@ def main():
     p.add_argument("--n-exec", type=int, default=10, help="actions executed per predicted chunk")
     p.add_argument("--trace", type=int, default=0, help="log simulator state every N steps (failure taxonomy)")
     p.add_argument("--act-log", action="store_true", help="E26: log every executed action (chunk-boundary metrics)")
+    p.add_argument("--sopt-mask-grasp", type=float, default=0.0,
+                   help="E34: switch the SOPT input off for this many seconds after each gripper-close command (<0: always off)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     args = p.parse_args()
     import importlib.util
@@ -70,6 +84,7 @@ def main():
         hist = [[feat(o["q"][None], o["fingers"][None])[0]] for o in obs]
         active = {i: True for i in range(len(tasks))}
         chunks, traces, alog = {}, {i: [] for i in range(len(tasks))}, {i: [] for i in range(len(tasks))}
+        last_close, was_open = {i: -10**9 for i in range(len(tasks))}, {i: True for i in range(len(tasks))}
         for t in range(args.max_steps):
             live = [i for i in active if active[i]]
             if not live:
@@ -81,6 +96,9 @@ def main():
                 with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
                     batch = V.make_batch(policy, img, torch.from_numpy(ctx.astype(np.float32)).to(device),
                                          [tasks[i] for i in live])
+                    if args.sopt_mask_grasp:
+                        mask_sopt(policy, [args.sopt_mask_grasp >= 0 and t - last_close[i] > 20 * args.sopt_mask_grasp
+                                           for i in live], device)
                     act = policy.predict_action_chunk(pre(batch))
                 act = post(act.float()).cpu().numpy()  # (B, chunk, 7), dataset convention
                 chunks.update({i: act[j] for j, i in enumerate(live)})
@@ -88,6 +106,9 @@ def main():
             for i in live:
                 a = chunks[i][t % args.n_exec]
                 actions[i] = np.concatenate([np.clip(a[:6], -1, 1), dataset_to_sim_gripper(np.array([float(a[6] > 0.5)]))])
+                if was_open[i] and a[6] <= 0.5:  # dataset convention: 1 = open
+                    last_close[i] = t
+                was_open[i] = a[6] > 0.5
                 if args.act_log:
                     alog[i].append([round(float(x), 3) for x in a[:7]])
             if args.trace and t % args.trace == 0:
@@ -109,7 +130,7 @@ def main():
     venv.close()
     per_task = {t: float(np.mean([r["success"] for r in rows if r["task"] == t])) for t in tasks}
     summary = {"ckpt": args.ckpt, "arm": arm, "vla": ck["meta"].get("vla", "smolvla"), "suite": suite, "max_steps": args.max_steps, "success_rate": float(np.mean([r["success"] for r in rows])),
-               "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "trace_every": args.trace, "wall_s": time.time() - t0,
+               "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "trace_every": args.trace, "sopt_mask_grasp": args.sopt_mask_grasp, "wall_s": time.time() - t0,
                "episodes": rows}
     Path(args.out).write_text(json.dumps(summary, indent=2))
     print(json.dumps({k: v for k, v in summary.items() if k != "episodes"}, indent=2))
