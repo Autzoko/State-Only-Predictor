@@ -1273,3 +1273,13 @@ dev / new 拆分（agg_split）：
 | +SOPT DROID | 84.2 / 81.6 / 83.6 | 83.1 ± 1.4 |
 - droid vs none：175:149，p=0.17；scratch vs none：126:102，p=0.13；droid vs scratch：140:138，p=0.95。
 - 结论：libero_object 上 SOPT 两个臂都为正（约 +1.6），但都不显著，DROID 预训练相对 scratch 没有额外收益（object 任务的 pick-place 结构简单、上下文短，先验内容用不上）。seed 0 的 +6.6 是 none 偏低造成的。标准 suite 目前：spatial 持平（p=0.53）、object 小正（p=0.17），goal / libero_10 补 seed 中。
+
+## E13 libero_goal k5 2 seed 汇总（2026-10-18，Jubail 18834313 = s1；SmolVLA，`agg_e13.py libero_goal 5`）
+| | s0 / s1 | 均值 |
+|---|---|---|
+| none | 75.0 / 80.4 | 77.7 |
+| +SOPT scratch | 76.8 / 79.2 | 78.0 |
+| +SOPT DROID | 80.6 / 81.4 | 81.0 |
+- droid vs none：101:68，p=0.014；droid vs scratch：86:56，p=0.015；scratch vs none：83:80，p=0.88。
+- seed 1 复现了 seed 0 的增益（+1.0，方向一致），而且收益来自 DROID 先验本身（scratch 臂无效果）。libero_goal 是标准 suite 里唯一"同一场景、多种目标"的 suite，策略必须从语言 + 当前进展区分任务，与 SOPT 的运动阶段信息互补。
+- 为凑齐 3 seed，goal s2、libero_10 s2 追加到 Jubail 队列末尾（E31 screen 之后）。
