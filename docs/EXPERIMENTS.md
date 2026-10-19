@@ -1357,3 +1357,16 @@ dev / new 拆分（agg_split）：
 - **xattn + dropout 0.3 学会了不用 SOPT**：全程关掉 SOPT 与 none 无差别（80.9 vs 81.2），开着也没有收益。它对 GR00T "不伤"的原因就是基本不用。所以后续 xattn 的 seed 和新实验都改用无正则版（E31 s0 中它的 dev 是 80.3，高于 none 的 79.1）。
 - **对强宿主的总结（LIBERO-90 17 任务）**：GR00T 的失败以视觉精度决定的 grasp_miss 为主。SOPT 提供的局部动力学和阶段信息（E27 证明宿主原本没有）在这类短任务上转化不成成功率。加法注入的代价是更多 grasp_miss，交叉注意力去掉了这一代价，但没有带来收益。
 - **下一步 E35**：在长时程 suite 上测强宿主（GR00T libero_10 k5）。SmolVLA 在这里从头训练的历史组件显著有用（+3.2，p=0.011）。SET=a 为 none / expert_scratch / expert_droid，SET=b 为 xattn_scratch / xattn_droid（无正则），使用 EE-only 先验。脚本 `scripts/slurm/e35_groot_std.sbatch`，排在 E31 s1 之后。
+
+## E31 screen seed 1 + 2 seed 汇总（2026-10-20，Jubail 18845047；GR00T，与 E22 同 seed 配对，`agg_e31.py 0 1`）
+| 臂 | s0 | s1 | 2 seed | 7 dev | 10 new | 布丁两阶段 |
+|---|---|---|---|---|---|---|
+| none | 81.9 | 79.6 | 80.8 | 79.3 | 81.8 | 92 |
+| expert_droid（加法） | 79.2 | **84.4** | 81.8 | 78.1 | 84.3 | 83 |
+| expert_scratch | 77.2 | 79.9 | 78.5 | 74.1 | 81.6 | 89 |
+| adaln_droid | 79.9 | 80.6 | 80.2 | 76.9 | 82.6 | 81 |
+| xattn_droid | 80.4 | 83.9 | **82.1** | **80.0** | 83.6 | 89 |
+| xattn_droid + reg | 80.5 | 82.2 | 81.4 | 78.6 | 83.3 | 92 |
+- s1 上 none 偏低（79.6），expert_droid 对 none 112:72，p=0.004（这一 seed 新任务 +8.0）。2 seed 合并后：expert_droid vs none 190:173（p=0.40），xattn_droid vs none 166:143（p=0.21），xattn+reg 166:156（p=0.62），adaln 174:183（p=0.67）。
+- xattn_droid（无正则）是唯一 dev 和 new 都不低于 none 的接口，2 seed 均值最高；布丁两阶段任务上，加法 droid 的掉分（3:12，p=0.035）在 xattn 上消失（3:6，p=0.51）。adaln 在布丁任务上同样掉分（2:13，p=0.007），且整体最弱。
+- GR00T 的 seed 间波动（none 79.6–81.9、expert_droid 79.2–84.4）与效应量相当，需要第 3 个 seed：E31 SET=screen SEED=2 已排队（E22 s2 已有）。
