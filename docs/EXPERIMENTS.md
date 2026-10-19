@@ -1312,3 +1312,20 @@ dev / new 拆分（agg_split）：
 | +SOPT DROID | 80.6 / 81.4 / 80.2 | 80.7 ± 0.6 |
 - droid vs none：139:101，p=0.017（3 seed 确认，+2.5）；droid vs scratch：120:93，p=0.075；scratch vs none：p=0.51。
 - 3 个 seed 中 droid 都 ≥ none（+5.6 / +1.0 / +1.0），seed 方差也最小。libero_goal 是标准 suite 里第一个 3 seed 确认的显著提升。
+
+## E31 screen seed 0 结果（2026-10-19，Jubail 18837197；GR00T，17 任务 × 50 init，与 E22 s0 配对，`scripts/agg_e31.py 0`）
+- 启动检查通过：3 个新接口初始化时与 none 完全相等（max |Δ| = 0.0），冒烟训练和评测通过。20k 步约 3.7 h（1.4–1.5 it/s）。
+
+| 臂 | 全部 | 7 dev | 10 new | 布丁两阶段 |
+|---|---|---|---|---|
+| none | 81.9 | 79.1 | 83.8 | 92 |
+| expert_droid（加法，E22） | 79.2 | 76.9 | 80.8 | 76 |
+| expert_scratch（E22） | 77.2 | 72.6 | 80.4 | 88 |
+| adaln_droid | 79.9 | 75.1 | 83.2 | 84 |
+| xattn_droid（无正则） | 80.4 | **80.3** | 80.4 | 88 |
+| xattn_droid + dropout 0.3 + 先验 lr×0.1 | **80.5** | 77.4 | 82.6 | 90 |
+
+- 对 none：adaln 80:97（p=0.23），xattn 73:86（p=0.34），xattn+reg 79:91（p=0.40）。所有接口都没有超过 none，也都没有显著变差。加法 expert_droid 这一 seed 是 78:101（p=0.10）。
+- 对加法 expert_droid：三种新接口都略好（85:79 / 92:82 / 87:76，都不显著）。两个 xattn 在布丁两阶段任务上把掉分补回来了（vs expert_droid 6:0，p=0.031；8:1，p=0.039）。
+- 初步解读：交叉注意力接口消除了加法注入在布丁任务上的损失（与 E26 的抓空照常搬运机制一致，待 E34 的 trace 验证），但整体仍然无法超过 GR00T none。强宿主上，接口只能做到"不伤"，做不到"提升"。
+- 下一步：E34（已解除依赖，自动提交）给出 xattn+reg 的 phantom 比例，以及接触窗口内关掉 SOPT 的效果；E31 SET=screen SEED=1 排队，用来确认这些单 seed 差异。
