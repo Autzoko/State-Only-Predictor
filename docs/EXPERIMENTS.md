@@ -1340,3 +1340,20 @@ dev / new 拆分（agg_split）：
 - s2 的 none 偏高（54.0），droid 偏低（46.2），2 seed 时 droid 的 +3.9 消失了。3 seed 结论：libero_10 上有用的是 SOPT 组件，也就是因果编码的 6.4 s 本体感觉历史；**DROID 预训练的先验反而显著差于从头训练**。
 - 解读：DROID 先验在短时程运动统计上很强（E24：速度、加速度 R² 约 0.9 以上），但 libero_10 这类长任务需要的是任务内的进度和阶段表示，这类表示用 k5 示范从头学更合适。这与 E27 一致：droid 臂并没有把阶段信息传进宿主。E32（段级阶段记忆预训练）和 E33（更长历史）正是针对这一点。
 - 标准 suite 3 seed 汇总（SmolVLA k5，droid vs none）：spatial −0.7（p=0.53），object +1.7（p=0.17），goal +2.5（p=0.017），libero_10 0.0（p=1；scratch +3.2，p=0.011）。
+
+## E34 结果（2026-10-19，Jubail 18844862；GR00T，只评测，17 任务 × 50 init 加轨迹，固定 E26 标定）
+| checkpoint / 评测方式 | 成功率 | grasp_miss | 其中抓空照常搬运 | 布丁两阶段 |
+|---|---|---|---|---|
+| e22 none | 81.2 | 83 | 15.7%（13） | 46/50 |
+| e22 expert_droid | 78.8 | 116 | 81.9%（95） | 38/50 |
+| e22 expert_droid，闭合后 2 s 关 SOPT | **49.8** | 171 | 2.3%（4） | 24/50 |
+| e31 xattn_droid+reg | 80.0 | 88 | 43.2%（38） | 45/50 |
+| e31 xattn_droid+reg，闭合后 2 s 关 SOPT | 80.0 | 88 | **23.9%（21）** | 47/50 |
+| e31 xattn_droid+reg，全程关 SOPT | 80.9 | 84 | 17.9%（15） | 46/50 |
+- 配对：xattn 2 s 关闭 vs 不关 29:29（p=1）；全程关 vs 不关 61:53（p=0.51）；全程关 vs e22 none 79:81（p=0.94）；e22 expert_droid 2 s 关闭 vs 不关 18:265（p=2e-57）。
+- **因果确认**：关掉 SOPT 输入会让抓空照常搬运显著减少（xattn 43%→24%，全程关为 18%，接近 none 的 16%）。这一行为确实来自 SOPT 历史。
+- **但它不决定成败**：关闭后 grasp_miss 数量不变（88→88），只是失败的样子从"抬起来搬空气"变成了"停在原地或重试"。成功率不变。抓空照常搬运是抓空之后的症状，不是失败的原因。
+- **加法接口高度依赖 SOPT**：e22 expert_droid 在闭合后关 SOPT 会崩溃（78.8→49.8，place_fail 从 49 增至 244，grip_cycles 11.5）。抓住之后的搬运阶段完全靠 SOPT 特征驱动。训练时 SOPT 一直开着，所以这一结果属于分布外，只说明依赖程度，不说明机制。
+- **xattn + dropout 0.3 学会了不用 SOPT**：全程关掉 SOPT 与 none 无差别（80.9 vs 81.2），开着也没有收益。它对 GR00T "不伤"的原因就是基本不用。所以后续 xattn 的 seed 和新实验都改用无正则版（E31 s0 中它的 dev 是 80.3，高于 none 的 79.1）。
+- **对强宿主的总结（LIBERO-90 17 任务）**：GR00T 的失败以视觉精度决定的 grasp_miss 为主。SOPT 提供的局部动力学和阶段信息（E27 证明宿主原本没有）在这类短任务上转化不成成功率。加法注入的代价是更多 grasp_miss，交叉注意力去掉了这一代价，但没有带来收益。
+- **下一步 E35**：在长时程 suite 上测强宿主（GR00T libero_10 k5）。SmolVLA 在这里从头训练的历史组件显著有用（+3.2，p=0.011）。SET=a 为 none / expert_scratch / expert_droid，SET=b 为 xattn_scratch / xattn_droid（无正则），使用 EE-only 先验。脚本 `scripts/slurm/e35_groot_std.sbatch`，排在 E31 s1 之后。
