@@ -1465,3 +1465,19 @@ dev / new 拆分（agg_split）：
   - 交叉注意力缩小了加法接口在其他任务上的代价，但没有完全消除。
 - 与 LIBERO-90 17 任务（E31）一致：xattn 是代价最小的接入方式，同时保住了历史带来的收益。
 - 下一步：SET=b seed 1 插到队首（2 块 GPU），用于把 xattn 与 SET=a 的 2 seed 配对；hist384（18876338）正在运行，之后是 hist192。
+
+## E35 SET=hist CTX=384 seed 0：25.6 s 历史（2026-10-20，Jubail 18876338，cn262，commit 42f12be；先验 e33_ar_flow_f100_s_ee_ctx384）
+| 臂（s0） | ctx96（6.4 s） | ctx384（25.6 s） | 384 vs 96 | 384 vs none（61.8） |
+|---|---|---|---|---|
+| expert_scratch | 63.8 | 64.6 | 73:69，p=0.80 | 82:68，p=0.29 |
+| expert_droid | 59.2 | 61.2 | 78:68，p=0.46 | 71:74，p=0.87 |
+| xattn_droid | 63.0 | **68.8** | **83:54，p=0.016** | **90:55，p=0.005** |
+- xattn_droid + 25.6 s：
+  - 摩卡壶仍是 66（对 none 21:1）；
+  - 其余 9 个任务对 ctx96 74:45（p=0.010），对 none 69:54（p=0.21）；
+  - 长历史主要改善了 xattn 在其他任务上的代价，例如 "turn on the stove + moka" 74→96、"mug in microwave + close" 38→58、"black bowl drawer + close" 84→96。
+- 两个加法臂对历史长度不敏感。
+- **注意**：这只是 1 个 seed，而且是 3 个臂 × 2 个历史长度中最好的一格，有挑选的成分。在复现之前，不能作为结论。
+- 复现与对照（已排队，优先于 hist192）：
+  1. SET=hist CTX=384 SEED=1：3 个臂的第 2 个 seed，与 SET=a / b 的 s1 配对；
+  2. SET=histx CTX=384 SEED=0：xattn_scratch + 25.6 s（1 块 GPU），用来区分收益来自"长历史"还是"DROID 预训练 + 长历史"。

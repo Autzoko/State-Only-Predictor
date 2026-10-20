@@ -8,6 +8,8 @@
 #   SET=hist expert_scratch | expert_droid | xattn_droid with an E33 history-length prior (CTX=48|192|384:
 #            outputs/e33_ar_flow_f100_s_ee_ctx$CTX, same recipe, only ctx_len changed; the policy's history = the
 #            prior's ctx_len). Run names get _ctx$CTX; paired with the ctx96 runs of SET=a / b (same seed / demos / inits).
+#   SET=histx xattn_scratch with the CTX prior's config (control: long history without DROID pretraining; 1 GPU,
+#            SBATCH_GRES=gpu:a100:1)
 #   SUITE=libero_10 SET=a SEED=0 sbatch scripts/slurm/e35_groot_std.sbatch
 #   2-arm SETs must request 2 GPUs (SBATCH_GRES=gpu:a100:2 overrides the directive below): Jubail cancels jobs
 #   holding an idle GPU (E35 SET=b was cancelled twice, at 04:00 and 08:00, with 1 of 3 GPUs unused).
@@ -27,7 +29,7 @@ export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=/scratch/ll5582
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache HF_HUB_OFFLINE=1
 export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS_NUM_THREADS=4
 SUITE=${SUITE:-libero_10}; S=${SEED:-0}; SET=${SET:-a}; K=${K:-5}; PRIOR=outputs/e13_ar_flow_f100_s_ee/best.pt; PT=""
-[ $SET = hist ] && { PRIOR=outputs/e33_ar_flow_f100_s_ee_ctx${CTX:?set CTX}/best.pt; PT=_ctx$CTX; }
+[[ $SET = hist* ]] && { PRIOR=outputs/e33_ar_flow_f100_s_ee_ctx${CTX:?set CTX}/best.pt; PT=_ctx$CTX; }
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE set=$SET seed=$S prior=$PRIOR start=$(date -Is)"
 if [ ! -f outputs/e35_smoke_$SUITE/rollouts.json ]; then  # GR00T has not run on a standard suite before
   python scripts/vla_train.py --vla groot --arm xattn_droid --k $K --suite $SUITE --seed 0 --run e35_smoke_$SUITE \
@@ -47,6 +49,7 @@ case $SET in
   a) run none 0 & run expert_scratch 1 & run expert_droid 2 & wait ;;
   b) run xattn_scratch 0 & run xattn_droid 1 & wait ;;
   hist) run expert_scratch 0 & run expert_droid 1 & run xattn_droid 2 & wait ;;
+  histx) run xattn_scratch 0 ;;
   *) echo "unknown SET $SET"; exit 1 ;;
 esac
 echo "end=$(date -Is)"
