@@ -1446,3 +1446,22 @@ dev / new 拆分（agg_split）：
 | ctx384 | 25.6 s | **7.13** | 7.52 | **4.660** |
 - 历史越长，DROID 上的预测越好，但从 96 帧往上增益很小。注意 const-vel 基线随 ctx 变化，说明各变体的验证窗口并不完全相同（left_pad 改变了锚点的可用范围），所以绝对值只能粗略比较。
 - 宿主实验：`e35_groot_std.sbatch` 新增 SET=hist（CTX=…），三个臂为 expert_scratch / expert_droid / xattn_droid，换用长上下文先验，与 E35 ctx96 的同 seed 结果配对。先跑 CTX=384，再跑 CTX=192，都是 seed 0。
+
+## E35 SET=b seed 0：GR00T libero_10 交叉注意力接口（2026-10-20，Jubail 18869802，cn013，2 块 GPU，commit 244df2f）
+| 臂（s0） | 全部 | 摩卡壶 | 其余 9 个任务 |
+|---|---|---|---|
+| none | 61.8 | 26 | 65.8 |
+| expert_scratch | 63.8 | 56 | — |
+| expert_droid | 59.2 | 62 | 59.6 |
+| xattn_scratch | 62.8 | 56 | — |
+| xattn_droid | **63.0** | **66** | 62.7 |
+- 配对：
+  - xattn_droid vs none 88:82（p=0.70）；vs expert_droid 85:66（p=0.14）；vs xattn_scratch 83:82（p=1）。
+  - xattn_scratch vs none 68:63（p=0.73）。
+- 摩卡壶任务：四个 SOPT 臂都显著高于 none（xattn_droid 23:3，p=1e-4；xattn_scratch 15:0，p=1e-4；expert_droid 21:3，p=3e-4）。
+- 其余 9 个任务：
+  - expert_droid 对 none 47:78（**p=0.007**，加法接口的代价）；
+  - xattn_droid 65:79（p=0.28）；xattn_scratch 53:63（p=0.40）。
+  - 交叉注意力缩小了加法接口在其他任务上的代价，但没有完全消除。
+- 与 LIBERO-90 17 任务（E31）一致：xattn 是代价最小的接入方式，同时保住了历史带来的收益。
+- 下一步：SET=b seed 1 插到队首（2 块 GPU），用于把 xattn 与 SET=a 的 2 seed 配对；hist384（18876338）正在运行，之后是 hist192。
