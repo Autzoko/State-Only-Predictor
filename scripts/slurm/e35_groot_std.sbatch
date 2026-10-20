@@ -10,6 +10,8 @@
 #            prior's ctx_len). Run names get _ctx$CTX; paired with the ctx96 runs of SET=a / b (same seed / demos / inits).
 #   SET=histx xattn_scratch with the CTX prior's config (control: long history without DROID pretraining; 1 GPU,
 #            SBATCH_GRES=gpu:a100:1)
+#   SET=key  none | xattn_droid (ctx96) | xattn_droid with the CTX prior: the decisive comparison for extra seeds
+#            (same names as SET=a / b / hist, so seeds pool directly)
 #   SUITE=libero_10 SET=a SEED=0 sbatch scripts/slurm/e35_groot_std.sbatch
 #   2-arm SETs must request 2 GPUs (SBATCH_GRES=gpu:a100:2 overrides the directive below): Jubail cancels jobs
 #   holding an idle GPU (E35 SET=b was cancelled twice, at 04:00 and 08:00, with 1 of 3 GPUs unused).
@@ -50,6 +52,8 @@ case $SET in
   b) run xattn_scratch 0 & run xattn_droid 1 & wait ;;
   hist) run expert_scratch 0 & run expert_droid 1 & run xattn_droid 2 & wait ;;
   histx) run xattn_scratch 0 ;;
+  key) run none 0 & run xattn_droid 1 &
+       (PRIOR=outputs/e33_ar_flow_f100_s_ee_ctx${CTX:?set CTX}/best.pt PT=_ctx$CTX; run xattn_droid 2) & wait ;;
   *) echo "unknown SET $SET"; exit 1 ;;
 esac
 echo "end=$(date -Is)"
