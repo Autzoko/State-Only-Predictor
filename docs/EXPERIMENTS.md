@@ -1481,3 +1481,23 @@ dev / new 拆分（agg_split）：
 - 复现与对照（已排队，优先于 hist192）：
   1. SET=hist CTX=384 SEED=1：3 个臂的第 2 个 seed，与 SET=a / b 的 s1 配对；
   2. SET=histx CTX=384 SEED=0：xattn_scratch + 25.6 s（1 块 GPU），用来区分收益来自"长历史"还是"DROID 预训练 + 长历史"。
+
+## E35 SET=b seed 1 + 2 seed 汇总（2026-10-20，Jubail 18877325，cn267，commit dfdf991；ctx96）
+| 臂 | s0 | s1 | 2 seed | 对 none（配对，1000 个 episode） |
+|---|---|---|---|---|
+| none | 61.8 | 67.4 | 64.6 | — |
+| expert_scratch | 63.8 | 66.4 | 65.1 | 137:132，p=0.81 |
+| expert_droid | 59.2 | 63.6 | 61.4 | 131:163，p=0.070 |
+| xattn_scratch | 62.8 | 59.8 | 61.3 | 120:153，p=0.053 |
+| xattn_droid | 63.0 | 61.8 | 62.4 | 155:177，p=0.25 |
+- s1 上 xattn_droid 没有复现 s0 的小幅领先（61.8 vs none 67.4）。2 seed 下，ctx96 的四个 SOPT 臂都没有超过 none。只有 expert_scratch 与 none 持平。
+- 摩卡壶 vs 其余 9 个任务（2 seed，对 none）：
+
+  | 臂 | 摩卡壶 | 其余 9 个任务 |
+  |---|---|---|
+  | xattn_droid | 37:6（p<1e-5） | 118:171（p=0.002） |
+  | expert_droid | 38:11（p=1e-4） | 93:152（p=2e-4） |
+  | xattn_scratch | 21:11（p=0.11） | 99:142（p=0.007） |
+  | expert_scratch | 35:16（p=0.011） | 102:116（p=0.38） |
+- 结论（ctx96）：DROID 先验在"重复动作、需要记住进度"的任务上收益很大，而且稳定。但在其他多物体任务上，它造成显著代价，并且 xattn 在 2 seed 下也没有消除这一代价（s0 的 p=0.28 是偶然偏好）。
+- 这让 hist384 s0 的 68.8 更需要复现：hist384 SEED=1（18885772）和 histx（18887043）已提交，正在排队等资源。
