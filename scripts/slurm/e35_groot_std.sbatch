@@ -6,6 +6,8 @@
 #   SET=b  xattn_scratch | xattn_droid                 (E31 interface, no regularizer: E34 showed dropout 0.3 makes the
 #                                                      branch unused)
 #   SUITE=libero_10 SET=a SEED=0 sbatch scripts/slurm/e35_groot_std.sbatch
+#   2-arm SETs must request 2 GPUs (SBATCH_GRES=gpu:a100:2 overrides the directive below): Jubail cancels jobs
+#   holding an idle GPU (E35 SET=b was cancelled twice, at 04:00 and 08:00, with 1 of 3 GPUs unused).
 #SBATCH --job-name=sopt-e35
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3

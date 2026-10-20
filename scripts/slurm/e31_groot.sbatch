@@ -8,6 +8,8 @@
 # First: a fresh adaln / xattn policy must equal `none` exactly (zero init) and a 30-step smoke run + 1-init eval of
 # each new arm must pass, else the job aborts.
 #   SET=screen SEED=0 sbatch scripts/slurm/e31_groot.sbatch
+#   2-arm SETs must request 2 GPUs (SBATCH_GRES=gpu:a100:2 overrides the directive below): Jubail cancels jobs
+#   holding an idle GPU (E35 SET=b was cancelled twice, at 04:00 and 08:00, with 1 of 3 GPUs unused).
 #SBATCH --job-name=sopt-e31
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3

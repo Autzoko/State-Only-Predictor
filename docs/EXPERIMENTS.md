@@ -1386,3 +1386,8 @@ dev / new 拆分（agg_split）：
   - "put both moka pots on the stove"：26 / 56 / 62。两个 SOPT 臂都 +30 以上，是唯一的大幅收益。这是双物体、重复同一动作的任务，需要记住做到第几步。
   - 掉分集中在 "alphabet soup + cream cheese"（70 / 64 / 50）、"mug + pudding"（48 / 54 / 38）、"mug in microwave and close"（46 / 32 / 40）。
 - 初步判断：强宿主在长时程任务上也能从历史获益，但这一收益来自"历史"本身（scratch 同样有），DROID 预训练没有额外贡献，反而略差。SET=b（xattn_scratch / xattn_droid，18855804）正在运行，再决定是否补 seed 1/2。
+
+### 2026-10-20 E35 SET=b 第二次被取消（18855804）：原因是闲置 GPU
+- 同样在 cn264，于 08:00:20 被取消，当时训练到 18.3k / 20k 步。两次取消都恰好落在整 4 小时边界（04:00、08:00）。`nvidia` 分区的 PreemptMode=OFF，所以不是抢占。
+- SET=b 只有 2 个臂，但申请了 3 块 A100，有 1 块一直闲置。推断原因是集群定期清理占着闲置 GPU 的作业（推断，管理员没有给出原因）。
+- 修复：2 个臂的 SET 改为 `SBATCH_GRES=gpu:a100:2` 提交（这个环境变量优先于脚本里的 #SBATCH 指令）。说明已写进 e35 和 e31 两个 sbatch 的头部。SET=b 已重新排队，排在 E35 SET=a s1（18861939）之后。
