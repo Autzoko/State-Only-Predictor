@@ -1370,3 +1370,6 @@ dev / new 拆分（agg_split）：
 - s1 上 none 偏低（79.6），expert_droid 对 none 112:72，p=0.004（这一 seed 新任务 +8.0）。2 seed 合并后：expert_droid vs none 190:173（p=0.40），xattn_droid vs none 166:143（p=0.21），xattn+reg 166:156（p=0.62），adaln 174:183（p=0.67）。
 - xattn_droid（无正则）是唯一 dev 和 new 都不低于 none 的接口，2 seed 均值最高；布丁两阶段任务上，加法 droid 的掉分（3:12，p=0.035）在 xattn 上消失（3:6，p=0.51）。adaln 在布丁任务上同样掉分（2:13，p=0.007），且整体最弱。
 - GR00T 的 seed 间波动（none 79.6–81.9、expert_droid 79.2–84.4）与效应量相当，需要第 3 个 seed：E31 SET=screen SEED=2 已排队（E22 s2 已有）。
+
+### 2026-10-20 E35 SET=b（18851299）被系统取消
+- cn264 上运行到约 10.7k / 20k 步时，于 04:00 被 root（uid 0）取消，不是我们的操作，日志里没有错误。没有中间 checkpoint，已重新放到 Jubail 队首，从头重跑。
