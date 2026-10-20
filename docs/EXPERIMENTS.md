@@ -1433,3 +1433,16 @@ dev / new 拆分（agg_split）：
   - 这个任务是 s0 事后挑出来的，s1 独立复现：56 / 64 / 74。
 - 但 droid 在其余多物体任务上掉分（白杯 + 黄白杯 74→62，cream cheese + butter 58→48，alphabet + tomato 32→26），总分因此被拉低。
 - 解读：在需要"记住做到第几步"的重复动作任务上，DROID 先验的历史表示确实有用，而且是全部 10 个任务里最大、最稳定的收益。在其他多物体任务上，它反而比 scratch 更差。下一步看 SET=b（xattn，18869802 运行中）能否保住摩卡壶收益、同时去掉掉分；E33 的长历史先验也会在这里测。
+
+## E33 先验预训练（2026-10-20，Jubail 18874812，cn006，commit 472dc96；DGX 自 10-17 起不可达，改在 Jubail 跑）
+- 数据：127 上的 DROID 状态数据（3.4 GB，只含状态）经本机中转传到 `/scratch/ll5582/SOPT_DATA/processed/droid`。各文件大小一致，parquet 和 summary 的 md5 一致。
+- 配方与 `e13_ar_flow_f100_s_ee` 完全相同（S，ar_flow，100% DROID，ee_only，40k 步），只改 ctx_len。长上下文变体加 left_pad = ctx − 96。3 个变体各占 1 块 GPU，并行跑，30–36 分钟完成。
+
+| 先验 | 历史 | val pos ADE（cm） | const-vel | selection（越低越好） |
+|---|---|---|---|---|
+| ctx48 | 3.2 s | 7.80 | 7.50 | 4.846 |
+| e13（ctx96） | 6.4 s | 7.37 | 7.30 | 4.672 |
+| ctx192 | 12.8 s | 7.25 | 7.43 | 4.663 |
+| ctx384 | 25.6 s | **7.13** | 7.52 | **4.660** |
+- 历史越长，DROID 上的预测越好，但从 96 帧往上增益很小。注意 const-vel 基线随 ctx 变化，说明各变体的验证窗口并不完全相同（left_pad 改变了锚点的可用范围），所以绝对值只能粗略比较。
+- 宿主实验：`e35_groot_std.sbatch` 新增 SET=hist（CTX=…），三个臂为 expert_scratch / expert_droid / xattn_droid，换用长上下文先验，与 E35 ctx96 的同 seed 结果配对。先跑 CTX=384，再跑 CTX=192，都是 seed 0。

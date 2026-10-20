@@ -5,6 +5,9 @@
 #   SET=a  none | expert_scratch | expert_droid        (additive, = E13 arms on GR00T)
 #   SET=b  xattn_scratch | xattn_droid                 (E31 interface, no regularizer: E34 showed dropout 0.3 makes the
 #                                                      branch unused)
+#   SET=hist expert_scratch | expert_droid | xattn_droid with an E33 history-length prior (CTX=48|192|384:
+#            outputs/e33_ar_flow_f100_s_ee_ctx$CTX, same recipe, only ctx_len changed; the policy's history = the
+#            prior's ctx_len). Run names get _ctx$CTX; paired with the ctx96 runs of SET=a / b (same seed / demos / inits).
 #   SUITE=libero_10 SET=a SEED=0 sbatch scripts/slurm/e35_groot_std.sbatch
 #   2-arm SETs must request 2 GPUs (SBATCH_GRES=gpu:a100:2 overrides the directive below): Jubail cancels jobs
 #   holding an idle GPU (E35 SET=b was cancelled twice, at 04:00 and 08:00, with 1 of 3 GPUs unused).
@@ -23,8 +26,9 @@ cd /scratch/ll5582/SOPT
 export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=/scratch/ll5582/SOPT/pydeps:$PWD/src
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache HF_HUB_OFFLINE=1
 export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS_NUM_THREADS=4
-SUITE=${SUITE:-libero_10}; S=${SEED:-0}; SET=${SET:-a}; K=${K:-5}; PRIOR=outputs/e13_ar_flow_f100_s_ee/best.pt
-echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE set=$SET seed=$S start=$(date -Is)"
+SUITE=${SUITE:-libero_10}; S=${SEED:-0}; SET=${SET:-a}; K=${K:-5}; PRIOR=outputs/e13_ar_flow_f100_s_ee/best.pt; PT=""
+[ $SET = hist ] && { PRIOR=outputs/e33_ar_flow_f100_s_ee_ctx${CTX:?set CTX}/best.pt; PT=_ctx$CTX; }
+echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE set=$SET seed=$S prior=$PRIOR start=$(date -Is)"
 if [ ! -f outputs/e35_smoke_$SUITE/rollouts.json ]; then  # GR00T has not run on a standard suite before
   python scripts/vla_train.py --vla groot --arm xattn_droid --k $K --suite $SUITE --seed 0 --run e35_smoke_$SUITE \
     --prior $PRIOR --steps 30 --bs 32 --workers 8 > logs/e35_smoke.log 2>&1 && \
@@ -32,7 +36,7 @@ if [ ! -f outputs/e35_smoke_$SUITE/rollouts.json ]; then  # GR00T has not run on
     --n-init 1 --max-steps 40 > logs/e35_smoke.eval.log 2>&1
   rc=$?; echo "smoke exit $rc $(date -Is)"; [ $rc = 0 ] || { tail -5 logs/e35_smoke.log logs/e35_smoke.eval.log; exit 1; }
 fi
-run() { local name=e35_groot_${SUITE}_$1_k${K}_s$S
+run() { local name=e35_groot_${SUITE}_$1_k${K}${PT}_s$S
   [ -f outputs/$name/final.pt ] || CUDA_VISIBLE_DEVICES=$2 python scripts/vla_train.py --vla groot --arm $1 --k $K \
     --suite $SUITE --seed $S --run $name --steps 20000 --bs 32 --workers 8 --prior $PRIOR > logs/$name.log 2>&1
   echo "$name train exit $? $(date -Is)"
@@ -42,6 +46,7 @@ run() { local name=e35_groot_${SUITE}_$1_k${K}_s$S
 case $SET in
   a) run none 0 & run expert_scratch 1 & run expert_droid 2 & wait ;;
   b) run xattn_scratch 0 & run xattn_droid 1 & wait ;;
+  hist) run expert_scratch 0 & run expert_droid 1 & run xattn_droid 2 & wait ;;
   *) echo "unknown SET $SET"; exit 1 ;;
 esac
 echo "end=$(date -Is)"
