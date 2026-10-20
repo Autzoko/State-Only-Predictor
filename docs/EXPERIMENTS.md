@@ -1415,3 +1415,21 @@ dev / new 拆分（agg_split）：
   - AdaLN 最差，不再追加。
   - SET=scratch 对照不再需要（screen 没有收益可以归因），取消。
 - 下一步：重点转到长时程（E35 libero_10，seed 0 的摩卡壶任务 +30）以及更长历史（E33）。
+
+## E35 SET=a seed 1 + 2 seed 汇总（2026-10-20，Jubail 18861939，cn264，commit 533f785；GR00T libero_10，k5，EE-only 先验）
+| 臂 | s0 | s1 | 2 seed |
+|---|---|---|---|
+| none | 61.8 | 67.4 | 64.6 |
+| expert_scratch | 63.8 | 66.4 | 65.1 |
+| expert_droid | 59.2 | 63.6 | 61.4 |
+- 配对（各 1000 个 episode）：
+  - scratch vs none 137:132（p=0.81）；
+  - droid vs none 131:163（p=0.070）；
+  - **droid vs scratch 126:163（p=0.034）**。
+- **跨宿主一致**：在长时程的 libero_10 上，DROID 先验不如同结构的从头训历史组件。SmolVLA 是 p=0.014（3 seed），GR00T 是 p=0.034（2 seed）。这与 LIBERO-90 17 任务正好相反：那里 GR00T 上 droid 优于 scratch，p=0.039（E31）。
+- **摩卡壶任务**（"put both moka pots on the stove"，同一动作做两遍）：
+  - none / scratch / droid = 41 / 60 / 68（2 seed）；
+  - droid vs none 38:11（p=1e-4，任务数 Bonferroni ×10 后仍 < 0.01）；scratch vs none 35:16（p=0.011）；
+  - 这个任务是 s0 事后挑出来的，s1 独立复现：56 / 64 / 74。
+- 但 droid 在其余多物体任务上掉分（白杯 + 黄白杯 74→62，cream cheese + butter 58→48，alphabet + tomato 32→26），总分因此被拉低。
+- 解读：在需要"记住做到第几步"的重复动作任务上，DROID 先验的历史表示确实有用，而且是全部 10 个任务里最大、最稳定的收益。在其他多物体任务上，它反而比 scratch 更差。下一步看 SET=b（xattn，18869802 运行中）能否保住摩卡壶收益、同时去掉掉分；E33 的长历史先验也会在这里测。
