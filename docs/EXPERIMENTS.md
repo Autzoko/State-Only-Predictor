@@ -1373,3 +1373,16 @@ dev / new 拆分（agg_split）：
 
 ### 2026-10-20 E35 SET=b（18851299）被系统取消
 - cn264 上运行到约 10.7k / 20k 步时，于 04:00 被 root（uid 0）取消，不是我们的操作，日志里没有错误。没有中间 checkpoint，已重新放到 Jubail 队首，从头重跑。
+
+## E35 SET=a seed 0：GR00T libero_10（2026-10-20，Jubail 18845212，cn262，commit b954db7；k5，EE-only 先验，10 任务 × 50 init）
+| 臂 | 成功率 |
+|---|---|
+| none | 61.8 |
+| expert_scratch | **63.8** |
+| expert_droid | 59.2 |
+- 配对 McNemar：scratch vs none 74:64（p=0.44）；droid vs none 68:81（p=0.33）；droid vs scratch 57:80（p=0.060）。
+- 与 SmolVLA libero_10（3 seed：none 47.9 / scratch 51.1 / droid 47.9；scratch vs none p=0.011，droid vs scratch p=0.014）的排序相同：从头训练的历史组件 ≥ none > DROID 预训练。目前只有 1 个 seed，不显著。
+- 分任务（none / scratch / droid）：
+  - "put both moka pots on the stove"：26 / 56 / 62。两个 SOPT 臂都 +30 以上，是唯一的大幅收益。这是双物体、重复同一动作的任务，需要记住做到第几步。
+  - 掉分集中在 "alphabet soup + cream cheese"（70 / 64 / 50）、"mug + pudding"（48 / 54 / 38）、"mug in microwave and close"（46 / 32 / 40）。
+- 初步判断：强宿主在长时程任务上也能从历史获益，但这一收益来自"历史"本身（scratch 同样有），DROID 预训练没有额外贡献，反而略差。SET=b（xattn_scratch / xattn_droid，18855804）正在运行，再决定是否补 seed 1/2。
