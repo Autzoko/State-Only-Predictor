@@ -1391,3 +1391,27 @@ dev / new 拆分（agg_split）：
 - 同样在 cn264，于 08:00:20 被取消，当时训练到 18.3k / 20k 步。两次取消都恰好落在整 4 小时边界（04:00、08:00）。`nvidia` 分区的 PreemptMode=OFF，所以不是抢占。
 - SET=b 只有 2 个臂，但申请了 3 块 A100，有 1 块一直闲置。推断原因是集群定期清理占着闲置 GPU 的作业（推断，管理员没有给出原因）。
 - 修复：2 个臂的 SET 改为 `SBATCH_GRES=gpu:a100:2` 提交（这个环境变量优先于脚本里的 #SBATCH 指令）。说明已写进 e35 和 e31 两个 sbatch 的头部。SET=b 已重新排队，排在 E35 SET=a s1（18861939）之后。
+
+## E31 screen seed 2 + 3 seed 汇总（2026-10-20，Jubail 18857850；GR00T，17 任务，与 E22 同 seed 配对，`agg_e31.py 0 1 2`）
+| 臂 | s2 | 3 seed | 7 dev | 10 new | 布丁两阶段 |
+|---|---|---|---|---|---|
+| none | 81.9 | 81.1 | 79.0 | 82.7 | 94.0 |
+| expert_droid（加法） | 79.9 | 81.1 | 76.9 | 84.1 | 84.7 |
+| expert_scratch | 80.7 | 79.3 | 75.5 | 81.9 | 89.3 |
+| adaln_droid | 77.4 | 79.3 | 75.6 | 81.9 | 81.3 |
+| xattn_droid | 81.2 | **81.8** | **79.4** | 83.5 | 90.7 |
+| xattn_droid + reg | 78.7 | 80.5 | 77.2 | 82.7 | 94.0 |
+- 3 seed 配对（各 2550 个 episode）：
+  - xattn_droid vs none 246:229（p=0.46）；
+  - expert_droid vs none 271:271（p=1）；
+  - expert_scratch vs none 204:252（**p=0.028**，有害）；
+  - adaln_droid vs none 264:311（p=0.055）。
+  - expert_droid vs expert_scratch 284:236（p=0.039）：在 GR00T 上，DROID 预训练相对从头训的同一组件有显著好处。但两者都没有超过 none。
+- 布丁两阶段任务：
+  - 加法 droid 3:17（p=0.0026）、adaln 2:21（p=6.6e-5）显著掉分；
+  - xattn_droid 3:8（p=0.23），对加法 droid 11:2（p=0.022），这项代价基本消除。
+- **结论**：在 LIBERO-90 17 任务这类短任务上，三种接口都没能让 GR00T 超过 none。
+  - xattn_droid（无正则）是唯一完全无代价的接口：dev 和 new 都 ≥ none，布丁掉分消失。后续统一用它作为 SOPT 接入强宿主的方式。
+  - AdaLN 最差，不再追加。
+  - SET=scratch 对照不再需要（screen 没有收益可以归因），取消。
+- 下一步：重点转到长时程（E35 libero_10，seed 0 的摩卡壶任务 +30）以及更长历史（E33）。
