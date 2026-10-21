@@ -22,7 +22,7 @@
 #SBATCH --exclude=cn014,cn015,cn270
 #SBATCH --cpus-per-task=30
 #SBATCH --mem=360G
-#SBATCH --time=36:00:00
+#SBATCH --time=10:00:00
 #SBATCH --output=/scratch/ll5582/SOPT/logs/%x-%j.out
 source /etc/profile
 set -uo pipefail
