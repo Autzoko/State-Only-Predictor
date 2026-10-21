@@ -12,6 +12,8 @@
 #            SBATCH_GRES=gpu:a100:1)
 #   SET=key  none | xattn_droid (ctx96) | xattn_droid with the CTX prior: the decisive comparison for extra seeds
 #            (same names as SET=a / b / hist, so seeds pool directly)
+#   SET=one  a single arm ARM=<arm> on 1 GPU (SBATCH_GRES=gpu:a100:1; CTX=<n> for an E33 prior, unset = ctx96):
+#            1-GPU jobs start within hours while 3-GPU jobs wait a day on the busy nvidia partition
 #   SUITE=libero_10 SET=a SEED=0 sbatch scripts/slurm/e35_groot_std.sbatch
 #   2-arm SETs must request 2 GPUs (SBATCH_GRES=gpu:a100:2 overrides the directive below): Jubail cancels jobs
 #   holding an idle GPU (E35 SET=b was cancelled twice, at 04:00 and 08:00, with 1 of 3 GPUs unused).
@@ -31,7 +33,7 @@ export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=/scratch/ll5582
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache HF_HUB_OFFLINE=1
 export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS_NUM_THREADS=4
 SUITE=${SUITE:-libero_10}; S=${SEED:-0}; SET=${SET:-a}; K=${K:-5}; PRIOR=outputs/e13_ar_flow_f100_s_ee/best.pt; PT=""
-[[ $SET = hist* ]] && { PRIOR=outputs/e33_ar_flow_f100_s_ee_ctx${CTX:?set CTX}/best.pt; PT=_ctx$CTX; }
+[[ $SET = hist* || ( $SET = one && -n ${CTX:-} ) ]] && { PRIOR=outputs/e33_ar_flow_f100_s_ee_ctx${CTX:?set CTX}/best.pt; PT=_ctx$CTX; }
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE set=$SET seed=$S prior=$PRIOR start=$(date -Is)"
 if [ ! -f outputs/e35_smoke_$SUITE/rollouts.json ]; then  # GR00T has not run on a standard suite before
   python scripts/vla_train.py --vla groot --arm xattn_droid --k $K --suite $SUITE --seed 0 --run e35_smoke_$SUITE \
@@ -52,6 +54,7 @@ case $SET in
   b) run xattn_scratch 0 & run xattn_droid 1 & wait ;;
   hist) run expert_scratch 0 & run expert_droid 1 & run xattn_droid 2 & wait ;;
   histx) run xattn_scratch 0 ;;
+  one) run ${ARM:?set ARM} 0 ;;
   key) run none 0 & run xattn_droid 1 &
        (PRIOR=outputs/e33_ar_flow_f100_s_ee_ctx${CTX:?set CTX}/best.pt PT=_ctx$CTX; run xattn_droid 2) & wait ;;
   *) echo "unknown SET $SET"; exit 1 ;;
