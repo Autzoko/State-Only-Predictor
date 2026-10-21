@@ -1516,3 +1516,13 @@ dev / new 拆分（agg_split）：
 - 现状：xattn_droid ctx384 对 none +3.1，2 seed p=0.078。需要第 3 个 seed。
   - 新增 SET=key：只跑 none / xattn_droid ctx96 / xattn_droid ctx384 三个关键臂，CTX=384 SEED=2 已插到队首。
   - histx（xattn_scratch ctx384，18887043）正在运行。
+
+## E35 SET=histx CTX=384 seed 0：xattn_scratch + 25.6 s 历史（2026-10-21，Jubail 18887043，cn254，1 块 GPU）
+| 臂（s0） | ctx96 | ctx384 |
+|---|---|---|
+| none | 61.8 | — |
+| xattn_scratch | 62.8 | 62.4（对 ctx96 71:73，p=0.93；对 none 67:64，p=0.86） |
+| xattn_droid | 63.0 | **68.8** |
+- **xattn_droid ctx384 vs xattn_scratch ctx384：91:59（p=0.011）**。两者结构相同、历史长度相同，唯一区别是 SOPT 编码器是否用 DROID 预训练。
+- 从头训的 xattn 对历史长度完全不敏感。长历史带来的提升只在用 DROID 预训练的编码器上出现，也就是说，它来自预训练学到的长时程运动表示，而不是单纯多看了一段历史。
+- 这是目前强宿主上 DROID 预训练价值最直接的证据（1 个 seed）。histx SEED=1 已排队，用于把 droid vs scratch 的对比扩到 2 seed。
