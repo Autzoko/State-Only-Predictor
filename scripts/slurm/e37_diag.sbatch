@@ -1,5 +1,5 @@
 #!/bin/bash
-# E37 probe follow-up: source of reset-to-reset differences in LIBERO kitchen scenes (scripts/e37_diag.py).
+# E37 probe follow-up: source of reset-to-reset differences in LIBERO kitchen scenes (scripts/e37_diag.py; DIAG=e37_diag2 for the drift test).
 #   sbatch scripts/slurm/e37_diag.sbatch
 #SBATCH --job-name=sopt-e37d
 #SBATCH --partition=nvidia
@@ -16,5 +16,5 @@ export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=/scratch/ll5582
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache HF_HUB_OFFLINE=1
 export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS_NUM_THREADS=4
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) start=$(date -Is)"
-python scripts/e37_diag.py 2>&1 | grep -v "task orders"
+python scripts/${DIAG:-e37_diag}.py 2>&1 | grep -v "task orders"
 echo "end=$(date -Is)"
