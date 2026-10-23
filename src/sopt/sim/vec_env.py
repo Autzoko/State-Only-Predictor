@@ -11,11 +11,11 @@ import multiprocessing as mp
 import numpy as np
 
 
-def _worker(conn, sopt_data: str, suite: str, task_lang: str):
+def _worker(conn, sopt_data: str, suite: str, task_lang: str, perturb: str | None):
     from sopt.sim.libero_env import LiberoTaskEnv, setup_env_vars, suite_tasks
 
     setup_env_vars(sopt_data)
-    env = LiberoTaskEnv(suite, suite_tasks(suite).index(task_lang))
+    env = LiberoTaskEnv(suite, suite_tasks(suite).index(task_lang), perturb=perturb)
     while True:
         cmd, arg = conn.recv()
         if cmd == "reset":
@@ -29,12 +29,12 @@ def _worker(conn, sopt_data: str, suite: str, task_lang: str):
 
 
 class TaskVecEnv:
-    def __init__(self, sopt_data: str, tasks: list[str], suite: str = "libero_90"):
+    def __init__(self, sopt_data: str, tasks: list[str], suite: str = "libero_90", perturb: str | None = None):
         ctx = mp.get_context("spawn")
         self.conns, self.procs = [], []
         for t in tasks:
             a, b = ctx.Pipe()
-            proc = ctx.Process(target=_worker, args=(b, str(sopt_data), suite, t), daemon=True)
+            proc = ctx.Process(target=_worker, args=(b, str(sopt_data), suite, t, perturb), daemon=True)
             proc.start()
             self.conns.append(a)
             self.procs.append(proc)

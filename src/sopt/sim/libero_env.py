@@ -15,6 +15,8 @@ from pathlib import Path
 
 import numpy as np
 
+from sopt.sim.perturb import apply_scene, episode_seed, noisy_image, parse_spec
+
 SETTLE_STEPS = 10  # zero actions after reset so objects settle (as in OpenVLA's LIBERO evaluation)
 
 
@@ -50,7 +52,7 @@ def suite_tasks(suite: str = "libero_90") -> list[str]:
 
 
 class LiberoTaskEnv:
-    def __init__(self, suite: str, task_id: int, resolution: int = 256):
+    def __init__(self, suite: str, task_id: int, resolution: int = 256, perturb: str | None = None):
         from libero.libero import benchmark, get_libero_path
         from libero.libero.envs import OffScreenRenderEnv
 
@@ -60,6 +62,8 @@ class LiberoTaskEnv:
         self.env = OffScreenRenderEnv(bddl_file_name=bddl, camera_heights=resolution, camera_widths=resolution)
         self.init_states = b.get_task_init_states(task_id)
         self.language = task.language
+        self.spec = parse_spec(perturb)  # E37 (sopt/sim/perturb.py); None = the unperturbed benchmark
+        self.pinfo, self._seed, self._t = {}, 0, 0
 
     @staticmethod
     def parse(obs: dict) -> dict:
@@ -78,14 +82,29 @@ class LiberoTaskEnv:
         self.env.seed(seed)
         self.env.reset()
         obs = self.env.set_init_state(self.init_states[init_index % len(self.init_states)])
+        if self.spec is not None:  # after the init state, before settling: objects settle in the perturbed scene
+            self._seed = episode_seed(self.spec, self.language, init_index)
+            z = [v[2] for v in self.parse(obs)["objs"].values()]
+            self.pinfo = {"spec": f"{self.spec[0]}:{self.spec[1]}",
+                          **apply_scene(self.env, self.spec, self._seed, float(np.median(z)) if z else 0.9)}
         for _ in range(SETTLE_STEPS):
             obs, *_ = self.env.step(np.array([0, 0, 0, 0, 0, 0, -1.0]))
-        return self.parse(obs)
+        self._t = 0
+        return self._observe(obs)
 
     def step(self, action: np.ndarray) -> tuple[dict, bool]:
         """action: 7-d in simulator convention (gripper -1 open / +1 close). Returns (obs, success)."""
         obs, _, done, _ = self.env.step(np.asarray(action, dtype=np.float64))
-        return self.parse(obs), bool(done)
+        self._t += 1
+        return self._observe(obs), bool(done)
+
+    def _observe(self, obs: dict) -> dict:
+        o = self.parse(obs)
+        if self.spec is not None:
+            o["agent"] = noisy_image(o["agent"], self.spec, self._seed, self._t, 0)
+            o["wrist"] = noisy_image(o["wrist"], self.spec, self._seed, self._t, 1)
+            o["perturb"] = self.pinfo
+        return o
 
     def close(self) -> None:
         self.env.close()

@@ -45,6 +45,9 @@ def main():
     p.add_argument("--act-log", action="store_true", help="E26: log every executed action (chunk-boundary metrics)")
     p.add_argument("--sopt-mask-grasp", type=float, default=0.0,
                    help="E34: switch the SOPT input off for this many seconds after each gripper-close command (<0: always off)")
+    p.add_argument("--perturb", default=None, help="E37: <kind>:<level>, kinds in sopt/sim/perturb.py (default: none)")
+    p.add_argument("--log-npz", default=None,
+                   help="E36: per-step raw proprio (q, fingers), executed actions and every predicted chunk -> .npz")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     args = p.parse_args()
     import importlib.util
@@ -68,16 +71,17 @@ def main():
     V.load_trainable(policy, args.ckpt)
     policy.eval()
     if suite in ("libero90", "libero90_17"):
-        venv, feat = TaskVecEnv(args.sopt_data, tasks), features_20hz
+        venv, feat = TaskVecEnv(args.sopt_data, tasks, perturb=args.perturb), features_20hz
         args.max_steps = args.max_steps or 400
     else:  # EE-only features: joints hidden exactly as in training (sopt/data/libero_std.py)
         from sopt.data.libero_std import MAX_STEPS, hide_joints
 
-        venv = TaskVecEnv(args.sopt_data, tasks, suite=suite)
+        venv = TaskVecEnv(args.sopt_data, tasks, suite=suite, perturb=args.perturb)
         feat = lambda q, f: hide_joints(features_20hz(q, f))  # noqa: E731
         args.max_steps = args.max_steps or MAX_STEPS[suite]
     C = ck["meta"].get("ctx", CTX)  # history length the policy was trained with (E33)
     rows, t0 = [], time.time()
+    log = []  # E36: one dict of arrays per finished episode, in the order of `rows`
     for init in range(args.n_init):
         torch.manual_seed(init)
         obs = venv.reset(init)
@@ -85,6 +89,19 @@ def main():
         active = {i: True for i in range(len(tasks))}
         chunks, traces, alog = {}, {i: [] for i in range(len(tasks))}, {i: [] for i in range(len(tasks))}
         last_close, was_open = {i: -10**9 for i in range(len(tasks))}, {i: True for i in range(len(tasks))}
+        lq = {i: [np.concatenate([o["q"], o["fingers"]])] for i, o in enumerate(obs)}  # state before step t at [t]
+        la, lc = {i: [] for i in range(len(tasks))}, {i: [] for i in range(len(tasks))}
+        pinfo = {i: o.get("perturb", {}) for i, o in enumerate(obs)}
+
+        def finish(i, success, steps):
+            rows.append({"task": tasks[i], "init": init, "success": success, "steps": steps,
+                         **({"perturb": pinfo[i]} if args.perturb else {}),
+                         **({"trace": traces[i]} if args.trace else {}),
+                         **({"acts": alog[i]} if args.act_log else {})})
+            if args.log_npz:
+                log.append({"qf": np.asarray(lq[i], np.float32), "act": np.asarray(la[i], np.float32),
+                            "chunk_t": np.asarray([c[0] for c in lc[i]], np.int32),
+                            "chunk": np.asarray([c[1] for c in lc[i]], np.float32)})
         for t in range(args.max_steps):
             live = [i for i in active if active[i]]
             if not live:
@@ -102,6 +119,8 @@ def main():
                     act = policy.predict_action_chunk(pre(batch))
                 act = post(act.float()).cpu().numpy()  # (B, chunk, 7), dataset convention
                 chunks.update({i: act[j] for j, i in enumerate(live)})
+                for j, i in enumerate(live):
+                    lc[i].append((t, act[j]))
             actions = {}
             for i in live:
                 a = chunks[i][t % args.n_exec]
@@ -111,28 +130,38 @@ def main():
                 was_open[i] = a[6] > 0.5
                 if args.act_log:
                     alog[i].append([round(float(x), 3) for x in a[:7]])
+            for i in live:
+                la[i].append(actions[i])
             if args.trace and t % args.trace == 0:
                 for i in live:
                     traces[i].append(trace_row(t, obs[i], actions[i]))
             for i, (o, success) in venv.step(actions).items():
                 obs[i] = o
                 hist[i].append(feat(o["q"][None], o["fingers"][None])[0])
+                lq[i].append(np.concatenate([o["q"], o["fingers"]]))
                 if success:
                     active[i] = False
-                    rows.append({"task": tasks[i], "init": init, "success": True, "steps": t + 1,
-                                 **({"trace": traces[i]} if args.trace else {}),
-                                 **({"acts": alog[i]} if args.act_log else {})})
-        rows += [{"task": tasks[i], "init": init, "success": False, "steps": args.max_steps,
-                  **({"trace": traces[i]} if args.trace else {}),
-                  **({"acts": alog[i]} if args.act_log else {})} for i in active if active[i]]
+                    finish(i, True, t + 1)
+        for i in active:
+            if active[i]:
+                finish(i, False, args.max_steps)
         sr = np.mean([r["success"] for r in rows])
         print(f"init {init}: running success {sr:.3f} ({time.time() - t0:.0f}s)", flush=True)
     venv.close()
     per_task = {t: float(np.mean([r["success"] for r in rows if r["task"] == t])) for t in tasks}
     summary = {"ckpt": args.ckpt, "arm": arm, "vla": ck["meta"].get("vla", "smolvla"), "suite": suite, "max_steps": args.max_steps, "success_rate": float(np.mean([r["success"] for r in rows])),
-               "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "trace_every": args.trace, "sopt_mask_grasp": args.sopt_mask_grasp, "wall_s": time.time() - t0,
+               "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "trace_every": args.trace, "sopt_mask_grasp": args.sopt_mask_grasp,
+               "perturb": args.perturb, "ctx": C, "wall_s": time.time() - t0,
                "episodes": rows}
     Path(args.out).write_text(json.dumps(summary, indent=2))
+    if args.log_npz:  # flat arrays + per-episode offsets (row k of `episodes` <-> episode k here)
+        cat = lambda k: np.concatenate([e[k] for e in log]) if log else np.zeros((0,))  # noqa: E731
+        off = lambda k: np.cumsum([0] + [len(e[k]) for e in log]).astype(np.int64)  # noqa: E731
+        np.savez_compressed(args.log_npz, qf=cat("qf"), qf_off=off("qf"), act=cat("act"), act_off=off("act"),
+                            chunk=cat("chunk"), chunk_t=cat("chunk_t"), chunk_off=off("chunk"),
+                            success=np.array([r["success"] for r in rows]), init=np.array([r["init"] for r in rows]),
+                            task=np.array([tasks.index(r["task"]) for r in rows]), tasks=np.array(tasks),
+                            suite=suite, n_exec=args.n_exec)
     print(json.dumps({k: v for k, v in summary.items() if k != "episodes"}, indent=2))
 
 
