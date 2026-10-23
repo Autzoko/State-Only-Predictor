@@ -1671,3 +1671,4 @@ dev / new 拆分（agg_split）：
   - 摩卡壶收益在所有先验 / 长度上都显著（各 p≤2e-4）；
   - 预注册 s3 + s4 的结果（p=0.099）。
 - 受影响、需要重新验证的结论："DROID vs scratch，p=1.4e-4"。它在 ctx384 上比较，只用了一个 DROID 先验实例；scratch 不依赖先验实例。
+- ctx96 复制先验已训练（2026-10-23，Jubail 18917745，22 min，git b41c4cc）。DROID val selection 4.711，e13 为 4.672；E33 其余各档：ctx48 4.846、ctx192 4.663、ctx384 4.660。已排入 xattn_droid × s0–s2（输出 e35_groot_libero_10_xattn_droid_k5_ctx96_s*）。
