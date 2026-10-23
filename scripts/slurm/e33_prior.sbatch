@@ -5,6 +5,8 @@
 # Longer contexts use data.left_pad = ctx - 96, so every window keeps >= 96 real frames: the same episodes / anchors
 # as ctx96, only older history added (first-frame padding, as LIBERO rollouts pad early history). DROID only.
 #   sbatch scripts/slurm/e33_prior.sbatch
+# One prior on one GPU (e.g. a ctx96 replica of e13 trained with this script, to separate history length from
+# prior-run variance): SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=80G ONE=96 sbatch scripts/slurm/e33_prior.sbatch
 #SBATCH --job-name=sopt-e33
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3
@@ -26,5 +28,6 @@ run() { local n=$1 gpu=$2 pad=$3 name=e33_ar_flow_f100_s_ee_ctx$1
     --config configs/experiment/e2.yaml model.objective=ar_flow model.ee_only=true data.root=$D run_name=$name \
     model.ctx_len=$n data.left_pad=$pad train.num_workers=8 > logs/$name.log 2>&1
   echo "$name exit $? $(date -Is)"; tail -2 logs/$name.log; }
-run 48 0 0 & run 192 1 96 & run 384 2 288 & wait
+if [ -n "${ONE:-}" ]; then run $ONE 0 $(( ONE > 96 ? ONE - 96 : 0 ))
+else run 48 0 0 & run 192 1 96 & run 384 2 288 & wait; fi
 echo "end=$(date -Is)"
