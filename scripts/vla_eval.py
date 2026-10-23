@@ -161,7 +161,7 @@ def main():
                             chunk=cat("chunk"), chunk_t=cat("chunk_t"), chunk_off=off("chunk"),
                             success=np.array([r["success"] for r in rows]), init=np.array([r["init"] for r in rows]),
                             task=np.array([tasks.index(r["task"]) for r in rows]), tasks=np.array(tasks),
-                            suite=suite, n_exec=args.n_exec)
+                            suite=suite, n_exec=args.n_exec, max_steps=args.max_steps)
     print(json.dumps({k: v for k, v in summary.items() if k != "episodes"}, indent=2))
 
 

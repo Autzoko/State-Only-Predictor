@@ -1694,3 +1694,70 @@ dev / new 拆分（agg_split）：
   9. base
   10. speed
   11. scratch
+
+## E36 / E37 设计与实现（2026-10-23，按用户要求，判据在看到任何结果前写定；计划见 `docs/SOPT_NEXT.md`）
+
+### 共用基础设施（9301499 及之后）
+- `src/sopt/sim/perturb.py`：评测时的场景扰动，维度参照 LIBERO-Plus。
+  - 视觉类：camera（agentview 绕它在桌面上的注视点做水平旋转，正负号随机）、light（场景灯变暗并偏色）、texture（只改桌面 / 地面 / 墙面材质的颜色，不碰任务物体和机器人）、noise（两路相机的像素高斯噪声）。
+  - 本体感觉对照：robot（初始关节加均匀偏移）。
+  - 每种 3 档，强度事先固定。所有随机数只由 (kind, level, task, init) 决定，noise 另加 step，所以被比较的各臂看到的是完全相同的扰动 episode。
+  - 改动在 set_init_state 之后、settle 之前施加，物体在扰动后的场景里落稳；hard reset 会重建场景。
+- `vla_eval.py`：
+  - `--perturb kind:level`；
+  - `--log-npz`：逐步记录原始关节 + 手指、实际执行的动作、每次预测的完整动作块，以及 max_steps；
+  - 不加这两个参数时，输出与原来逐字段相同，只多 perturb / ctx 两个汇总字段。
+- 本地单元检查（通过）：
+  - 相机旋转保持注视点、高度和距离，R' = Rz·R；四元数乘法与矩阵乘法一致；
+  - 随机种子稳定；noise 只在 noise 档生效。
+- 集群预检 `scripts/slurm/e37_probe.sbatch`（已排在队首）。17 个 LIBERO-90 任务加 libero_goal / libero_10 场景，逐项检查：
+  1. perturb=None 时与原环境的图像和关节完全相同；
+  2. 每一档都可复现；
+  3. 普通 reset 后相机、灯光、材质恢复为 XML 原值；
+  4. 每个场景实际匹配到的材质名、相机父刚体、灯数；
+  5. 输出图像，人工查看；
+  6. 另外：DP none s0 的 2 个 init 重评测与原 rollouts 一致，npz 偏移与步数一致；DP 和 GR00T 各做一次扰动冒烟。
+
+### E36a 只用本体感觉的运行时失败预测（`scripts/e36_failure.py`，`scripts/slurm/e36_log.sbatch`）
+- 数据：重新做干净评测并加 `--log-npz`，s0、LIBERO-90 17 任务 × 50 init：
+  - GR00T none / xattn_droid、DP none / expert_droid、π0.5 none、X-VLA none；
+  - 长时程：libero_10 s3 的 GR00T none / xattn_droid ctx384。
+  - 先检查与原 rollouts 的逐 episode 一致率。
+- 分数，全部严格因果：t 时刻只用 ≤ t 的数据，已用"改写 t 之后的轨迹，t 之前的分数不变"测试过：
+  - sopt_ee：冻结的 DROID EE-only 先验在 t−1 s 发出的预测，对 (t−1 s, t] 实际 EE 位姿 + 夹爪的能量分数；K=16，每个宿主都用同一个先验；
+  - sopt_full：同上，全状态先验，仅 LIBERO-90；
+  - rand_ee：同结构、同归一化，随机初始化；
+  - constvel：恒速外推；
+  - still / gripcyc / blocked：E26 的定义，在线版本；
+  - chunkcons：宿主自己相邻动作块重叠部分的不一致度，Sentinel 式，宿主专用。
+  - 聚合：截至目前的最大值，或当前值（_last）。基线取两者中较好的一个，对 SOPT 更保守。
+  - 检查时刻从第 2 s 开始，每 0.5 s 一次。
+- 划分：init < 25 只用于校准，只用成功轨迹，与 FAIL-Detect 一致；init ≥ 25 用于测试。
+- 指标：
+  - 在步数上限 25 / 50 / 75 % 时刻，对仍在运行的测试 episode 计算 AUROC；
+  - 随时间变化的保形阈值（α=0.1）下的 TPR / FPR / 中位检测时间；
+  - 跨 run 的阈值迁移。
+- **判据**：在 6 个干净 LIBERO-90 run 上，50% 时刻 sopt_ee 的平均 AUROC 须同时满足：
+  - ≥ 0.75；
+  - 比最好的非 SOPT 分数高 ≥ 0.05；
+  - 合并配对自助法的 95% CI > 0；
+  - 跨 run 迁移时 TPR 平均下降 ≤ 0.05，且 FPR ≤ 0.15。
+- 合成数据端到端测试通过：AUROC 与暴力枚举一致；因果性检查通过；恒速轨迹的恒速误差为 0。
+
+### E36b（有条件执行）
+- 只有 E36a 通过才设计和实施检测后的恢复，阈值沿用 E36a 的校准结果。
+
+### E37 视觉分布偏移下的 SOPT 收益（`scripts/slurm/e37_robust.sbatch`，`scripts/e37_analyze.py`）
+- 只做评测，比较已报告过的干净对照：
+  - DP none vs expert_droid（17 任务）；
+  - SmolVLA libero_goal none vs expert_droid；
+  - GR00T none（E22）vs xattn_droid（E31）。
+  - seeds 0–1。
+- **档位标定**：MODE=pilot，用三个宿主 seed 2 的 none checkpoint。这些 checkpoint 不进入检验，也不看任何 SOPT 臂；每种 3 档 × 10 init。
+  - 规则事先写定：每种扰动取"三宿主平均的扰动 / 干净成功率 ≤ 0.85"的最低一档，都不满足则取第 3 档。
+- **主检验**：每对 (task, init) 的交互项 = (SOPT_扰动 − none_扰动) − (SOPT_干净 − none_干净)。
+  - 在 4 种视觉扰动 × 3 宿主 × 2 seed 上合并取平均，按 宿主 × seed × 扰动 分层做自助法得 95% CI，CI > 0 才认为"视觉偏移下 SOPT 收益更大"。
+  - robot 单独报告，不并入主检验。
+  - 次要：分宿主、分扰动的交互项；各条件下 SOPT vs none 的配对 McNemar；两臂的成功率保持比例。
+- 合成数据测试：真值为视觉 +0.15、robot −0.05，分析恢复出 +0.162 [0.145, 0.179] 和 −0.049。
+- 执行顺序：probe 通过 → e36_log 和 e37 pilot → 我检查档位 → e37 main（DP / SmolVLA 每 seed 一个作业；GR00T 每臂一个作业）。
