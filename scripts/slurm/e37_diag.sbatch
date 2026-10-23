@@ -1,5 +1,5 @@
 #!/bin/bash
-# E37 probe follow-up: source of reset-to-reset differences in LIBERO kitchen scenes (scripts/e37_diag.py; DIAG=e37_diag2 for the drift test).
+# E37 probe follow-up: source of reset-to-reset differences in LIBERO kitchen scenes (scripts/e37_diag.py; DIAG=e37_diag2 drift test, DIAG=e37_diag3 texture trace).
 #   sbatch scripts/slurm/e37_diag.sbatch
 #SBATCH --job-name=sopt-e37d
 #SBATCH --partition=nvidia
