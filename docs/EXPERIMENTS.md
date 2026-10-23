@@ -1672,3 +1672,25 @@ dev / new 拆分（agg_split）：
   - 预注册 s3 + s4 的结果（p=0.099）。
 - 受影响、需要重新验证的结论："DROID vs scratch，p=1.4e-4"。它在 ctx384 上比较，只用了一个 DROID 先验实例；scratch 不依赖先验实例。
 - ctx96 复制先验已训练（2026-10-23，Jubail 18917745，22 min，git b41c4cc）。DROID val selection 4.711，e13 为 4.672；E33 其余各档：ctx48 4.846、ctx192 4.663、ctx384 4.660。已排入 xattn_droid × s0–s2（输出 e35_groot_libero_10_xattn_droid_k5_ctx96_s*）。
+
+## DGX 任务迁到 Jubail（2026-10-23，按用户要求）
+- DGX 自 10-17 起不可达。本地的 DGX 排队器和等待 SmolVLA s2 的监视已停止，DGX 上不再提交任何作业。
+- DGX 上的 e23 TrunkBC / SmolVLA s0–s1 rollouts 目前取不到，本地缓存已被 /tmp 清理。因此迁移时所有对照臂都在 Jubail 上重跑，保证同集群、同代码配对。
+- 新脚本 `scripts/slurm/e25_trunk.sbatch`（1 GPU）：VARIANT = ref | scratch | base | speed | ctx48 | ctx192 | ctx384。
+  - 先验为全状态 e2 配方，输出 `e25j_<V>`；TrunkBC 17 任务 × k5 × 3 seed × 50 init，输出 `e25j_trunk_<V>_k5_t17_s*`；最后跑 E24 探针。
+  - ref 使用现有的 `outputs/e2_ar_flow_f100_s`。base 为 seed=1 的同配方复制，用于量化先验实例方差。
+  - IDM `e4b_idm` 从 127 拷到 Jubail outputs/，md5 一致：36daaddc…。
+- SmolVLA 17 任务 s2：`e23_smolvla.sbatch` 新增 ARM=（单臂、单 GPU）模式，三臂各 1 个作业。
+  - s0 / s1 在 DGX 上已完成，逐 episode 数据暂时取不到；3 seed 合并时，s0 + s1 用已记录的不一致对计数（droid vs none 241:150，droid vs scratch 260:139）加上 s2 的计数。McNemar 的合并统计量就是不一致对之和，因此这样合并是等价的。
+- 排队顺序（Jubail 最多 2 个并发）：
+  1. E35 ctx96 复制先验 s2
+  2. ref
+  3. SmolVLA s2 none
+  4. ctx192
+  5. SmolVLA s2 droid
+  6. ctx384
+  7. SmolVLA s2 scratch
+  8. ctx48
+  9. base
+  10. speed
+  11. scratch

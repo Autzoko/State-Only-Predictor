@@ -2,6 +2,8 @@
 # E23: SmolVLA + SOPT on the 17-task LIBERO-90 protocol (7 E4b test tasks + 10 val-split tasks; configs/libero90_17_tasks.json),
 # E7 recipe. One seed per job; arms none / expert_scratch / expert_droid in parallel on 3 GPUs.
 #   SUITE=libero90_17 SEED=0 sbatch scripts/slurm/e23_smolvla.sbatch
+# One arm on one GPU (1-GPU jobs start much sooner; idle GPUs get jobs cancelled):
+#   SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=120G SUITE=libero90_17 SEED=2 ARM=none sbatch scripts/slurm/e23_smolvla.sbatch
 #SBATCH --job-name=sopt-e23
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3
@@ -36,5 +38,6 @@ run() { local name=e23_smolvla_$1_k5${TAG}${ST}_s$S
       --ckpt outputs/$name/final.pt --out outputs/$name/rollouts_n50$x.json --n-init 50 > logs/$name.eval_n50$x.log 2>&1
     echo "$name eval n_exec $n exit $? $(date -Is)"
   done; }
-run none 0 & run expert_scratch 1 & run expert_droid 2 & wait
+if [ -n "${ARM:-}" ]; then run $ARM 0
+else run none 0 & run expert_scratch 1 & run expert_droid 2 & wait; fi
 echo "end=$(date -Is)"
