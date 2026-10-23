@@ -3,13 +3,17 @@
 Visual perturbations change only what the cameras see; the dynamics, object layout and success check are untouched:
   camera   agentview rotated about the vertical axis through the point it looks at on the table (yaw, random sign)
   light    scene lights dimmed and tinted
-  texture  table / floor / wall materials recoloured (task objects and the robot are never touched)
+  texture  table / floor / wall texture images blended towards a random colour (textures shared with task objects or
+           the robot are never touched)
   noise    i.i.d. Gaussian pixel noise on both camera images
 Proprioceptive control:
   robot    arm joints of the initial state offset by uniform noise (the robot starts from an unseen configuration)
 
 Every random draw is a pure function of (kind, level, task, init) -- and of the step for pixel noise -- so all arms of
-a comparison see exactly the same perturbed episode. Levels 1-3 are fixed here, before any perturbed result is seen.
+a comparison see exactly the same perturbed episode. (LIBERO itself re-samples fixture poses -- cabinet, stove, rack --
+within ~2 cm at every hard reset, from a sampler whose state depends on the reset sequence but not on the actions taken
+(scripts/e37_diag2.py); vla_eval resets every worker in the same init order, so this too is identical across arms and
+between clean and perturbed runs.) Levels 1-3 are fixed here, before any perturbed result is seen.
 """
 
 from __future__ import annotations
@@ -22,7 +26,7 @@ KINDS = ("camera", "light", "texture", "noise", "robot")
 LEVELS = {
     "camera": {1: 10.0, 2: 20.0, 3: 30.0},  # yaw in degrees
     "light": {1: (0.6, 0.15), 2: (0.4, 0.3), 3: (0.25, 0.45)},  # (diffuse scale, max per-channel tint)
-    "texture": {1: 0.35, 2: 0.65, 3: 0.95},  # blend weight towards a random colour
+    "texture": {1: 0.35, 2: 0.65, 3: 0.95},  # blend weight of the texture images towards a random colour
     "noise": {1: 8.0, 2: 16.0, 3: 32.0},  # pixel std on the 0-255 scale
     "robot": {1: 0.05, 2: 0.10, 3: 0.20},  # max |offset| per arm joint, rad
 }
@@ -108,12 +112,33 @@ def apply_scene(env, spec: tuple[str, int] | None, seed: int, table_z: float) ->
             m.light_ambient[i] = m.light_ambient[i] * scale * col
         out = {"scale": scale, "colour": [round(float(v), 3) for v in col]}
     elif kind == "texture":
+        # Blend the texture images themselves (not mat_rgba): MuJoCo clamps lighting * rgba to [0, 1] before the
+        # texture modulates it, so in the brightly lit kitchen scenes an rgba blend was invisible (E37 probe / diag3).
         mats = arena_materials(m)
         assert mats, "no arena materials found"
-        for i in mats:
-            c = rng.random(3)
-            m.mat_rgba[i, :3] = (1 - p) * m.mat_rgba[i, :3] + p * c
-        out = {"materials": [m.material(i).name for i in mats]}
+        mm = m._model
+        texs = {i: [int(t) for t in np.atleast_1d(mm.mat_texid[i]) if t >= 0] for i in range(mm.nmat)}
+        others = {t for i, ts in texs.items() if i not in mats for t in ts}  # used by objects / robot: never touched
+        ours = sorted({t for i in mats for t in texs[i]} - others)
+        ctx = sim._render_context_offscreen
+        assert ctx is not None, "render context must exist (env renders observations at reset)"
+        import mujoco
+
+        for t in ours:
+            c = rng.random(3) * 255.0
+            nch = int(mm.tex_nchannel[t])
+            a, n = int(mm.tex_adr[t]), int(mm.tex_width[t] * mm.tex_height[t] * nch)
+            d = mm.tex_data[a:a + n].reshape(-1, nch).astype(np.float64)
+            d[:, :3] = (1 - p) * d[:, :3] + p * c
+            mm.tex_data[a:a + n] = np.clip(np.rint(d), 0, 255).astype(np.uint8).ravel()
+            ctx.gl_ctx.make_current()
+            mujoco.mjr_uploadTexture(mm, ctx.con, t)
+        plain = [i for i in mats if not texs[i]]  # untextured arena materials: rgba blend
+        for i in plain:
+            m.mat_rgba[i, :3] = (1 - p) * m.mat_rgba[i, :3] + p * rng.random(3)
+        out = {"materials": [m.material(i).name for i in mats], "textures": [mm.texture(t).name for t in ours],
+               "skipped_shared": sorted(mm.texture(t).name for t in {t for i in mats for t in texs[i]} & others),
+               "rgba_only": [m.material(i).name for i in plain]}
     elif kind == "robot":
         robot = env.env.robots[0]
         idx = list(robot._ref_joint_pos_indexes)

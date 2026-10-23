@@ -12,7 +12,7 @@
 #SBATCH --exclude=cn014,cn015,cn270
 #SBATCH --cpus-per-task=24
 #SBATCH --mem=120G
-#SBATCH --time=4:00:00
+#SBATCH --time=6:00:00
 #SBATCH --output=/scratch/ll5582/SOPT/logs/%x-%j.out
 source /etc/profile
 set -uo pipefail
@@ -22,7 +22,7 @@ export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_
 export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS_NUM_THREADS=4
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) start=$(date -Is)"
 python scripts/e37_probe.py --out outputs/e37_probe > logs/e37_probe.log 2>&1
-echo "probe exit $? $(date -Is)"; tail -n 30 logs/e37_probe.log
+echo "probe exit $? $(date -Is)"; grep -v "task orders" logs/e37_probe.log | tail -n 70
 D=outputs/e37_check; mkdir -p $D
 python scripts/vla_eval.py --ckpt outputs/e21_dp_none_k5_t17_s0/final.pt --out $D/dp_none_clean.json --n-init 2 \
   --log-npz $D/dp_none_clean.npz > logs/e37_check_clean.log 2>&1; echo "clean eval exit $? $(date -Is)"
