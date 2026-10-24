@@ -1932,3 +1932,12 @@ dev / new 拆分（agg_split）：
 - 10 个评测全部 exit 0，20 个 json/npz 齐全。干净：none 75.0 / expert_droid 80.6（+5.6）。
 - 扰动下 none → droid：camera:2 54.8 → 66.6（+11.8）；light:3 74.8 → 83.2（+8.4）；texture:2 65.2 → 73.8（+8.6）；noise:2 70.0 → 82.8（+12.8）；robot:2 63.2 → 64.8（+1.6）。
 - 单 seed 中间读数，不做显著性判断；视觉四项的增益都大于干净条件，机器人初始位姿一项反而小于干净条件。
+
+## E37 main 进度：GR00T seed 0 两臂（2026-10-24，Jubail 18930617 none / 18931751 xattn_droid）
+- 两个作业各 5 个评测全部 exit 0，json/npz 齐全。干净：none 81.9 / xattn_droid 80.4（−1.5）。
+- 扰动下 none → droid：camera:2 42.1 → 70.5（+28.4）；light:3 80.2 → 79.1（−1.1）；texture:2 78.6 → 80.6（+2.0）；noise:2 71.9 → 73.6（+1.7）；robot:2 69.3 → 72.0（+2.7）。
+- **camera +28.4 的核查（本地，两臂 camera2 json + 干净 rollout）**：
+  - 两臂 850 个 episode 的扰动参数（yaw ±20°、pivot）逐条完全一致；正负偏转各 425 个。
+  - 增益不集中：17 个任务里 16 个 droid ≥ none（唯一例外 close bottom drawer 98 vs 96），例如 white bowl on cabinet 12 → 68、yellow-white mug 10 → 56、wine rack 6 → 54、ketchup in drawer 2 → 38。
+  - none 臂对偏转方向敏感（−20°：36.5，+20°：47.8），droid 臂不敏感（70.4 / 70.6）。
+  - 结论：不是实现或配对伪影；在 GR00T 上，SOPT 历史分支在相机视角偏移时大幅减小性能损失（干净 → camera：none −39.8，droid −9.9）。仍为单 seed 读数，正式检验等 E37 全部完成。
