@@ -1927,3 +1927,8 @@ dev / new 拆分（agg_split）：
 - **主检验（4 个，Holm）**：DP droid_pB1 vs none、DP droid_pB2 vs none、TrunkBC base_pB1 vs scratch、TrunkBC base2_pB2 vs scratch。
 - **判据**：4 个主检验 Holm p < 0.05 且差值为正 → "SOPT 收益在先验实例间可复制"。同时报告 3 个实例增益的均值 ± sd，以及 pB vs p0 的直接差（次要）。若有主检验未通过，论文中主表的 SOPT 结论需注明实例依赖。
 - **队列顺序**（E37 剩余 4 个作业之后）：E25j ref → base → base2 → scratch → SmolVLA s2 none / droid → DP pB1/pB2 s0 → SmolVLA s2 scratch → DP s1、s2 → E25j ctx192 / ctx384 / ctx48 / speed。DP 作业开头检查先验文件存在，缺失则立刻退出（不占用 GPU）。
+
+## E37 main 进度：SmolVLA（libero_goal）seed 0（2026-10-24，Jubail 18931487，3.0 h）
+- 10 个评测全部 exit 0，20 个 json/npz 齐全。干净：none 75.0 / expert_droid 80.6（+5.6）。
+- 扰动下 none → droid：camera:2 54.8 → 66.6（+11.8）；light:3 74.8 → 83.2（+8.4）；texture:2 65.2 → 73.8（+8.6）；noise:2 70.0 → 82.8（+12.8）；robot:2 63.2 → 64.8（+1.6）。
+- 单 seed 中间读数，不做显著性判断；视觉四项的增益都大于干净条件，机器人初始位姿一项反而小于干净条件。
