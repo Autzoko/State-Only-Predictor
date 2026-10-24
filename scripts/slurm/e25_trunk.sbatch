@@ -5,6 +5,7 @@
 # re-run here so all comparisons are same-cluster and same-code:
 #   ref     no pretraining: the existing full-state ctx96 prior outputs/e2_ar_flow_f100_s (= e23_trunk_droid)
 #   base    e2 recipe, pretraining seed=1 (prior-instance variance; E35 showed it can matter downstream)
+#   base2   e2 recipe, pretraining seed=2 (E38: third prior instance; base / base2 also serve the E38 DP runs)
 #   speed   data.speed_aug=[0.5,2.0] data.speed_aug_prob=0.8
 #   ctx48 / ctx192 / ctx384   history 3.2 / 12.8 / 25.6 s; left_pad = ctx - 96 as in E33 (same anchors as ctx96)
 #   scratch random-init trunk (the E23 scratch arm)
@@ -28,6 +29,7 @@ V=${VARIANT:?set VARIANT}
 case $V in
   ref|scratch) OV="" ;;
   base) OV="seed=1" ;;
+  base2) OV="seed=2" ;;
   speed) OV="data.speed_aug=[0.5,2.0] data.speed_aug_prob=0.8" ;;
   ctx48) OV="model.ctx_len=48" ;;
   ctx192) OV="model.ctx_len=192 data.left_pad=96" ;;

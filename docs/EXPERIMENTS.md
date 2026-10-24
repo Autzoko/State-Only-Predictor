@@ -1917,3 +1917,13 @@ dev / new 拆分（agg_split）：
 - 10 个评测全部 exit 0，json/npz 齐全；17 任务 × 50 init。原始干净 rollout：none 73.6 / expert_droid 76.1（+2.5）。
 - 扰动下成功率 none → droid（差值）：camera:2 32.1 → 45.4（+13.3）；light:3 69.2 → 69.6（+0.4）；texture:2 41.5 → 45.6（+4.1）；noise:2 31.6 → 41.3（+9.7）；robot:2 56.7 → 65.3（+8.6）。
 - 方向上 camera / noise / robot 的 SOPT 增益大于干净条件下的 +2.5（交互为正），light 档位偏弱（pilot 已知）。**这是单宿主单 seed 的中间读数，不做显著性判断**；预注册主检验（视觉三项合并的交互，宿主分层 bootstrap）等 8 个作业全部完成后由 `scripts/e37_analyze.py` 统一计算。
+
+## E38 先验实例复制（预注册 2026-10-24，任何结果出来之前写定；按用户要求排队）
+- **动机**：E35 显示同一配方换一个先验实例，单 seed 上下游就能差 4.8 点（p=0.035）。论文主表全部只用了一个先验实例 `e2_ar_flow_f100_s`（预训练 seed 0，记作 p0）。需要确认"SOPT 有收益"不依赖这一个实例。
+- **先验**：同一配方（S，ar_flow，100% DROID，全状态，ctx96，40k 步），只改预训练 seed：pB1 = seed 1（`outputs/e25j_base`，E25j 原已排队），pB2 = seed 2（`outputs/e25j_base2`，新增 `VARIANT=base2`）。都在 Jubail 训练，所以与 p0 的差异包含 seed 和平台两部分，即完整的"实例方差"。
+- **宿主 1：TrunkBC**（E25j 协议，17 任务 k5，seed 0–2，50 init）：ref_p0 / base_pB1 / base2_pB2 / scratch 全部在 Jubail 同一代码重跑。
+- **宿主 2：Diffusion Policy**（主表中 SOPT 增益显著的宿主，E21 配方 30k 步）：只训练 expert_droid 臂，换 pB1 / pB2，seed 0–2，单卡单臂（`scripts/slurm/e21_dp.sbatch` 新增 `ARM` / `PRIOR` / `PTAG`，run 名 `e21_dp_expert_droid_k5_t17_pB{1,2}_s{seed}`）。与已有的 none 臂和 p0 臂按 (seed, task, init) 配对。评测从 checkpoint 的 `meta.prior` 重建先验（已核对 `vla_eval.py`），不会回落到默认先验。
+- **分析**：`python scripts/stats_all.py --root outputs --manifest configs/e38_manifest.json`（与主表同口径：配对差、(seed, task) 聚类 bootstrap 95% CI、合并 McNemar；主检验 Holm 校正）。已用合成数据跑通。
+- **主检验（4 个，Holm）**：DP droid_pB1 vs none、DP droid_pB2 vs none、TrunkBC base_pB1 vs scratch、TrunkBC base2_pB2 vs scratch。
+- **判据**：4 个主检验 Holm p < 0.05 且差值为正 → "SOPT 收益在先验实例间可复制"。同时报告 3 个实例增益的均值 ± sd，以及 pB vs p0 的直接差（次要）。若有主检验未通过，论文中主表的 SOPT 结论需注明实例依赖。
+- **队列顺序**（E37 剩余 4 个作业之后）：E25j ref → base → base2 → scratch → SmolVLA s2 none / droid → DP pB1/pB2 s0 → SmolVLA s2 scratch → DP s1、s2 → E25j ctx192 / ctx384 / ctx48 / speed。DP 作业开头检查先验文件存在，缺失则立刻退出（不占用 GPU）。

@@ -1,0 +1,119 @@
+{
+ "_comment": "E38 prior-instance replication (pre-registered 2026-10-24, docs/EXPERIMENTS.md). p0 = outputs/e2_ar_flow_f100_s (main-table prior, pretraining seed 0); pB1 / pB2 = same recipe, pretraining seed 1 / 2 (outputs/e25j_base, outputs/e25j_base2). Run: python scripts/stats_all.py --root outputs --manifest configs/e38_manifest.json",
+ "comparisons": [
+  {
+   "name": "E38 Diffusion Policy x prior instance, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e21_dp_none_k5_t17_s0",
+     "e21_dp_none_k5_t17_s1",
+     "e21_dp_none_k5_t17_s2"
+    ],
+    "droid_p0": [
+     "e21_dp_expert_droid_k5_t17_s0",
+     "e21_dp_expert_droid_k5_t17_s1",
+     "e21_dp_expert_droid_k5_t17_s2"
+    ],
+    "droid_pB1": [
+     "e21_dp_expert_droid_k5_t17_pB1_s0",
+     "e21_dp_expert_droid_k5_t17_pB1_s1",
+     "e21_dp_expert_droid_k5_t17_pB1_s2"
+    ],
+    "droid_pB2": [
+     "e21_dp_expert_droid_k5_t17_pB2_s0",
+     "e21_dp_expert_droid_k5_t17_pB2_s1",
+     "e21_dp_expert_droid_k5_t17_pB2_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "droid_p0",
+     "none"
+    ],
+    [
+     "droid_pB1",
+     "none"
+    ],
+    [
+     "droid_pB2",
+     "none"
+    ],
+    [
+     "droid_pB1",
+     "droid_p0"
+    ],
+    [
+     "droid_pB2",
+     "droid_p0"
+    ]
+   ],
+   "primary": [
+    [
+     "droid_pB1",
+     "none"
+    ],
+    [
+     "droid_pB2",
+     "none"
+    ]
+   ]
+  },
+  {
+   "name": "E38 TrunkBC x prior instance, LIBERO-90-17 k5",
+   "arms": {
+    "scratch": [
+     "e25j_trunk_scratch_k5_t17_s0",
+     "e25j_trunk_scratch_k5_t17_s1",
+     "e25j_trunk_scratch_k5_t17_s2"
+    ],
+    "ref_p0": [
+     "e25j_trunk_ref_k5_t17_s0",
+     "e25j_trunk_ref_k5_t17_s1",
+     "e25j_trunk_ref_k5_t17_s2"
+    ],
+    "base_pB1": [
+     "e25j_trunk_base_k5_t17_s0",
+     "e25j_trunk_base_k5_t17_s1",
+     "e25j_trunk_base_k5_t17_s2"
+    ],
+    "base2_pB2": [
+     "e25j_trunk_base2_k5_t17_s0",
+     "e25j_trunk_base2_k5_t17_s1",
+     "e25j_trunk_base2_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "ref_p0",
+     "scratch"
+    ],
+    [
+     "base_pB1",
+     "scratch"
+    ],
+    [
+     "base2_pB2",
+     "scratch"
+    ],
+    [
+     "base_pB1",
+     "ref_p0"
+    ],
+    [
+     "base2_pB2",
+     "ref_p0"
+    ]
+   ],
+   "primary": [
+    [
+     "base_pB1",
+     "scratch"
+    ],
+    [
+     "base2_pB2",
+     "scratch"
+    ]
+   ]
+  }
+ ]
+}
