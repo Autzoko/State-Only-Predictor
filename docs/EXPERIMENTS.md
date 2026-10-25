@@ -2021,3 +2021,4 @@ dev / new 拆分（agg_split）：
 - E38 DP pB1 s0（Jubail 18940875，1.3 h）：exit 0，**76.6**（同 seed：none 73.6、p0 76.1）。
   - 核对：meta 记录 prior = `outputs/e25j_base/best.pt`；与 none / p0 两臂的 85 条示范 episode 完全相同，steps / bs / lr / chunk / cond_drop 一致（旧 meta 无 ctx 字段，默认 96）→ 配对有效。
 - E38 DP pB2 s0（Jubail 18941750，1.3 h）：exit 0，**75.9**（prior = `outputs/e25j_base2/best.pt`，示范 episode 与 none 臂一致）。seed 0 三个实例：p0 76.1 / pB1 76.6 / pB2 75.9，none 73.6。
+- E38 DP pB1 s1（Jubail 18942601，1.3 h）：exit 0，**74.0**（prior = `outputs/e25j_base/best.pt`，示范 episode 与 none 臂一致）。seed 1：none 71.4 / p0 77.3 / pB1 74.0。
