@@ -2015,3 +2015,8 @@ dev / new 拆分（agg_split）：
 - 预注册的 Holm 校正针对 4 个主检验；即使按 4 个校正（p × 4），两个 TrunkBC 主检验的调整后 p 仍 ≤ 3e-5 → **TrunkBC 部分通过**。
 - 三个实例的预训练增益：+5.4 / +4.9 / +4.4，均值 +4.9 ± 0.5；实例之间两两差异都不显著。与 E35 中 GR00T × 长时程上较大的实例方差相比，TrunkBC 上"DROID 预训练 > 随机初始化"对先验实例很稳健。
 - DP 部分（6 个作业）正在排队，完成后补全 4 个主检验。
+
+## 进度（2026-10-25 晚）：SmolVLA 17 任务 s2 droid；E38 DP pB1 s0
+- SmolVLA s2 expert_droid（Jubail 18940450）：训练 / 评测 exit 0，67.8（s2 none 64.2，+3.5）。expert_scratch s2（18941753）排队中，完成后合并三 seed 更新主表。
+- E38 DP pB1 s0（Jubail 18940875，1.3 h）：exit 0，**76.6**（同 seed：none 73.6、p0 76.1）。
+  - 核对：meta 记录 prior = `outputs/e25j_base/best.pt`；与 none / p0 两臂的 85 条示范 episode 完全相同，steps / bs / lr / chunk / cond_drop 一致（旧 meta 无 ctx 字段，默认 96）→ 配对有效。
