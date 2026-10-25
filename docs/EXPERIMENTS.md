@@ -2022,3 +2022,16 @@ dev / new 拆分（agg_split）：
   - 核对：meta 记录 prior = `outputs/e25j_base/best.pt`；与 none / p0 两臂的 85 条示范 episode 完全相同，steps / bs / lr / chunk / cond_drop 一致（旧 meta 无 ctx 字段，默认 96）→ 配对有效。
 - E38 DP pB2 s0（Jubail 18941750，1.3 h）：exit 0，**75.9**（prior = `outputs/e25j_base2/best.pt`，示范 episode 与 none 臂一致）。seed 0 三个实例：p0 76.1 / pB1 76.6 / pB2 75.9，none 73.6。
 - E38 DP pB1 s1（Jubail 18942601，1.3 h）：exit 0，**74.0**（prior = `outputs/e25j_base/best.pt`，示范 episode 与 none 臂一致）。seed 1：none 71.4 / p0 77.3 / pB1 74.0。
+
+## SmolVLA 17 任务 3 seed 主表（2026-10-26；s2 三臂均在 Jubail：none / droid 已记，expert_scratch 18941753，2.6 h，exit 0）
+| arm | s0 | s1 | s2 | 均值 |
+|---|---|---|---|---|
+| none | 60.6 | 60.1 | 64.2 | 61.6 |
+| expert_scratch | 58.7 | 58.5 | 62.2 | 59.8 |
+| expert_droid | 64.0 | 67.4 | 67.8 | **66.4** |
+- 核对：s2 三臂 850 ep / n_exec 10；步数 20000、lr 1e-4、k5 一致；三臂示范 episode 完全相同。
+- s2 配对 McNemar：droid vs none 100:70 p=0.026；droid vs scratch 108:61 p=3.7e-4；scratch vs none 65:82 p=0.19。
+- **3 seed 合并 McNemar**（s0+s1 的不一致对计数取自上方 E23 汇总，加上 s2）：droid vs none 341:220 **p=3.7e-7**；droid vs scratch 368:200 **p=1.7e-12**。三个 seed 方向都一致（+3.4 / +7.3 / +3.5）。
+- 簇 bootstrap（stats_all + paper_manifest）需要 s0/s1 逐回合数据，这些数据在 DGX 上；目前 DGX 和 127 都连不上，等可访问时补算。
+
+- E38 DP pB2 s1（Jubail 18942994，1.3 h）：exit 0，**75.8**（prior = `outputs/e25j_base2/best.pt`，示范 episode 与 none 臂一致）。seed 1 对 none（71.4）：p0 77.3（116:66 p=2.6e-4）/ pB1 74.0（100:78 p=0.12）/ pB2 75.8（106:69 p=0.006）。剩 pB1 s2（18943514 运行中）、pB2 s2。
