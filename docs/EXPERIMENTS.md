@@ -1946,3 +1946,8 @@ dev / new 拆分（agg_split）：
 - 10 个评测全部 exit 0，20 个 json/npz 齐全。干净：none 71.4 / expert_droid 77.3（+5.9）。
 - 扰动下 none → droid：camera:2 42.6 → 56.7（+14.1）；light:3 65.4 → 73.6（+8.2）；texture:2 37.4 → 47.6（+10.2）；noise:2 30.0 → 44.2（+14.2）；robot:2 54.7 → 64.7（+10.0）。
 - 与 seed 0 同向：所有扰动下的 SOPT 增益都 ≥ 干净条件下的增益（light 例外于 s0）。GR00T seed 1 none 臂（18932782）也已完成（camera 51.9 / light 78.8 / texture 78.6 / noise 74.6 / robot 69.6），等 droid 臂配对。
+
+## E37 main 进度：GR00T seed 1 两臂（2026-10-25，Jubail 18932782 none / 18937181 xattn_droid）
+- 10 个评测全部 exit 0，json/npz 齐全。干净：none 79.6 / xattn_droid 83.9（+4.2）。
+- 扰动下 none → droid：camera:2 51.9 → 68.9（+17.1）；light:3 78.8 → 80.7（+1.9）；texture:2 78.6 → 83.6（+5.1）；noise:2 74.6 → 72.8（−1.8）；robot:2 69.6 → 70.2（+0.6）。
+- 与 seed 0 一致：GR00T 上只有相机视角偏移的增益明显大于干净条件，其余扰动与干净增益相当或更小。
