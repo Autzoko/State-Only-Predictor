@@ -1979,3 +1979,9 @@ dev / new 拆分（agg_split）：
 - 3 个 seed 训练 + 评测全部 exit 0（TrunkBC 很小：15k 步约 12 min，850 episode 评测约 10 min），E24 探针 exit 0。
 - 成功率：74.6 / 71.5 / 74.2，均值 73.4。DGX 上的 E23 原始结果为 72.8 / 70.9 / 72.9（72.2），同配方、同先验、跨平台重跑差 +1.2，逐 seed 方向一致——作为 E38 中 p0 的同平台参照。
 - 等待 base（pB1，18939367）、base2、scratch 完成后按 `configs/e38_manifest.json` 做分析。
+
+## E25j / E38：TrunkBC base（pB1，预训练 seed 1）（2026-10-25，Jubail 18939367，1.6 h）
+- 预训练 40k 步 30 min，exit 0；DROID val selection 4.216（pos_ade 7.02 cm，const-vel 7.30）。base2（pB2，18939543）的预训练也已完成：selection 4.200（pos_ade 6.91）。
+- E24 探针与 ref 几乎相同（例如 prog 0.942 vs 0.936，task 0.871 vs 0.871，stage 0.795 vs 0.771），说明新实例的表征质量与 p0 相当。
+- TrunkBC 成功率：73.0 / 73.6 / 72.4，均值 73.0（ref p0 同平台 73.4）。base2 s0 = 72.7。
+- 正式比较等 scratch 臂完成后用 `configs/e38_manifest.json` 计算。
