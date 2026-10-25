@@ -1985,3 +1985,10 @@ dev / new 拆分（agg_split）：
 - E24 探针与 ref 几乎相同（例如 prog 0.942 vs 0.936，task 0.871 vs 0.871，stage 0.795 vs 0.771），说明新实例的表征质量与 p0 相当。
 - TrunkBC 成功率：73.0 / 73.6 / 72.4，均值 73.0（ref p0 同平台 73.4）。base2 s0 = 72.7。
 - 正式比较等 scratch 臂完成后用 `configs/e38_manifest.json` 计算。
+
+## E25j / E38：TrunkBC base2（pB2）完成；scratch 臂首跑失败与修复（2026-10-25）
+- base2（Jubail 18939543，1.7 h）：3 seed 全部 exit 0，成功率 72.7 / 72.1 / 72.6，均值 72.5。至此三个先验实例的 TrunkBC 均值：p0 73.4 / pB1 73.0 / pB2 72.5（极差 0.9 点）。
+- scratch（Jubail 18939762）46 s 内失败：随机初始化的 trunk 用 LIBERO-90 train 划分的状态统计做归一化（`e4b_train.py::libero_state_stats`），而 Jubail 的 `processed/libero90/` 只有 `episodes.parquet`，缺 `states.npy`（以前 scratch 臂都在 127 / DGX 上跑）。
+  - 修复：从 127 经本机中转 `states.npy`（md5 72422ef2…，与 127 一致）和 `summary.json`；两边 `episodes.parquet` md5 相同（9684b361…）。这只是 LIBERO-90 的本体状态数据，与 E23 scratch 臂所用完全相同，不涉及新数据或泄漏。
+  - `e25_trunk.sbatch` 增加前置检查：scratch 缺该文件时立即退出。
+  - scratch 已放回队首重新排队（不影响其他作业）。

@@ -40,7 +40,8 @@ echo "host=$(hostname) commit=$(git rev-parse --short HEAD) variant=$V ($OV) sta
 [ -f outputs/e4b_idm/final.pt ] || { echo "no outputs/e4b_idm"; exit 1; }
 case $V in
   ref) P=outputs/e2_ar_flow_f100_s; INIT=$P/best.pt; RP=e25j_trunk_ref ;;
-  scratch) P=""; INIT=scratch; RP=e25j_trunk_scratch ;;
+  scratch) P=""; INIT=scratch; RP=e25j_trunk_scratch  # random init normalizes with LIBERO-90 train-split state stats
+     [ -f $SOPT_DATA/processed/libero90/states.npy ] || { echo "no LIBERO-90 states for scratch stats"; exit 1; } ;;
   *) P=outputs/e25j_$V; INIT=$P/best.pt; RP=e25j_trunk_$V
      [ -f $P/best.pt ] || { python scripts/train.py --config configs/model/s.yaml --config configs/experiment/e2.yaml \
        model.objective=ar_flow data.root=$SOPT_DATA/processed/droid run_name=e25j_$V train.num_workers=8 $OV \
