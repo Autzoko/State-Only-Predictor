@@ -1941,3 +1941,8 @@ dev / new 拆分（agg_split）：
   - 增益不集中：17 个任务里 16 个 droid ≥ none（唯一例外 close bottom drawer 98 vs 96），例如 white bowl on cabinet 12 → 68、yellow-white mug 10 → 56、wine rack 6 → 54、ketchup in drawer 2 → 38。
   - none 臂对偏转方向敏感（−20°：36.5，+20°：47.8），droid 臂不敏感（70.4 / 70.6）。
   - 结论：不是实现或配对伪影；在 GR00T 上，SOPT 历史分支在相机视角偏移时大幅减小性能损失（干净 → camera：none −39.8，droid −9.9）。仍为单 seed 读数，正式检验等 E37 全部完成。
+
+## E37 main 进度：DP seed 1（2026-10-25，Jubail 18932425，4.6 h）
+- 10 个评测全部 exit 0，20 个 json/npz 齐全。干净：none 71.4 / expert_droid 77.3（+5.9）。
+- 扰动下 none → droid：camera:2 42.6 → 56.7（+14.1）；light:3 65.4 → 73.6（+8.2）；texture:2 37.4 → 47.6（+10.2）；noise:2 30.0 → 44.2（+14.2）；robot:2 54.7 → 64.7（+10.0）。
+- 与 seed 0 同向：所有扰动下的 SOPT 增益都 ≥ 干净条件下的增益（light 例外于 s0）。GR00T seed 1 none 臂（18932782）也已完成（camera 51.9 / light 78.8 / texture 78.6 / noise 74.6 / robot 69.6），等 droid 臂配对。
