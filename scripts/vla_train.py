@@ -69,6 +69,10 @@ def main():
     p.add_argument("--lr", type=float, default=None, help="default: the VLA's recipe (sopt.vla.<vla>.OPT)")
     p.add_argument("--workers", type=int, default=6)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--task-vocab", default=None, help="E40: 'all' = one-hot over every LIBERO-90 task (Diffusion Policy; "
+                   "lets a host pretrained on other tasks load unchanged); default: the training tasks")
+    p.add_argument("--init-host", default=None, help="E40: start from this host checkpoint (arm none, same vla / vocab); "
+                   "its action / state normalization is reused")
     p.add_argument("--suite", default="libero90",
                    help="libero90 (7 E4b tasks), libero90_17 (E23: + 10 val-split tasks) or a standard suite")
     p.add_argument("--prior", default=DROID_PRIOR, help="SOPT checkpoint (config / normalization / droid weights)")
@@ -84,11 +88,19 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     device = torch.device("cuda")
     sopt_data = Path(args.sopt_data)
-    if args.suite in ("libero90", "libero90_17"):
+    if args.suite in ("libero90", "libero90_17", "libero90_train"):
         raw = Raw20(sopt_data / "processed/libero90_raw20")
-        tf = "configs/e4b_tasks.json" if args.suite == "libero90" else "configs/libero90_17_tasks.json"
-        tasks = json.loads((REPO_ROOT / tf).read_text())
-        sel = select_episodes(raw.eps[raw.eps["split"].isin(["test", "val"])], tasks, args.k or None)
+        if args.suite == "libero90_train":  # E40 host pretraining: train-split tasks only, never an evaluated task
+            held = set(json.loads((REPO_ROOT / "configs/libero90_17_tasks.json").read_text()))
+            held |= set(json.loads((REPO_ROOT / "configs/e4b_tasks.json").read_text()))
+            pool = raw.eps[raw.eps["split"] == "train"]
+            tasks = sorted(pool["task"].unique())
+            assert not held & set(tasks) and not held & set(pool["task"]), "evaluated task in the host-pretraining data"
+            sel = select_episodes(pool, tasks, args.k or None)
+        else:
+            tf = "configs/e4b_tasks.json" if args.suite == "libero90" else "configs/libero90_17_tasks.json"
+            tasks = json.loads((REPO_ROOT / tf).read_text())
+            sel = select_episodes(raw.eps[raw.eps["split"].isin(["test", "val"])], tasks, args.k or None)
         assert sel["task"].nunique() == len(tasks), "missing tasks"
         frames = sopt_data / "processed/libero90_frames256"
         build_frame_cache(sel, frames, workers=args.workers, size=256)
@@ -106,15 +118,37 @@ def main():
     chunk = getattr(V, "CHUNK", CHUNK)  # the VLA's native chunk length (X-VLA: 30)
     A = np.concatenate([raw.episode(r)[1] for r in sel.itertuples()])
     action_stats = stats_of(A)
+    vocab = tasks
+    if args.task_vocab:
+        assert getattr(V, "NEEDS_TASKS", False) and args.suite.startswith("libero90"), "--task-vocab: one-hot hosts only"
+        vocab = sorted(raw.eps["task"].unique()) if args.task_vocab == "all" else json.loads(Path(args.task_vocab).read_text())
+        assert set(tasks) <= set(vocab)
+    host = None
+    if args.init_host:  # E40: a host pretrained on other tasks; SOPT (if any) is added on top, zero-initialized
+        host = torch.load(REPO_ROOT / args.init_host, map_location="cpu", weights_only=False)
+        assert host["arm"] == "none" and host["meta"]["vla"] == args.vla, (host["arm"], host["meta"]["vla"])
+        assert host.get("vocab", host["tasks"]) == vocab, "host one-hot vocabulary differs"
+        assert not set(host["meta"]["episodes"]) & set(sel["episode_index"]), "host saw a fine-tuning episode"
+        action_stats = {k: np.asarray(v) for k, v in host["action_stats"].items()}
+        out_of_range = float(((A < action_stats["min"]) | (A > action_stats["max"])).any(1).mean())
+        print(f"init-host {args.init_host}: fine-tuning actions outside the host's min/max: {out_of_range:.4f}", flush=True)
     if args.vla == "smolvla":  # E5 / E7 / E13 (unchanged: mean / std only)
         action_stats, state_stats = {k: action_stats[k] for k in ("mean", "std")}, None
         prior = make_prior(args.arm, args.prior)
         policy, pre, _ = V.build_policy(prior, args.arm, action_stats, chunk=chunk)
     else:  # current-state quantiles over the training frames
         state_stats = stats_of(np.concatenate([raw.episode(r)[0] for r in sel.itertuples()]))
-        kw = {"tasks": tasks} if getattr(V, "NEEDS_TASKS", False) else {}
+        if host is not None:
+            state_stats = {k: np.asarray(v) for k, v in host["state_stats"].items()}
+        kw = {"tasks": vocab} if getattr(V, "NEEDS_TASKS", False) else {}
         prior = make_prior(args.arm, args.prior)
         policy, pre, _ = V.build_policy(prior, args.arm, action_stats, chunk=chunk, state_stats=state_stats, **kw)
+    if host is not None:
+        missing, unexpected = policy.load_state_dict(host["trainable"], strict=False)
+        assert not unexpected and all(m.startswith("sopt.") for m in missing), (missing[:5], unexpected[:5])
+        assert (args.arm == "none") == (not missing), "SOPT arms must add exactly the sopt.* weights"
+        print(f"init-host: loaded {len(host['trainable'])} tensors, new {len(missing)} (sopt.*)", flush=True)
+        del host
     ctx_len = prior.cfg.ctx_len  # history length = the prior's (E33: 96 default; longer-context priors see more)
     ds = PolicyDataset(raw, sel, frames, ctx_len, 32, act_chunk=chunk, shift=0)
     V.set_cond_drop(policy, args.cond_drop)
@@ -160,7 +194,7 @@ def main():
             if step >= args.steps:
                 break
     V.save_trainable(policy, out / "final.pt", {"arm": args.arm, "tasks": tasks, "action_stats": action_stats,
-                                                "state_stats": state_stats, "meta": meta})
+                                                "state_stats": state_stats, "meta": meta, "vocab": vocab})
     print("saved", out / "final.pt", flush=True)
 
 

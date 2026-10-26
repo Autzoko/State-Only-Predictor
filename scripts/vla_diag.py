@@ -47,7 +47,7 @@ def build(vt, ck, ckpt=None):
     init = {k: v.detach().clone() for k, v in prior.state_dict().items()}
     extra = {"state_stats": ck["state_stats"]} if ck.get("state_stats") is not None else {}
     if getattr(V, "NEEDS_TASKS", False):
-        extra["tasks"] = ck["tasks"]
+        extra["tasks"] = ck.get("vocab") or ck["tasks"]  # one-hot vocabulary (E40); evaluated tasks stay ck["tasks"]
     policy, pre, post = V.build_policy(prior, ck["arm"], ck["action_stats"], chunk=ck["meta"]["chunk"], **extra)
     if ckpt is not None:
         V.load_trainable(policy, ckpt)

@@ -2122,3 +2122,75 @@ dev / new 拆分（agg_split）：
   - 每个长度相对 scratch 都显著为正（+3.5 至 +5.1）。
   - 探针中的阶段信息从 3.2 s 到 6.4 s 明显增加，更长后持平或回落（stage 0.74 / 0.82 / 0.80 / 0.76，multi 版 0.85 / 0.92 / 0.94 / 0.93），但这类信息在 LIBERO 短任务上没有转化为下游收益。
   - 论文保持 ctx96。只剩 speed（18945933）。
+
+## E39 / E40 / E41 / E38b 预注册 + SmolVLA 主表 Jubail 重跑（2026-10-26，任何结果出来之前写定；按用户要求排队 P0 与统计缺口）
+统一分析：`scripts/contrast_boot.py`（新增）。
+- 每个对比是"各宿主组的加权和"；组内是若干 run 的带权和，按 (seed, task) 聚类重采样，同组各项共用同一组簇，以保持配对；各宿主组独立重采样。
+- 报告：估计值（百分点）、95% 百分位 CI、双侧 bootstrap p；主检验做 Holm 校正。
+- 定义由 `scripts/make_contrast_specs.py` 生成（`configs/e39/e40/e41_contrasts.json`，`configs/e38b_manifest.json`，`configs/smolvla_jubail_manifest.json`），并已用植入已知效应的合成数据检验：
+  - 低数据增益：植入 +10 → 估计 +10.0；
+  - 剂量：植入 +10 → 估计 +7.8，CI [5.2, 10.5]；
+  - 遮蔽：植入 0 → 估计 +0.8，CI 含 0。
+
+**E39 示范数量曲线（P0-1）**
+- 宿主：Diffusion Policy（E21 配方，30k 步）和 SmolVLA（E23 配方，20k 步），17 任务。
+- k ∈ {1, 2, 10, 25, 全部}，加上已有的 k5；seed 0–2。
+  - 臂：none / expert_droid；k1 和全部再加 expert_scratch。
+  - 每个 (宿主, k, seed) 一个作业，各臂各占一块 GPU。
+- 示范子集是嵌套的（`select_episodes` 按加盐哈希排序取前 k 个）。步数在各 k 下固定为宿主配方值，不随 k 调。
+- 主检验（2 个，Holm）：
+  - **P1** k1 和 k2 的平均增益（droid − none，两宿主平均）> 0；
+  - **P2** 增益随数据量下降：k1、k2、k5 的平均增益 − k25、全部的平均增益 > 0（两宿主平均）。
+- 次要：每个 (宿主, k) 的增益；k1 和全部下 droid − scratch（区分预训练与组件）。
+- 判据：P1、P2 的 Holm p < 0.05 且方向为正 → "SOPT 是数据效率收益，随示范增多而减小"。若 P2 不显著，则论文写"在所测数据量范围内收益稳定"。
+
+**E40 宿主自身的动作预训练（P0-3，Diffusion Policy）**
+- 阶段 1：none 臂在 LIBERO-90 **train split 的 52 个任务的全部示范**上预训练，100k 步，batch 64。
+  - 17 个评测任务不在其中；`vla_train.py` 会断言评测任务、以及微调用的 episode 都不在宿主预训练数据中。
+  - 任务 one-hot 覆盖全部 LIBERO-90 任务（`--task-vocab all`），所以两阶段的权重形状一致、可完整加载。
+- 阶段 2：从这个宿主出发，17 任务 k5 微调 none / expert_droid（30k 步，seed 0–2；`--init-host`）。
+  - 动作 / 状态归一化沿用宿主预训练时的统计量，日志会记录微调动作超出该范围的比例。
+- 主检验（1 个）：交互 = 增益（从头训练的宿主，E21 主表）− 增益（预训练过的宿主）> 0。
+- 次要：预训练宿主上的增益；宿主预训练本身对 none 的效果（检查天花板）。
+- 局限：只有 1 个宿主预训练实例；"从头训练的宿主"一侧用 E21 主表的 run（同配方、同 seed、同示范，one-hot 维度不同：多出的维度输入恒为 0，不影响输出）。
+- 判读：交互显著为正，说明"互补"的因果证据成立；不显著，则论文中强宿主无收益只作相关性描述。
+
+**E41 相机分析补充（P0-4，只评测，E37 的 checkpoint，seed 0–1，50 init）**
+- 剂量：none 和 SOPT 臂在 camera:1（10°）和 camera:3（30°）下评测；20° 与干净条件已有。
+- 遮蔽：SOPT 臂整个 episode 关闭 SOPT 输入（`--sopt-mask-grasp -1`，同 E34），在干净和 20° 下各测一次。只做 DP 和 GR00T：SmolVLA 的 SOPT 特征在 forward 内部计算，没有可用的遮蔽钩子。
+- 主检验（2 个，Holm）：
+  - **P1** 交互（30°）− 交互（10°）> 0（3 个宿主平均；交互 = (sopt−none)_扰动 − (sopt−none)_干净）；
+  - **P2** 关闭 SOPT 的代价在 20° 下大于干净条件下（DP 和 GR00T 平均）。
+- 注意：训练时 SOPT 一直开着，关闭属于分布外（E34），所以 P2 测的是"偏移下对 SOPT 的依赖是否增加"，不是干净的因果消融。
+
+**统计缺口**
+- SmolVLA 主表 s0 / s1 在 Jubail 重跑（`TAG=_jr`，三臂）。之后 SmolVLA 主表统一用 Jubail 的 3 个 seed（`configs/smolvla_jubail_manifest.json`），DGX 上的 s0 / s1 作为跨平台复制报告。
+- **E38b**：把 E38 的先验实例复制扩到 SmolVLA 和 FastWAM。
+  - expert_droid 换 pB1 / pB2，seed 0–2，同一作业里两个先验各占一块 GPU（`PSET`）。
+  - 主检验：每个宿主的 pB1 vs none、pB2 vs none，共 4 个，Holm。
+  - `wam_train.py` / `wam_eval.py` 新增 `--prior`，评测时从 meta 读取；旧 run 没有这个字段，回落到默认先验。
+
+**实现**
+- `e21_dp` / `e23_smolvla` 新增 `K`、`ARMS`、`PSET`；默认值下 run 名不变。
+- DP 新增 `INIT_HOST`。
+- 新文件：`e40_host.sbatch`（宿主预训练前先跑一遍 30 步的全链路冒烟）、`e41_camera.sbatch`、`prep_frames.{py,sbatch}`。
+  - `prep_frames`：在 CPU 节点联网解码 17 任务全部示范和 train split 全部示范的视频，避免离线训练作业缺帧。
+- 评测与诊断脚本从 checkpoint 的 `vocab` 读取 one-hot 词表，评测任务仍是 `tasks`。
+
+**P0-2 跨机器人（E42）调研结论，尚未实现、未排队**
+- 候选：MimicGen robot-transfer 数据（HF `amandlek/mimicgen_datasets/robot`，CC-BY-4.0）。Square / Threading D0 在 Panda / Sawyer / IIWA / UR5e 上各有 1000 条示范，栈是 robosuite 1.4.1 + MuJoCo 2.3.2，与 LIBERO 同类。
+- 需要单独的 pydeps 环境、数据转换（基座坐标系下的 EE 位姿和夹爪标量，20 → 15 Hz）和闭环评测循环。
+- 局限：非 Panda 示范由 Panda 示范重放生成，运动风格接近。
+- 下一步：先实现并做冒烟，再写预注册。
+
+**排队顺序**（最多 2 个并发）：
+1. prep_frames
+2. SmolVLA _jr s0、s1
+3. E39 DP k1、k2（s0–2）
+4. E40 宿主预训练
+5. E39 DP k10、k25、全部
+6. E41 × 6
+7. E40 微调 s0–2
+8. E39 SmolVLA（15 个）
+9. E38b SmolVLA × 3
+10. E38b FastWAM × 3

@@ -1,0 +1,1015 @@
+{
+ "name": "E39 demo-count curve (17 tasks; seeds 0-2)",
+ "contrasts": [
+  {
+   "name": "E39-P1 low-data gain (k1, k2; mean of DP, SmolVLA)",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k1_t17_s0",
+        "e21_dp_expert_droid_k1_t17_s1",
+        "e21_dp_expert_droid_k1_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k1_t17_s0",
+        "e21_dp_none_k1_t17_s1",
+        "e21_dp_none_k1_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k2_t17_s0",
+        "e21_dp_expert_droid_k2_t17_s1",
+        "e21_dp_expert_droid_k2_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k2_t17_s0",
+        "e21_dp_none_k2_t17_s1",
+        "e21_dp_none_k2_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k1_t17_s0",
+        "e23_smolvla_expert_droid_k1_t17_s1",
+        "e23_smolvla_expert_droid_k1_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k1_t17_s0",
+        "e23_smolvla_none_k1_t17_s1",
+        "e23_smolvla_none_k1_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k2_t17_s0",
+        "e23_smolvla_expert_droid_k2_t17_s1",
+        "e23_smolvla_expert_droid_k2_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k2_t17_s0",
+        "e23_smolvla_none_k2_t17_s1",
+        "e23_smolvla_none_k2_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "E39-P2 gain decline (mean k1,k2,k5 - mean k25,all; mean of hosts)",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k1_t17_s0",
+        "e21_dp_expert_droid_k1_t17_s1",
+        "e21_dp_expert_droid_k1_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k1_t17_s0",
+        "e21_dp_none_k1_t17_s1",
+        "e21_dp_none_k1_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k2_t17_s0",
+        "e21_dp_expert_droid_k2_t17_s1",
+        "e21_dp_expert_droid_k2_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k2_t17_s0",
+        "e21_dp_none_k2_t17_s1",
+        "e21_dp_none_k2_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k25_t17_s0",
+        "e21_dp_expert_droid_k25_t17_s1",
+        "e21_dp_expert_droid_k25_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k25_t17_s0",
+        "e21_dp_none_k25_t17_s1",
+        "e21_dp_none_k25_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_kall_t17_s0",
+        "e21_dp_expert_droid_kall_t17_s1",
+        "e21_dp_expert_droid_kall_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_kall_t17_s0",
+        "e21_dp_none_kall_t17_s1",
+        "e21_dp_none_kall_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k1_t17_s0",
+        "e23_smolvla_expert_droid_k1_t17_s1",
+        "e23_smolvla_expert_droid_k1_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k1_t17_s0",
+        "e23_smolvla_none_k1_t17_s1",
+        "e23_smolvla_none_k1_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k2_t17_s0",
+        "e23_smolvla_expert_droid_k2_t17_s1",
+        "e23_smolvla_expert_droid_k2_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k2_t17_s0",
+        "e23_smolvla_none_k2_t17_s1",
+        "e23_smolvla_none_k2_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1",
+        "e23_smolvla_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1",
+        "e23_smolvla_none_k5_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k25_t17_s0",
+        "e23_smolvla_expert_droid_k25_t17_s1",
+        "e23_smolvla_expert_droid_k25_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k25_t17_s0",
+        "e23_smolvla_none_k25_t17_s1",
+        "e23_smolvla_none_k25_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_kall_t17_s0",
+        "e23_smolvla_expert_droid_kall_t17_s1",
+        "e23_smolvla_expert_droid_kall_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_kall_t17_s0",
+        "e23_smolvla_none_kall_t17_s1",
+        "e23_smolvla_none_kall_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain dp k1",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k1_t17_s0",
+        "e21_dp_expert_droid_k1_t17_s1",
+        "e21_dp_expert_droid_k1_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k1_t17_s0",
+        "e21_dp_none_k1_t17_s1",
+        "e21_dp_none_k1_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain dp k2",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k2_t17_s0",
+        "e21_dp_expert_droid_k2_t17_s1",
+        "e21_dp_expert_droid_k2_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k2_t17_s0",
+        "e21_dp_none_k2_t17_s1",
+        "e21_dp_none_k2_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain dp k5",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain dp k10",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k10_t17_s0",
+        "e21_dp_expert_droid_k10_t17_s1",
+        "e21_dp_expert_droid_k10_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k10_t17_s0",
+        "e21_dp_none_k10_t17_s1",
+        "e21_dp_none_k10_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain dp k25",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k25_t17_s0",
+        "e21_dp_expert_droid_k25_t17_s1",
+        "e21_dp_expert_droid_k25_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k25_t17_s0",
+        "e21_dp_none_k25_t17_s1",
+        "e21_dp_none_k25_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain dp kall",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_kall_t17_s0",
+        "e21_dp_expert_droid_kall_t17_s1",
+        "e21_dp_expert_droid_kall_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_kall_t17_s0",
+        "e21_dp_none_kall_t17_s1",
+        "e21_dp_none_kall_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "pretraining dp k1 (droid - scratch)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k1_t17_s0",
+        "e21_dp_expert_droid_k1_t17_s1",
+        "e21_dp_expert_droid_k1_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k1_t17_s0",
+        "e21_dp_expert_scratch_k1_t17_s1",
+        "e21_dp_expert_scratch_k1_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "pretraining dp kall (droid - scratch)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_kall_t17_s0",
+        "e21_dp_expert_droid_kall_t17_s1",
+        "e21_dp_expert_droid_kall_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_kall_t17_s0",
+        "e21_dp_expert_scratch_kall_t17_s1",
+        "e21_dp_expert_scratch_kall_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain smolvla k1",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k1_t17_s0",
+        "e23_smolvla_expert_droid_k1_t17_s1",
+        "e23_smolvla_expert_droid_k1_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k1_t17_s0",
+        "e23_smolvla_none_k1_t17_s1",
+        "e23_smolvla_none_k1_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain smolvla k2",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k2_t17_s0",
+        "e23_smolvla_expert_droid_k2_t17_s1",
+        "e23_smolvla_expert_droid_k2_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k2_t17_s0",
+        "e23_smolvla_none_k2_t17_s1",
+        "e23_smolvla_none_k2_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain smolvla k5",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1",
+        "e23_smolvla_expert_droid_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1",
+        "e23_smolvla_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain smolvla k10",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k10_t17_s0",
+        "e23_smolvla_expert_droid_k10_t17_s1",
+        "e23_smolvla_expert_droid_k10_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k10_t17_s0",
+        "e23_smolvla_none_k10_t17_s1",
+        "e23_smolvla_none_k10_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain smolvla k25",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k25_t17_s0",
+        "e23_smolvla_expert_droid_k25_t17_s1",
+        "e23_smolvla_expert_droid_k25_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k25_t17_s0",
+        "e23_smolvla_none_k25_t17_s1",
+        "e23_smolvla_none_k25_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain smolvla kall",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_kall_t17_s0",
+        "e23_smolvla_expert_droid_kall_t17_s1",
+        "e23_smolvla_expert_droid_kall_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_kall_t17_s0",
+        "e23_smolvla_none_kall_t17_s1",
+        "e23_smolvla_none_kall_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "pretraining smolvla k1 (droid - scratch)",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k1_t17_s0",
+        "e23_smolvla_expert_droid_k1_t17_s1",
+        "e23_smolvla_expert_droid_k1_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_scratch_k1_t17_s0",
+        "e23_smolvla_expert_scratch_k1_t17_s1",
+        "e23_smolvla_expert_scratch_k1_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "pretraining smolvla kall (droid - scratch)",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_kall_t17_s0",
+        "e23_smolvla_expert_droid_kall_t17_s1",
+        "e23_smolvla_expert_droid_kall_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_scratch_kall_t17_s0",
+        "e23_smolvla_expert_scratch_kall_t17_s1",
+        "e23_smolvla_expert_scratch_kall_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "low-data gain dp",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k1_t17_s0",
+        "e21_dp_expert_droid_k1_t17_s1",
+        "e21_dp_expert_droid_k1_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k1_t17_s0",
+        "e21_dp_none_k1_t17_s1",
+        "e21_dp_none_k1_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k2_t17_s0",
+        "e21_dp_expert_droid_k2_t17_s1",
+        "e21_dp_expert_droid_k2_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k2_t17_s0",
+        "e21_dp_none_k2_t17_s1",
+        "e21_dp_none_k2_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain decline dp",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k1_t17_s0",
+        "e21_dp_expert_droid_k1_t17_s1",
+        "e21_dp_expert_droid_k1_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k1_t17_s0",
+        "e21_dp_none_k1_t17_s1",
+        "e21_dp_none_k1_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k2_t17_s0",
+        "e21_dp_expert_droid_k2_t17_s1",
+        "e21_dp_expert_droid_k2_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k2_t17_s0",
+        "e21_dp_none_k2_t17_s1",
+        "e21_dp_none_k2_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k25_t17_s0",
+        "e21_dp_expert_droid_k25_t17_s1",
+        "e21_dp_expert_droid_k25_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k25_t17_s0",
+        "e21_dp_none_k25_t17_s1",
+        "e21_dp_none_k25_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_kall_t17_s0",
+        "e21_dp_expert_droid_kall_t17_s1",
+        "e21_dp_expert_droid_kall_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_kall_t17_s0",
+        "e21_dp_none_kall_t17_s1",
+        "e21_dp_none_kall_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "low-data gain smolvla",
+   "groups": {
+    "smolvla": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k1_t17_s0",
+        "e23_smolvla_expert_droid_k1_t17_s1",
+        "e23_smolvla_expert_droid_k1_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k1_t17_s0",
+        "e23_smolvla_none_k1_t17_s1",
+        "e23_smolvla_none_k1_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k2_t17_s0",
+        "e23_smolvla_expert_droid_k2_t17_s1",
+        "e23_smolvla_expert_droid_k2_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k2_t17_s0",
+        "e23_smolvla_none_k2_t17_s1",
+        "e23_smolvla_none_k2_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain decline smolvla",
+   "groups": {
+    "smolvla": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k1_t17_s0",
+        "e23_smolvla_expert_droid_k1_t17_s1",
+        "e23_smolvla_expert_droid_k1_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k1_t17_s0",
+        "e23_smolvla_none_k1_t17_s1",
+        "e23_smolvla_none_k1_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k2_t17_s0",
+        "e23_smolvla_expert_droid_k2_t17_s1",
+        "e23_smolvla_expert_droid_k2_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k2_t17_s0",
+        "e23_smolvla_none_k2_t17_s1",
+        "e23_smolvla_none_k2_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1",
+        "e23_smolvla_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1",
+        "e23_smolvla_none_k5_t17_s2"
+       ],
+       "w": -0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k25_t17_s0",
+        "e23_smolvla_expert_droid_k25_t17_s1",
+        "e23_smolvla_expert_droid_k25_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k25_t17_s0",
+        "e23_smolvla_none_k25_t17_s1",
+        "e23_smolvla_none_k25_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_kall_t17_s0",
+        "e23_smolvla_expert_droid_kall_t17_s1",
+        "e23_smolvla_expert_droid_kall_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_kall_t17_s0",
+        "e23_smolvla_none_kall_t17_s1",
+        "e23_smolvla_none_kall_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "primary": [
+  "E39-P1 low-data gain (k1, k2; mean of DP, SmolVLA)",
+  "E39-P2 gain decline (mean k1,k2,k5 - mean k25,all; mean of hosts)"
+ ]
+}

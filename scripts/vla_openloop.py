@@ -39,7 +39,7 @@ def main():
     prior = vt.make_prior(ck["arm"], ck["meta"].get("prior", vt.DROID_PRIOR))
     extra = {"state_stats": ck["state_stats"]} if ck.get("state_stats") is not None else {}
     if getattr(V, "NEEDS_TASKS", False):
-        extra["tasks"] = ck["tasks"]
+        extra["tasks"] = ck.get("vocab") or ck["tasks"]  # one-hot vocabulary (E40); evaluated tasks stay ck["tasks"]
     chunk = ck["meta"].get("chunk", vt.CHUNK)
     policy, pre, post = V.build_policy(prior, ck["arm"], ck["action_stats"], chunk=chunk, **extra)
     V.load_trainable(policy, args.ckpt)

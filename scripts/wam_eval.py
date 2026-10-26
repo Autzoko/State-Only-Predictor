@@ -44,7 +44,7 @@ def main():
 
     ck = torch.load(args.ckpt, map_location="cpu", weights_only=False)
     tasks, arm, chunk = ck["tasks"], ck["arm"], ck["meta"]["chunk"]
-    policy, sopt = build_fastwam(wt.make_prior(arm), arm, chunk=chunk)
+    policy, sopt = build_fastwam(wt.make_prior(arm, ck["meta"].get("prior")), arm, chunk=chunk)  # E38: run's prior
     model = policy.model
     load_trainable(model, sopt, ck["state"])
     model.eval()

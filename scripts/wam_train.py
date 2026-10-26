@@ -31,7 +31,7 @@ def lr_at(step, total, peak, warmup=500, final=2.5e-6):
     return final + (peak - final) * 0.5 * (1 + math.cos(math.pi * p))
 
 
-def make_prior(arm: str):
+def make_prior(arm: str, prior: str | None = None):
     import importlib.util
     import sys
 
@@ -39,7 +39,7 @@ def make_prior(arm: str):
     vt = importlib.util.module_from_spec(spec)
     sys.modules["vla_train"] = vt
     spec.loader.exec_module(vt)
-    return vt.make_prior("expert_droid" if arm == "expert_droid" else "scratch")
+    return vt.make_prior("expert_droid" if arm == "expert_droid" else "scratch", prior or vt.DROID_PRIOR)
 
 
 def main():
@@ -54,6 +54,7 @@ def main():
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     p.add_argument("--suite", default="libero90", choices=["libero90", "libero90_17"], help="7 E4b tasks / E23 17 tasks")
+    p.add_argument("--prior", default="outputs/e2_ar_flow_f100_s/best.pt", help="E38: SOPT checkpoint (prior instance)")
     args = p.parse_args()
     seed_everything(args.seed)
     out = REPO_ROOT / "outputs" / args.run
@@ -70,7 +71,7 @@ def main():
     A = np.concatenate([raw.episode(r)[1] for r in sel.itertuples()])
     action_stats = {"mean": A.mean(0), "std": np.maximum(A.std(0), 1e-3)}
 
-    policy, sopt = build_fastwam(make_prior(args.arm), args.arm, chunk=CHUNK)
+    policy, sopt = build_fastwam(make_prior(args.arm, args.prior), args.arm, chunk=CHUNK)
     model = policy.model
     dev = model.device
     a_mean, a_std = (torch.tensor(action_stats[k], dtype=torch.float32, device=dev) for k in ("mean", "std"))

@@ -1,0 +1,161 @@
+{
+ "name": "E40 host action pretraining x SOPT (Diffusion Policy, 17 tasks k5, seeds 0-2)",
+ "contrasts": [
+  {
+   "name": "E40 interaction: gain(host from scratch) - gain(host pretrained on train-split tasks)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_hpre_t17_s0",
+        "e21_dp_expert_droid_k5_hpre_t17_s1",
+        "e21_dp_expert_droid_k5_hpre_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_hpre_t17_s0",
+        "e21_dp_none_k5_hpre_t17_s1",
+        "e21_dp_none_k5_hpre_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain with pretrained host (droid - none, _hpre)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_hpre_t17_s0",
+        "e21_dp_expert_droid_k5_hpre_t17_s1",
+        "e21_dp_expert_droid_k5_hpre_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_hpre_t17_s0",
+        "e21_dp_none_k5_hpre_t17_s1",
+        "e21_dp_none_k5_hpre_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "gain with scratch host (E21 main table)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "host pretraining effect on none (none_hpre - none)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_none_k5_hpre_t17_s0",
+        "e21_dp_none_k5_hpre_t17_s1",
+        "e21_dp_none_k5_hpre_t17_s2"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "droid_hpre - droid (scratch host)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_hpre_t17_s0",
+        "e21_dp_expert_droid_k5_hpre_t17_s1",
+        "e21_dp_expert_droid_k5_hpre_t17_s2"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "primary": [
+  "E40 interaction: gain(host from scratch) - gain(host pretrained on train-split tasks)"
+ ]
+}

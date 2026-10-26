@@ -1,0 +1,1270 @@
+{
+ "name": "E41 camera dose and SOPT masking (seeds 0-1)",
+ "contrasts": [
+  {
+   "name": "E41-P1 dose: interaction(30 deg) - interaction(10 deg), mean of 3 hosts",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "E41-P2 mask: SOPT-off cost at camera 20 deg - at clean, mean of DP, GR00T",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_mask_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_mask_clean.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_mask_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_mask_clean.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction dp 10 deg",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction dp 20 deg",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction dp 30 deg",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dose dp (30 - 10 deg)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction smolvla_goal 10 deg",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction smolvla_goal 20 deg",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction smolvla_goal 30 deg",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dose smolvla_goal (30 - 10 deg)",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction groot 10 deg",
+   "groups": {
+    "groot": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction groot 20 deg",
+   "groups": {
+    "groot": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction groot 30 deg",
+   "groups": {
+    "groot": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dose groot (30 - 10 deg)",
+   "groups": {
+    "groot": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "mask cost dp clean (sopt - masked)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e41_mask_clean.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "mask cost dp camera 20 (sopt - masked)",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e41_mask_camera2.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "masked sopt - none, camera 20, dp",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e41_mask_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e37_main_camera2.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "mask cost groot clean (sopt - masked)",
+   "groups": {
+    "groot": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e41_mask_clean.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "mask cost groot camera 20 (sopt - masked)",
+   "groups": {
+    "groot": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e41_mask_camera2.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "masked sopt - none, camera 20, groot",
+   "groups": {
+    "groot": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e41_mask_camera2.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e37_main_camera2.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction pooled 10 deg",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "interaction pooled 30 deg",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "primary": [
+  "E41-P1 dose: interaction(30 deg) - interaction(10 deg), mean of 3 hosts",
+  "E41-P2 mask: SOPT-off cost at camera 20 deg - at clean, mean of DP, GR00T"
+ ]
+}
