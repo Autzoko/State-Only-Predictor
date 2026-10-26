@@ -2258,3 +2258,11 @@ dev / new 拆分（agg_split）：
 - 局限：每个变体只有一个先验实例（E38：实例间约 ±1 点）。
 
 **排队**：插到 E41 之前，顺序为 E37s DP s0、s1 → SmolVLA-goal s0、s1 → E18r f1 → f10 → libero，均为单卡作业。
+
+## E37 补充分解：宿主 × 扰动的任务簇 CI（2026-10-26，事后、本地分析）
+- 数据：`e37final`（与 Jubail `outputs/` 逐文件 md5 一致；档位 camera 2 / light 3 / texture 2 / noise 2 / robot 2）。方法同 `scripts/e37_cluster_boot.py`（宿主 × seed 分层，按任务整簇重抽样，5k）。
+- camera 交互项分宿主：DP **+9.5 [3.0, 16.8]**，GR00T-xattn **+21.4 [14.5, 28.4]**，SmolVLA-goal **+4.9 [−6.6, 17.6]**（20 簇，CI 跨 0）。三宿主合并 +13.0 [8.5, 17.8]。
+  - 6 个（宿主, seed）的 camera 交互全部为正：DP 10.8 / 8.2，SmolVLA 6.2 / 3.6，GR00T 29.9 / 12.8。
+- DP + SmolVLA 按 episode 加权为 +7.8 [1.6, 14.3]；E37s 预注册参照值 +7.2 是宿主等权平均，两者口径不同。
+- 论文措辞：相机鲁棒"三宿主方向一致、合并显著"，不写"每个宿主都显著"。只测了 DP / SmolVLA-goal / GR00T-xattn，FastWAM、π0.5、X-VLA、TrunkBC 没有视觉偏移评测。
+- 完整表：`paper/SOPT_results.xlsx` T2（分 seed 成功率、交互分解、保持比例）。
