@@ -2266,3 +2266,7 @@ dev / new 拆分（agg_split）：
 - DP + SmolVLA 按 episode 加权为 +7.8 [1.6, 14.3]；E37s 预注册参照值 +7.2 是宿主等权平均，两者口径不同。
 - 论文措辞：相机鲁棒"三宿主方向一致、合并显著"，不写"每个宿主都显著"。只测了 DP / SmolVLA-goal / GR00T-xattn，FastWAM、π0.5、X-VLA、TrunkBC 没有视觉偏移评测。
 - 完整表：`paper/SOPT_results.xlsx` T2（分 seed 成功率、交互分解、保持比例）。
+
+## SmolVLA 主表 Jubail 重跑（`_jr`）改为单卡作业（2026-10-26 17:45，用户批准）
+- 原来的两个 3 卡作业 18946722（s0）、18948300（s1）从 11:08 / 13:22 起一直 PENDING，Slurm 预计开始时间为 10-27 11:11 和 11-01 10:22，会把后面整个队列卡住；两个作业都未启动，没有任何输出。
+- 已取消，改为 6 个单卡作业：`SEED ∈ {0,1}` × `ARM ∈ {none, expert_scratch, expert_droid}`，`TAG=_jr`，排在队首。run 名不变（`e23_smolvla_<arm>_k5_jr_t17_s<S>`），训练与评测配方不变。
