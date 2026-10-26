@@ -2194,3 +2194,8 @@ dev / new 拆分（agg_split）：
 8. E39 SmolVLA（15 个）
 9. E38b SmolVLA × 3
 10. E38b FastWAM × 3
+- 帧缓存准备（Jubail 18946665，compute 分区，27 min，exit 0）：
+  - 17 任务全部示范：771 / 771 个 episode（之前已有 361 个）。
+  - train split 52 个任务全部示范：2725 / 2725 个 episode。
+  - `libero90_frames256` 共 186 GB。
+  - E39（k = 全部）和 E40 宿主预训练所需的帧均已就绪，训练作业保持离线运行。
