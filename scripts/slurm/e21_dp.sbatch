@@ -3,7 +3,7 @@
 # of E7 / E12 / E14 / E20). One seed per job (SEED env); arms none / expert_scratch / expert_droid in parallel on 3 GPUs;
 # 30k steps at batch 64 (Diffusion Policy needs more updates than the VLAs). Smoke run first for seed 0.
 #   SEED=0 sbatch scripts/slurm/e21_dp.sbatch      (STEPS, LR, TAG, NEXECS, EVAL_ONLY as in e14_pi05.sbatch)
-# K=<demos per task> (0 = all; names k<K> / kall), ARMS="none expert_droid" (one GPU each), PSET as in e23_smolvla.sbatch.
+# K=<demos per task> (0 = all; names k<K> / kall), ARMS=none,expert_droid (comma-separated, one GPU each), PSET as in e23_smolvla.sbatch.
 # E38 prior instances: one arm on one GPU with another SOPT checkpoint (run names get PTAG before _s<seed>; paired
 # with the existing none arm of the same seed / demos / inits):
 #   SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=120G SUITE=libero90_17 SEED=0 ARM=expert_droid \
@@ -47,7 +47,7 @@ run() { local name=e21_dp_$1_${KN}${TAG}${ST}${PT}_s$S
     echo "$name eval n_exec $n exit $? $(date -Is)"
   done; }
 if [ -n "${PSET:-}" ]; then  # expert_droid with several prior instances in parallel, one GPU each (E38)
-  g=0; for x in $PSET; do (PT=${x%%=*}; PRIOR=${x#*=}; [ -f "$PRIOR" ] || { echo "missing prior $PRIOR"; exit 1; }
+  g=0; for x in ${PSET//,/ }; do (PT=${x%%=*}; PRIOR=${x#*=}; [ -f "$PRIOR" ] || { echo "missing prior $PRIOR"; exit 1; }
     run expert_droid $g) & g=$((g+1)); done; wait
-else g=0; for a in ${ARMS:-${ARM:-none expert_scratch expert_droid}}; do run $a $g & g=$((g+1)); done; wait; fi
+else ARMS=${ARMS:-${ARM:-none,expert_scratch,expert_droid}}; g=0; for a in ${ARMS//,/ }; do run $a $g & g=$((g+1)); done; wait; fi
 echo "end=$(date -Is)"

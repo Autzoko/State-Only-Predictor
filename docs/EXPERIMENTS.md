@@ -2171,7 +2171,7 @@ dev / new 拆分（agg_split）：
   - `wam_train.py` / `wam_eval.py` 新增 `--prior`，评测时从 meta 读取；旧 run 没有这个字段，回落到默认先验。
 
 **实现**
-- `e21_dp` / `e23_smolvla` 新增 `K`、`ARMS`、`PSET`；默认值下 run 名不变。
+- `e21_dp` / `e23_smolvla` 新增 `K`、`ARMS`、`PSET`（逗号分隔，不含空格，避免队列脚本的引号问题）；默认值下 run 名不变，命名逻辑已在本地用桩函数逐一核对。
 - DP 新增 `INIT_HOST`。
 - 新文件：`e40_host.sbatch`（宿主预训练前先跑一遍 30 步的全链路冒烟）、`e41_camera.sbatch`、`prep_frames.{py,sbatch}`。
   - `prep_frames`：在 CPU 节点联网解码 17 任务全部示范和 train split 全部示范的视频，避免离线训练作业缺帧。

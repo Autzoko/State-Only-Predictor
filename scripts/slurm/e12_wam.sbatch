@@ -2,8 +2,7 @@
 # E12: FastWAM (world action model) + SOPT, k5. One seed per job (SEED env), three arms in parallel on 3 GPUs:
 # none / expert_scratch / expert_droid. 10k steps (bs 16, ~2.3 h), then 50-init closed-loop eval (~3 h).
 #   SEED=0 sbatch scripts/slurm/e12_wam.sbatch
-# E38 prior instances (2 GPUs): SBATCH_GRES=gpu:a100:2 SUITE=libero90_17 SEED=0 PSET="_pB1=outputs/e25j_base/best.pt \
-#   _pB2=outputs/e25j_base2/best.pt" sbatch scripts/slurm/e12_wam.sbatch
+# E38 prior instances (2 GPUs): SBATCH_GRES=gpu:a100:2 SUITE=libero90_17 SEED=0 PSET=_pB1=outputs/e25j_base/best.pt,_pB2=outputs/e25j_base2/best.pt sbatch scripts/slurm/e12_wam.sbatch
 #SBATCH --job-name=sopt-e12
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3
@@ -29,8 +28,8 @@ run() { local name=e12_wam_$1_k5${ST}${PT}_s$S
   [ -f outputs/$name/rollouts_n50.json ] || CUDA_VISIBLE_DEVICES=$2 python scripts/wam_eval.py \
     --ckpt outputs/$name/final.pt --out outputs/$name/rollouts_n50.json --n-init 50 > logs/$name.eval_n50.log 2>&1
   echo "$name eval exit $? $(date -Is)"; }
-if [ -n "${PSET:-}" ]; then  # E38: expert_droid per prior instance, one GPU each ("_pB1=<ckpt> _pB2=<ckpt>")
-  g=0; for x in $PSET; do (PT=${x%%=*}; PRIOR=${x#*=}; [ -f "$PRIOR" ] || { echo "missing prior $PRIOR"; exit 1; }
+if [ -n "${PSET:-}" ]; then  # E38: expert_droid per prior instance, one GPU each (PSET=_pB1=<ckpt>,_pB2=<ckpt>)
+  g=0; for x in ${PSET//,/ }; do (PT=${x%%=*}; PRIOR=${x#*=}; [ -f "$PRIOR" ] || { echo "missing prior $PRIOR"; exit 1; }
     run expert_droid $g) & g=$((g+1)); done; wait
 else run none 0 & run expert_scratch 1 & run expert_droid 2 & wait; fi
 echo "end=$(date -Is)"

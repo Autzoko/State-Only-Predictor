@@ -2,8 +2,8 @@
 # E23: SmolVLA + SOPT on the 17-task LIBERO-90 protocol (7 E4b test tasks + 10 val-split tasks; configs/libero90_17_tasks.json),
 # E7 recipe. One seed per job; arms none / expert_scratch / expert_droid in parallel on 3 GPUs.
 #   SUITE=libero90_17 SEED=0 sbatch scripts/slurm/e23_smolvla.sbatch
-# K=<demos per task> (0 = all; run names k<K> / kall, default k5), ARMS="none expert_droid" (one GPU each, set
-# SBATCH_GRES to match), PSET="_pB1=<prior> _pB2=<prior>" (E38: expert_droid per prior instance, run names get the tag).
+# K=<demos per task> (0 = all; run names k<K> / kall, default k5), ARMS=none,expert_droid (comma-separated, one GPU each, set
+# SBATCH_GRES to match), PSET=_pB1=<prior>,_pB2=<prior> (E38: expert_droid per prior instance, run names get the tag).
 # One arm on one GPU (1-GPU jobs start much sooner; idle GPUs get jobs cancelled):
 #   SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=120G SUITE=libero90_17 SEED=2 ARM=none sbatch scripts/slurm/e23_smolvla.sbatch
 #SBATCH --job-name=sopt-e23
@@ -43,7 +43,7 @@ run() { local name=e23_smolvla_$1_${KN}${TAG}${ST}${PT}_s$S
     echo "$name eval n_exec $n exit $? $(date -Is)"
   done; }
 if [ -n "${PSET:-}" ]; then  # expert_droid with several prior instances in parallel, one GPU each (E38)
-  g=0; for x in $PSET; do (PT=${x%%=*}; PRIOR=${x#*=}; [ -f "$PRIOR" ] || { echo "missing prior $PRIOR"; exit 1; }
+  g=0; for x in ${PSET//,/ }; do (PT=${x%%=*}; PRIOR=${x#*=}; [ -f "$PRIOR" ] || { echo "missing prior $PRIOR"; exit 1; }
     run expert_droid $g) & g=$((g+1)); done; wait
-else g=0; for a in ${ARMS:-${ARM:-none expert_scratch expert_droid}}; do run $a $g & g=$((g+1)); done; wait; fi
+else ARMS=${ARMS:-${ARM:-none,expert_scratch,expert_droid}}; g=0; for a in ${ARMS//,/ }; do run $a $g & g=$((g+1)); done; wait; fi
 echo "end=$(date -Is)"
