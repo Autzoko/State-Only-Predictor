@@ -1,0 +1,125 @@
+{
+ "_comment": "E25j / E33 pretraining-recipe ablations on TrunkBC, all arms re-run on Jubail with the same code. Exploratory (no Holm primaries): read each variant-vs-ref difference against the prior-instance band from E38 (base / base2 vs ref: -0.5 / -1.0). Run: python scripts/stats_all.py --root outputs --manifest configs/e25j_manifest.json",
+ "comparisons": [
+  {
+   "name": "E25j TrunkBC pretraining variant ctx48 (history 3.2 s), LIBERO-90-17 k5",
+   "arms": {
+    "scratch": [
+     "e25j_trunk_scratch_k5_t17_s0",
+     "e25j_trunk_scratch_k5_t17_s1",
+     "e25j_trunk_scratch_k5_t17_s2"
+    ],
+    "ref": [
+     "e25j_trunk_ref_k5_t17_s0",
+     "e25j_trunk_ref_k5_t17_s1",
+     "e25j_trunk_ref_k5_t17_s2"
+    ],
+    "ctx48": [
+     "e25j_trunk_ctx48_k5_t17_s0",
+     "e25j_trunk_ctx48_k5_t17_s1",
+     "e25j_trunk_ctx48_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "ctx48",
+     "ref"
+    ],
+    [
+     "ctx48",
+     "scratch"
+    ]
+   ]
+  },
+  {
+   "name": "E25j TrunkBC pretraining variant ctx192 (history 12.8 s), LIBERO-90-17 k5",
+   "arms": {
+    "scratch": [
+     "e25j_trunk_scratch_k5_t17_s0",
+     "e25j_trunk_scratch_k5_t17_s1",
+     "e25j_trunk_scratch_k5_t17_s2"
+    ],
+    "ref": [
+     "e25j_trunk_ref_k5_t17_s0",
+     "e25j_trunk_ref_k5_t17_s1",
+     "e25j_trunk_ref_k5_t17_s2"
+    ],
+    "ctx192": [
+     "e25j_trunk_ctx192_k5_t17_s0",
+     "e25j_trunk_ctx192_k5_t17_s1",
+     "e25j_trunk_ctx192_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "ctx192",
+     "ref"
+    ],
+    [
+     "ctx192",
+     "scratch"
+    ]
+   ]
+  },
+  {
+   "name": "E25j TrunkBC pretraining variant ctx384 (history 25.6 s), LIBERO-90-17 k5",
+   "arms": {
+    "scratch": [
+     "e25j_trunk_scratch_k5_t17_s0",
+     "e25j_trunk_scratch_k5_t17_s1",
+     "e25j_trunk_scratch_k5_t17_s2"
+    ],
+    "ref": [
+     "e25j_trunk_ref_k5_t17_s0",
+     "e25j_trunk_ref_k5_t17_s1",
+     "e25j_trunk_ref_k5_t17_s2"
+    ],
+    "ctx384": [
+     "e25j_trunk_ctx384_k5_t17_s0",
+     "e25j_trunk_ctx384_k5_t17_s1",
+     "e25j_trunk_ctx384_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "ctx384",
+     "ref"
+    ],
+    [
+     "ctx384",
+     "scratch"
+    ]
+   ]
+  },
+  {
+   "name": "E25j TrunkBC pretraining variant speed (speed augmentation), LIBERO-90-17 k5",
+   "arms": {
+    "scratch": [
+     "e25j_trunk_scratch_k5_t17_s0",
+     "e25j_trunk_scratch_k5_t17_s1",
+     "e25j_trunk_scratch_k5_t17_s2"
+    ],
+    "ref": [
+     "e25j_trunk_ref_k5_t17_s0",
+     "e25j_trunk_ref_k5_t17_s1",
+     "e25j_trunk_ref_k5_t17_s2"
+    ],
+    "speed": [
+     "e25j_trunk_speed_k5_t17_s0",
+     "e25j_trunk_speed_k5_t17_s1",
+     "e25j_trunk_speed_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "speed",
+     "ref"
+    ],
+    [
+     "speed",
+     "scratch"
+    ]
+   ]
+  }
+ ]
+}
