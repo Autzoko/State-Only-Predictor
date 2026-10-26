@@ -10,3 +10,6 @@ __pycache__/
 *.pt
 /logs/*
 !/logs/.gitkeep
+
+/paper/
+paper/
