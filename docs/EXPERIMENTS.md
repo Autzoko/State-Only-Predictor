@@ -2211,3 +2211,50 @@ dev / new 拆分（agg_split）：
 - speed vs scratch：+4.7，CI [+1.6, +7.8]，p=1.1e-6。
 - 探针（droid_ee → speed）：acc 0.90 → 0.87 略降，其余基本持平（stage 0.82 → 0.81，fut10 0.75 → 0.76，task 0.87 → 0.87）；multi 版 stage 0.92 → 0.94。
 - **结论**：速度增强对下游 TrunkBC 无收益，差值在先验实例波动（≈1 点）内。E25j 预训练配方消融（ctx48 / ctx192 / ctx384 / speed）全部完成：没有任何变体超过 ref，各变体相对 scratch 都显著为正（+3.5 至 +5.1）。论文保持 ref 配方，并以"增益对预训练配方细节稳健"呈现这组结果（探索性，不做 Holm）。
+
+## E37s / E18r 预注册（2026-10-26，用户批准；任何结果出来之前写定）
+动机（论文审稿风险）：
+- 视角鲁棒（E37）只比了 none 和 DROID，没有 scratch 臂，分不清鲁棒性来自"预训练"还是只来自"有本体历史输入"。
+- E18（同域状态预训练无效）和 E11（1% DROID 就有效）只在 DEV7 上测过，DEV7 在开发中被反复使用。
+
+**E37s：scratch 臂在视觉偏移下（只评测）**
+- 臂：同结构随机初始化的 SOPT（expert_scratch）。
+  - DP：`e21_dp_expert_scratch_k5_t17_s{0,1}`，17 任务；
+  - SmolVLA-goal：`e13_libero_goal_expert_scratch_k5_s{0,1}`。
+  - 17 任务的 GR00T xattn_scratch checkpoint 不存在，本次不含 GR00T。
+- 扰动、档位、初始状态与 E37 完全相同（camera 2 / light 3 / texture 2 / noise 2 / robot 2，50 init，`outputs/e37_levels.json`）。干净条件用已有的 `rollouts_n50.json`。
+- 运行：`MODE=main HOST=dp|smolvla_goal SEED=0|1 ARM=scratch sbatch scripts/slurm/e37_robust.sbatch`，4 个单卡作业。
+- 分析：`python scripts/contrast_boot.py --root outputs --spec configs/e37s_contrasts.json`，(seed, task) 簇 bootstrap，宿主分层。
+- 主检验（2 个，Holm）：交互 D = (droid − scratch)_扰动 − (droid − scratch)_干净。
+  - **P1**：camera，DP 与 SmolVLA-goal 平均；
+  - **P2**：视觉 4 项平均，同样两宿主平均。
+- 次要：
+  - scratch vs none 的交互（camera、视觉 4 项），即"只有历史"的鲁棒性；
+  - E37 的 droid vs none 交互限定在这两个宿主上的参照值（现有数据：camera +7.2 [0.1, 14.2]，视觉 4 项 +3.9 [0.6, 7.4]）；
+  - 每个宿主 × 扰动的两种交互。
+- 判读（写作措辞）：
+  1. P1 的 Holm p < 0.05 且为正：写"预训练表示带来视角鲁棒性"。
+  2. 否则，若 scratch vs none 的 camera 交互 CI > 0：写"本体历史带来视角鲁棒性，预训练的额外贡献未被证实"，论点 B 按此改写。
+  3. 否则：写"鲁棒性来源不能确定"，只报告 SOPT（DROID）vs none 的结果并注明这一局限。
+- 功效说明：两宿主的 droid 交互本身 CI 较宽（camera +7.2 [0.1, 14.2]），P1 不显著不能解读为"预训练与 scratch 相同"。
+- 代码与验证：
+  - `e37_robust.sbatch` 新增 `ARM=scratch`；`make_contrast_specs.py` 新增 `e37s`。
+  - 用真实 E37 文件植入已知效应检验：scratch := droid 时 P1 = 0；scratch := none 时 P1 = droid 交互（+7.2）。
+  - `contrast_boot.py` 的 bootstrap p 上限改为 1（估计恰为 0 时原先显示 2）。
+
+**E18r / E11r：预训练数据来源与数量在 17 任务上复现（TrunkBC，Jubail）**
+- 变体（`e25_trunk.sbatch` 新增 VARIANT，TrunkBC 17 任务 × k5 × seed 0–2 × 50 init，并跑 E24 探针）：
+  - `f1` / `f10`：DROID 1% / 10%（e2 配方，嵌套的 `data.train_fraction`；按 DROID val 选模，与 E11 原先验相同）。
+  - `libero`：只用 LIBERO-90 train split 的状态，用 E4a scratch 配方（s + e2 + libero90 + e4a，lr 3e-4，warmup 300，3k 步）。
+- **防泄漏修正**：原 E18 的 LIBERO-only 先验（e4a_ar_flow_scratch_kall）按 LIBERO val split 选模，而 val split 含 17 任务协议中的 10 个评测任务。复现中改为在 train split 内部按加盐哈希留出 10% 的任务做选模（新增 `data.holdout_train_tasks`）：
+  - 训练 48 个任务 / 2401 条示范，选模 4 个任务 / 324 条；
+  - 与 17 个评测任务交集为 0（本地用真实 episodes.parquet 验证）。
+  - 本地 CPU 30 步冒烟通过（9.78M 参数）。
+- 对照：已有的 `e25j_trunk_scratch` 与 `e25j_trunk_ref`（DROID 100%，p0），同 seed 配对。
+- 分析：`python scripts/stats_all.py --root outputs --manifest configs/e18r_manifest.json`。
+- 主检验（2 个，Holm）：**ref vs libero > 0**（DROID 优于同域状态预训练）；**f1 vs scratch > 0**（1% DROID 就有增益）。
+- 次要：libero vs scratch（报告点估计与 CI；只有当 CI 很窄、接近 0 时，才写"同域预训练无增益"，否则写"增益显著小于 DROID"）；f10 vs scratch；ref vs f1、ref vs f10、f10 vs f1（数据量趋势）。
+- 判读：两个主检验都通过时，这两条才能进摘要和图 1；未通过的一条只放附录，并注明 DEV7 与 17 任务的差异。
+- 局限：每个变体只有一个先验实例（E38：实例间约 ±1 点）。
+
+**排队**：插到 E41 之前，顺序为 E37s DP s0、s1 → SmolVLA-goal s0、s1 → E18r f1 → f10 → libero，均为单卡作业。

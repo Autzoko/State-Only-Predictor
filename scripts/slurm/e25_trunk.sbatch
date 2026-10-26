@@ -9,6 +9,10 @@
 #   speed   data.speed_aug=[0.5,2.0] data.speed_aug_prob=0.8
 #   ctx48 / ctx192 / ctx384   history 3.2 / 12.8 / 25.6 s; left_pad = ctx - 96 as in E33 (same anchors as ctx96)
 #   scratch random-init trunk (the E23 scratch arm)
+#   f1 / f10 DROID 1% / 10% (nested train_fraction; E11 on 17 tasks, E18r/E11r 2026-10-26)
+#   libero  SOPT trained only on LIBERO-90 train-split states (E18 libero_only on 17 tasks). E4a scratch recipe
+#           (s + e2 + libero90 + e4a, lr 3e-4, warmup 300, 3k steps) but checkpoint selection on 10% of the
+#           *train-split* tasks (data.holdout_train_tasks=0.1): the stored val split holds 10 of the 17 eval tasks
 # Pretraining = e2_ar_flow_f100_s recipe (S, ar_flow, 100% DROID, full state, 40k steps). DROID states only.
 #   SBATCH_GRES=gpu:a100:1 VARIANT=ctx192 sbatch scripts/slurm/e25_trunk.sbatch
 #SBATCH --job-name=sopt-e25
@@ -31,6 +35,9 @@ case $V in
   base) OV="seed=1" ;;
   base2) OV="seed=2" ;;
   speed) OV="data.speed_aug=[0.5,2.0] data.speed_aug_prob=0.8" ;;
+  f1) OV="data.train_fraction=0.01" ;;
+  f10) OV="data.train_fraction=0.1" ;;
+  libero) OV="" ;;
   ctx48) OV="model.ctx_len=48" ;;
   ctx192) OV="model.ctx_len=192 data.left_pad=96" ;;
   ctx384) OV="model.ctx_len=384 data.left_pad=288" ;;
@@ -43,9 +50,17 @@ case $V in
   scratch) P=""; INIT=scratch; RP=e25j_trunk_scratch  # random init normalizes with LIBERO-90 train-split state stats
      [ -f $SOPT_DATA/processed/libero90/states.npy ] || { echo "no LIBERO-90 states for scratch stats"; exit 1; } ;;
   *) P=outputs/e25j_$V; INIT=$P/best.pt; RP=e25j_trunk_$V
-     [ -f $P/best.pt ] || { python scripts/train.py --config configs/model/s.yaml --config configs/experiment/e2.yaml \
-       model.objective=ar_flow data.root=$SOPT_DATA/processed/droid run_name=e25j_$V train.num_workers=8 $OV \
-       > logs/e25j_$V.log 2>&1; echo "pretrain exit $? $(date -Is)"; tail -n 2 logs/e25j_$V.log; }
+     if [ $V = libero ]; then
+       [ -f $P/best.pt ] || { python scripts/train.py --config configs/model/s.yaml --config configs/experiment/e2.yaml \
+         --config configs/data/libero90.yaml --config configs/experiment/e4a.yaml model.objective=ar_flow \
+         data.root=$SOPT_DATA/processed/libero90 data.holdout_train_tasks=0.1 train.lr=3e-4 train.warmup_steps=300 \
+         run_name=e25j_$V train.num_workers=8 > logs/e25j_$V.log 2>&1; echo "pretrain exit $? $(date -Is)"
+         tail -n 2 logs/e25j_$V.log; }
+     else
+       [ -f $P/best.pt ] || { python scripts/train.py --config configs/model/s.yaml --config configs/experiment/e2.yaml \
+         model.objective=ar_flow data.root=$SOPT_DATA/processed/droid run_name=e25j_$V train.num_workers=8 $OV \
+         > logs/e25j_$V.log 2>&1; echo "pretrain exit $? $(date -Is)"; tail -n 2 logs/e25j_$V.log; }
+     fi
      [ -f $P/best.pt ] || exit 1 ;;
 esac
 T=configs/libero90_17_tasks.json

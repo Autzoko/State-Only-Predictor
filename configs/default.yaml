@@ -17,6 +17,8 @@ data:
   eval_stride: null          # val window stride; null -> ctx_len
   left_pad: 0               # allow windows to start this many frames before an episode (rest padding)
   demos_per_task: null      # few-shot subsets for task-labelled datasets (LIBERO)
+  holdout_train_tasks: null # task-split data only: fraction of *train-split* tasks used as the selection ('val') set
+                            # instead of the stored val split (E18r: LIBERO val tasks are now evaluation tasks)
   speed_aug: [0.8, 1.25]
   speed_aug_prob: 0.5
 

@@ -5,10 +5,12 @@
 #               no SOPT arm is looked at): every (kind, level), 10 inits. Rule fixed in advance: per kind, the lowest
 #               level whose mean over hosts of (perturbed / clean success on the same inits) is <= 0.85, else level 3
 #               -> outputs/e37_levels.json.
-#   MODE=main HOST=dp|smolvla_goal|groot SEED=0|1 [ARM=none|droid]   both arms (or one) x 5 kinds at the chosen
+#   MODE=main HOST=dp|smolvla_goal|groot SEED=0|1 [ARM=none|droid|scratch]   both arms (or one) x 5 kinds at the chosen
 #               level, 50 inits, --log-npz (GR00T: one arm per job, ~0.7 h per eval).
 # Arms (the comparisons already reported clean): DP none vs expert_droid (17 tasks), SmolVLA libero_goal none vs
 # expert_droid, GR00T none (E22) vs xattn_droid (E31).
+# ARM=scratch (E37s, preregistered 2026-10-26): the same-structure random-init SOPT arm, DP e21_dp_expert_scratch and
+# SmolVLA-goal e13_libero_goal_expert_scratch only (no 17-task GR00T xattn_scratch checkpoint exists).
 #   SBATCH_GRES=gpu:a100:1 MODE=pilot sbatch scripts/slurm/e37_robust.sbatch
 #SBATCH --job-name=sopt-e37
 #SBATCH --partition=nvidia
@@ -66,7 +68,11 @@ else
   H=${HOST:?}; S=${SEED:?}
   [ -f outputs/e37_levels.json ] || { echo "no outputs/e37_levels.json (run MODE=pilot first)"; exit 1; }
   set -- $(runs $H $S)
-  case ${ARM:-both} in none) R=$1 ;; droid) R=$2 ;; both) R="$1 $2" ;; *) echo "bad ARM"; exit 1 ;; esac
+  case ${ARM:-both} in none) R=$1 ;; droid) R=$2 ;; both) R="$1 $2" ;;
+    scratch) case $H in dp) R=e21_dp_expert_scratch_k5_t17_s$S ;; smolvla_goal) R=e13_libero_goal_expert_scratch_k5_s$S ;;
+             *) echo "no scratch arm for $H"; exit 1 ;; esac
+             [ -f outputs/$R/final.pt ] && [ -f outputs/$R/rollouts_n50.json ] || { echo "missing $R"; exit 1; } ;;
+    *) echo "bad ARM"; exit 1 ;; esac
   for r in $R; do
     for k in camera light texture noise robot; do
       l=$(python -c "import json;print(json.load(open('outputs/e37_levels.json'))['levels']['$k'])")

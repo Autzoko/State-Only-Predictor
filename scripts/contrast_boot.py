@@ -81,7 +81,7 @@ def main():
             rows.append(f"| {c['name']} | missing: {', '.join(sorted(set(missing)))} | | | |")
             continue
         lo, hi = np.percentile(100 * boot, [2.5, 97.5])
-        p = max(2 * min((boot <= 0).mean(), (boot >= 0).mean()), 1 / args.boot)
+        p = min(1.0, max(2 * min((boot <= 0).mean(), (boot >= 0).mean()), 1 / args.boot))
         pvals[c["name"]] = p
         rows.append(f"| {c['name']} | {100 * est:+.1f} | [{lo:+.1f}, {hi:+.1f}] | {p:.2g} | HOLM:{c['name']} |")
     prim = [n for n in spec.get("primary", []) if n in pvals]

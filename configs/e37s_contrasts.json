@@ -1,0 +1,1879 @@
+{
+ "name": "E37s scratch arm under visual shift (DP 17 tasks, SmolVLA libero_goal; seeds 0-1)",
+ "contrasts": [
+  {
+   "name": "E37s-P1 camera: interaction(droid vs scratch), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "E37s-P2 visual 4: interaction(droid vs scratch), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "scratch vs none interaction, camera (history alone)",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "scratch vs none interaction, visual 4",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "droid vs none interaction, camera (E37 restricted to DP, SmolVLA-goal)",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "droid vs none interaction, visual 4 (E37 restricted)",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -0.25,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 0.25,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp camera: droid vs scratch interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp camera: scratch vs none interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp light: droid vs scratch interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp light: scratch vs none interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp texture: droid vs scratch interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp texture: scratch vs none interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp noise: droid vs scratch interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp noise: scratch vs none interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp robot: droid vs scratch interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_robot2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_robot2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp robot: scratch vs none interaction",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_robot2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_robot2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal camera: droid vs scratch interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal camera: scratch vs none interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal light: droid vs scratch interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal light: scratch vs none interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_light3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal texture: droid vs scratch interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal texture: scratch vs none interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_texture2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal noise: droid vs scratch interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal noise: scratch vs none interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_noise2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal robot: droid vs scratch interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_robot2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_robot2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal robot: scratch vs none interaction",
+   "groups": {
+    "smolvla_goal": {
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_robot2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_robot2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "primary": [
+  "E37s-P1 camera: interaction(droid vs scratch), mean of DP, SmolVLA-goal",
+  "E37s-P2 visual 4: interaction(droid vs scratch), mean of DP, SmolVLA-goal"
+ ]
+}

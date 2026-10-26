@@ -56,7 +56,12 @@ class TrajectoryStore:
     def split_episodes(self, data_cfg, split: str) -> pd.DataFrame:
         """Datasets with a stored `split` column (e.g. LIBERO, split by task) use it; DROID uses site splits."""
         eps = self.episodes
-        if "split" in eps.columns:
+        hold = data_cfg.get("holdout_train_tasks")
+        if hold is not None:  # selection set = a salted-hash subset of the train-split tasks; stored val/test unused
+            assert "split" in eps.columns and split in ("train", "val"), "holdout_train_tasks: task-split data only"
+            held = eps["task_index"].map(lambda t: hash_unit(f"task{t}", data_cfg.split_salt + "-holdout") < hold)
+            keep = ((eps["split"] == "train") & (held if split == "val" else ~held)).to_numpy().copy()
+        elif "split" in eps.columns:
             keep = (eps["split"] == split).to_numpy().copy()  # pandas copy-on-write arrays are read-only
         else:
             keep = assign_splits(eps, data_cfg) == split
