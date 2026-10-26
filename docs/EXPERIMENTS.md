@@ -2102,5 +2102,5 @@ dev / new 拆分（agg_split）：
 - 探针（droid_ee → ctx384）：局部动力学下降（acc 0.90 → 0.83，grip_vel 0.98 → 0.93，t_grip 0.83 → 0.79，stage 0.82 → 0.76）；t_next 0.51 → 0.54 略升；multi 版基本持平。
 - **结论**：历史再加长到 25.6 s 反而略差。
   - 合并 McNemar p=0.035，但 (seed, task) 聚类 CI 包含 0，幅度只略超先验实例波动（−0.5 / −1.0）：记为"无收益、可能有害"，不作强结论。
-  - 合理解释：LIBERO-90 示范平均 108.8 帧（15 Hz，约 7.3 s；`processed/libero90/summary.json`），已短于 ctx96 的 6.4 s 窗口加上任何更早历史；ctx192（12.8 s）和 ctx384 的额外历史在 LIBERO 上几乎都是首帧填充，因此长窗口在下游无从发挥；DROID 上更长窗口也稀释了对局部动力学的建模（探针 acc / grip_vel 下降）。
+  - 合理解释：LIBERO-90 示范平均 108.8 帧（15 Hz，约 7.3 s；`processed/libero90/summary.json`），只比 ctx96 的 6.4 s 窗口略长；ctx192（12.8 s）和 ctx384（25.6 s）多出的历史在 LIBERO 上大部分是首帧填充，因此长窗口在下游无从发挥；DROID 上更长窗口也稀释了对局部动力学的建模（探针 acc / grip_vel 下降）。
   - 结合 ctx192：ctx96 已在平台区，论文保持 ctx96。剩 ctx48（18945277）、speed。
