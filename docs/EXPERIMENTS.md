@@ -2399,3 +2399,8 @@ dev / new 拆分（agg_split）：
 ## SmolVLA `_jr` 重跑进度：s1 none（2026-10-27，Jubail 18955945，cn268，2.1 h）
 - 训练 20k 步 exit 0（1.5 h），评测 n_exec 10 exit 0（31 min）。核验：run 名 `e23_smolvla_none_k5_jr_t17_s1`，commit fe35765（与 s0 的 0130b58 相比只多了 DV 脚本和 `forecast.py` 的评测曲线，不涉及 VLA 训练 / 评测代码），k=5，suite libero90_17，seed 1，prior p0，samples 13186，85 条示范；850 episode = 17 任务 × 50。
 - 成功率 **57.8**（DGX 原 s1 为 60.1，跨平台 −2.3）。s1 expert_scratch（18955948）运行中，s1 expert_droid（18960640）排队。
+
+## 剩余多卡排队作业全部改为单卡（2026-10-27 16:10，用户批准）
+- 队列里 39 个多卡作业（2–3 卡，DP / SmolVLA 的 E39 示范数扫描 k1 / k2 / k10 / k25 / kall、E40 `_hpre`、E38 SmolVLA / FastWAM 的 pB1 / pB2）均未提交，拆成 90 个单卡作业（`SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=120G`），队列共 104 行，原有顺序不变（E40 主机预训练仍在 `_hpre` 之前）。
+- 拆分方式：`ARMS=a,b,c` → 每臂一行 `ARM=a`；SmolVLA 的 `PSET` → `ARM=expert_droid PRIOR=<ckpt> PTAG=_pB1/_pB2`（脚本已支持）；FastWAM 的 `PSET` → 每行只含一个先验实例。run 名、训练与评测配方都不变（run 名由 arm / K / TAG / suite / PTAG / seed 决定，与是否同作业无关）。
+- 代价：最多 2 个并行作业的限制下，每个作业只占 1 卡，总 GPU 时不变但墙钟更长；好处是不再出现多卡作业排队数天的情况（SmolVLA `_jr` 拆分后均在数小时内开始）。
