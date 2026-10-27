@@ -2395,3 +2395,7 @@ dev / new 拆分（agg_split）：
   - 到 1 s，知道终点能消除约三分之一；即使告诉模型 2.1 s 时的位置，中段仍有约 2/3 的不确定性来自运动方式。
   - 只知道下一个夹爪事件的位置（时间未知），在整个窗口内最多能消除 17%。
   - 这与 E9a / E7b 的失败归类一致：SOPT 改善的是执行（"怎么动"），不是"去哪"。
+
+## SmolVLA `_jr` 重跑进度：s1 none（2026-10-27，Jubail 18955945，cn268，2.1 h）
+- 训练 20k 步 exit 0（1.5 h），评测 n_exec 10 exit 0（31 min）。核验：run 名 `e23_smolvla_none_k5_jr_t17_s1`，commit fe35765（与 s0 的 0130b58 相比只多了 DV 脚本和 `forecast.py` 的评测曲线，不涉及 VLA 训练 / 评测代码），k=5，suite libero90_17，seed 1，prior p0，samples 13186，85 条示范；850 episode = 17 任务 × 50。
+- 成功率 **57.8**（DGX 原 s1 为 60.1，跨平台 −2.3）。s1 expert_scratch（18955948）运行中，s1 expert_droid（18960640）排队。
