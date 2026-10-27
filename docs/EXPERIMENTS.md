@@ -2418,3 +2418,22 @@ dev / new 拆分（agg_split）：
 - DP k1 s0 expert_droid（Jubail 18961518，cn006，1.4 h）：训练、评测 exit 0；run 名、commit、k=1、seed 0、samples 2697 与另两臂一致，17 条示范相同；850 episode 一一对应。成功率 **46.8**。
   - k1 s0 三臂：none 48.4 / scratch 47.2 / droid 46.8。droid vs none 85:98（p=0.38），droid vs scratch 89:92（p=0.88）。
   - 单 seed 下 k1 没有看到增益（对照：k5 时 DP 3 seed 均值为 none 72.9、droid 77.5）。按预注册不做中途判断，等 s1 / s2 与 k2 后计算 P1 / P2。
+
+## SmolVLA `_jr` 重跑完成：s1 expert_droid + 主表 3 seed 统计（2026-10-27，Jubail 18960640，cn256，2.6 h）
+- s1 expert_droid：训练、评测 exit 0；run 名、commit b2b2169（相对 fe35765 只多文档提交）、k=5、seed 1、prior p0、samples 13186，85 条示范与 none / scratch 相同；850 episode 一一对应。成功率 **66.9**（DGX 原 s1 为 67.4）。s1 配对：droid vs none 147:69（p=1.2e-7），droid vs scratch 132:64（p=1.3e-6）。
+- s2 三臂（原 Jubail 运行，commit 479534a / e76fb6e / 18ebc60）核验：meta 的 k / steps / bs / lr / prior / suite / samples 与 `_jr` s0 完全一致，85 条示范、850 episode。
+- `stats_all.py --manifest configs/smolvla_jubail_manifest.json`（3 seed，Jubail）：
+
+| arm | s0 / s1 / s2 | 均值 ± sd |
+|---|---|---|
+| none | 60.1 / 57.8 / 64.2 | 60.7 ± 3.3 |
+| expert_scratch | 61.9 / 58.9 / 62.2 | 61.0 ± 1.8 |
+| expert_droid | 64.6 / 66.9 / 67.8 | 66.4 ± 1.6 |
+
+- 主表口径（`configs/paper_main_manifest.json`：原主表 manifest 末尾加入 SmolVLA Jubail，Holm 对 13 个主比较；SmolVLA 放在末尾，使其它宿主的 bootstrap CI 与原表逐位一致）：
+  - droid − none **+5.7 [+3.1, +8.2]**，362:216，McNemar 1.3e-9，Holm 1.5e-8；
+  - droid − scratch **+5.4 [+2.8, +8.0]**，351:213，6.8e-9，Holm 6.8e-8；
+  - scratch − none +0.3 [−1.8, +2.6]，p=0.74。
+  - 并入后其它宿主 Holm 只有两处变化：FastWAM droid−none 3e-23 → 3.5e-23，DP droid−scratch 1.1e-11 → 1.3e-11。
+- 跨平台复制（原 DGX s0 / s1 + s2）：+4.8（p=3.7e-7）、droid − scratch +6.6。逐 seed 跨平台差：none −0.5 / −2.3，scratch +3.2 / +0.4，droid +0.6 / −0.5。结论不变：SmolVLA 上 SOPT 显著提升，同结构 scratch 无增益。
+- 已更新：表 T1 SmolVLA 行与 Holm 注、T10，大纲 5.1 与摘要数字（+4.8 → +5.7）。

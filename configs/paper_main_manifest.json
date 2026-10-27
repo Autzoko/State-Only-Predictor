@@ -1,0 +1,325 @@
+{
+ "comparisons": [
+  {
+   "name": "MAIN FastWAM, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e12_wam_none_k5_t17_s0",
+     "e12_wam_none_k5_t17_s1",
+     "e12_wam_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e12_wam_expert_scratch_k5_t17_s0",
+     "e12_wam_expert_scratch_k5_t17_s1",
+     "e12_wam_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e12_wam_expert_droid_k5_t17_s0",
+     "e12_wam_expert_droid_k5_t17_s1",
+     "e12_wam_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN X-VLA, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e20_xvla_none_k5_t17_s0",
+     "e20_xvla_none_k5_t17_s1",
+     "e20_xvla_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e20_xvla_expert_scratch_k5_t17_s0",
+     "e20_xvla_expert_scratch_k5_t17_s1",
+     "e20_xvla_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e20_xvla_expert_droid_k5_t17_s0",
+     "e20_xvla_expert_droid_k5_t17_s1",
+     "e20_xvla_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN Diffusion Policy, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e21_dp_none_k5_t17_s0",
+     "e21_dp_none_k5_t17_s1",
+     "e21_dp_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e21_dp_expert_scratch_k5_t17_s0",
+     "e21_dp_expert_scratch_k5_t17_s1",
+     "e21_dp_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e21_dp_expert_droid_k5_t17_s0",
+     "e21_dp_expert_droid_k5_t17_s1",
+     "e21_dp_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN pi0.5-DROID, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e14_pi05_none_k5_lr1e-4_t17_s0",
+     "e14_pi05_none_k5_lr1e-4_t17_s1",
+     "e14_pi05_none_k5_lr1e-4_t17_s2"
+    ],
+    "expert_scratch": [
+     "e14_pi05_expert_scratch_k5_lr1e-4_t17_s0",
+     "e14_pi05_expert_scratch_k5_lr1e-4_t17_s1",
+     "e14_pi05_expert_scratch_k5_lr1e-4_t17_s2"
+    ],
+    "expert_droid": [
+     "e14_pi05_expert_droid_k5_lr1e-4_t17_s0",
+     "e14_pi05_expert_droid_k5_lr1e-4_t17_s1",
+     "e14_pi05_expert_droid_k5_lr1e-4_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN GR00T N1.7, LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e22_groot_none_k5_t17_s0",
+     "e22_groot_none_k5_t17_s1",
+     "e22_groot_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e22_groot_expert_scratch_k5_t17_s0",
+     "e22_groot_expert_scratch_k5_t17_s1",
+     "e22_groot_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e22_groot_expert_droid_k5_t17_s0",
+     "e22_groot_expert_droid_k5_t17_s1",
+     "e22_groot_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  },
+  {
+   "name": "GR00T N1.7 + xattn interface (E31), LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e22_groot_none_k5_t17_s0",
+     "e22_groot_none_k5_t17_s1",
+     "e22_groot_none_k5_t17_s2"
+    ],
+    "xattn_droid": [
+     "e31_groot_xattn_droid_k5_t17_s0",
+     "e31_groot_xattn_droid_k5_t17_s1",
+     "e31_groot_xattn_droid_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e22_groot_expert_droid_k5_t17_s0",
+     "e22_groot_expert_droid_k5_t17_s1",
+     "e22_groot_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "xattn_droid",
+     "none"
+    ],
+    [
+     "xattn_droid",
+     "expert_droid"
+    ]
+   ]
+  },
+  {
+   "name": "TrunkBC (Jubail E25j), LIBERO-90-17 k5",
+   "arms": {
+    "scratch": [
+     "e25j_trunk_scratch_k5_t17_s0",
+     "e25j_trunk_scratch_k5_t17_s1",
+     "e25j_trunk_scratch_k5_t17_s2"
+    ],
+    "droid": [
+     "e25j_trunk_ref_k5_t17_s0",
+     "e25j_trunk_ref_k5_t17_s1",
+     "e25j_trunk_ref_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "droid",
+     "scratch"
+    ]
+   ],
+   "primary": [
+    [
+     "droid",
+     "scratch"
+    ]
+   ]
+  },
+  {
+   "name": "MAIN SmolVLA (Jubail), LIBERO-90-17 k5",
+   "arms": {
+    "none": [
+     "e23_smolvla_none_k5_jr_t17_s0",
+     "e23_smolvla_none_k5_jr_t17_s1",
+     "e23_smolvla_none_k5_t17_s2"
+    ],
+    "expert_scratch": [
+     "e23_smolvla_expert_scratch_k5_jr_t17_s0",
+     "e23_smolvla_expert_scratch_k5_jr_t17_s1",
+     "e23_smolvla_expert_scratch_k5_t17_s2"
+    ],
+    "expert_droid": [
+     "e23_smolvla_expert_droid_k5_jr_t17_s0",
+     "e23_smolvla_expert_droid_k5_jr_t17_s1",
+     "e23_smolvla_expert_droid_k5_t17_s2"
+    ]
+   },
+   "pairs": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ],
+    [
+     "expert_scratch",
+     "none"
+    ]
+   ],
+   "primary": [
+    [
+     "expert_droid",
+     "none"
+    ],
+    [
+     "expert_droid",
+     "expert_scratch"
+    ]
+   ]
+  }
+ ]
+}
