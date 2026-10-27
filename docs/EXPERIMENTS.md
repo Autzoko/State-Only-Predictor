@@ -2439,3 +2439,4 @@ dev / new 拆分（agg_split）：
 - 已更新：表 T1 SmolVLA 行与 Holm 注、T10，大纲 5.1 与摘要数字（+4.8 → +5.7）。
 - DP k1 s1 none（Jubail 18962935，1.3 h）：训练、评测 exit 0；run 名、k=1、seed 1、samples 2697，commit cbbcb2b（相对 b2b2169 只多文档提交）；850 episode。成功率 **46.0**（s0 为 48.4）。
   - 核对：示范集与 s0 相同、且是 k5 示范集的子集（`select_episodes` 按加盐哈希取前 k 条，不随 seed 变；seed 只改初始化和训练随机性），与主表 k5 的协议一致，符合预注册"嵌套子集"。
+- DP k1 s1 expert_scratch（Jubail 18963109，1.4 h）：训练、评测 exit 0；run 名、k=1、seed 1、samples 2697 与 none 一致，示范相同；850 episode 一一对应；commit b4ff68a（只多文档提交）。成功率 **40.7**；对 none（46.0）配对 56:101（p=4e-4）。s1 droid（18963657）运行中。
