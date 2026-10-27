@@ -2443,3 +2443,4 @@ dev / new 拆分（agg_split）：
 - DP k1 s1 expert_droid（Jubail 18963657，1.4 h）：训练、评测 exit 0；run 名、k=1、seed 1、samples 2697 与另两臂一致，示范相同；850 episode 一一对应；commit 065db0b（只多文档提交）。成功率 **46.1**。
   - k1 s1 三臂：none 46.0 / scratch 40.7 / droid 46.1。droid vs none 84:83（p=1），droid vs scratch 101:55（p=3e-4）。
   - k1 s0+s1 合并（描述性，非预注册检验）：droid vs none 169:181（p=0.56），droid vs scratch 190:147（p=0.022）。即 k1 下 SOPT 相对 none 无增益，但抵消了 scratch 组件的代价。主检验等 s2 与 k2 后按 `configs/e39_contrasts.json` 计算。
+- DP k1 s2 none（Jubail 18964007，1.3 h）：训练、评测 exit 0；run 名、k=1、seed 2、samples 2697，示范与 s0 / s1 相同；850 episode；commit 6159595（只多文档提交）。成功率 **48.0**（k1 none 3 seed：48.4 / 46.0 / 48.0）。s2 scratch / droid（18964093 / 18964305）排队中。
