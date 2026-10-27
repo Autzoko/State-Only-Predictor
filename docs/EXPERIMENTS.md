@@ -2275,3 +2275,5 @@ dev / new 拆分（agg_split）：
 - 训练 20k 步 exit 0（1.8 h），评测 n_exec 10 exit 0（34 min）。核验：run 名 `e23_smolvla_none_k5_jr_t17_s0`，commit 0130b58，k=5，suite libero90_17，seed 0，prior p0，samples 13186；850 episode = 17 任务 × 50。
 - 成功率 **60.1**（DGX 原 s0 为 60.6，同平台差 −0.5）。
 - s0 expert_scratch（18951197）训练已完成、评测中；s0 droid 与 s1 三臂由队列自动提交。6 臂齐后按 `configs/smolvla_jubail_manifest.json` 计算。
+- s0 expert_scratch（Jubail 18951197，cn017，2.8 h）：训练、评测均 exit 0；run 名、commit 0130b58、k=5、seed 0、samples 13186 与 none 臂一致；850 episode。成功率 **61.9**（DGX 原 s0 为 58.7，跨平台 +3.2）。与 Jubail s0 none 配对：82:67。
+  - 注意：DGX 上 scratch < none（58.7 vs 60.6），Jubail 上 scratch > none（61.9 vs 60.1）。单 seed 跨平台波动约 3 点，与之前 none 的 seed 间标准差（约 4.6）同量级；结论等 Jubail 3 seed 齐后再下。
