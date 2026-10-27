@@ -2414,3 +2414,4 @@ dev / new 拆分（agg_split）：
 ## E39 进度：DP k1 s0 none（2026-10-27，Jubail 18961064，cn259，1.3 h）
 - 训练 30k 步 exit 0（51 min），评测 n_exec 10 exit 0（27 min）。核验：run 名 `e21_dp_none_k1_t17_s0`，commit b2b2169，k=1（17 条示范，samples 2697），suite libero90_17，seed 0；850 episode。
 - 成功率 **48.4**（k5 none 3 seed 均值 72.9；k1 的示范只有 k5 的 1/5）。同 seed 的 scratch / droid 臂（18961094 / 18961518）运行中；单臂结果不做比较，等 E39 预注册的整组。
+- DP k1 s0 expert_scratch（Jubail 18961094，cn268，1.3 h）：训练、评测 exit 0；run 名、commit b2b2169、k=1、seed 0、samples 2697 与 none 臂一致，17 条示范完全相同；850 episode，(task, init) 与 none 一一对应。成功率 **47.2**；对 none 配对 77:87（p=0.48）。droid 臂（18961518）运行中。
