@@ -2447,3 +2447,8 @@ dev / new 拆分（agg_split）：
 - DP k1 s2 expert_scratch（Jubail 18964093，1.4 h）：训练、评测 exit 0；run 名、k=1、seed 2、samples 2697，示范与 none 相同；850 episode 一一对应。成功率 **49.6**；对 none（48.0）配对 88:74（p=0.31）。k1 scratch 3 seed：47.2 / 40.7 / 49.6。s2 droid（18964305）排队中。
 - 运维：22:29 起 Jubail 登录节点连不上 github.com（runner 的 `git pull` 失败，sbatch 照常提交）。Jubail 仓库停在 6159595；此后的提交只有文档，作业所用代码不受影响。若要改代码，需等 GitHub 连通后再提交依赖新代码的作业。
 - DP k2 s0 none（Jubail 18964641，1.3 h）：训练、评测 exit 0；run 名 `e21_dp_none_k2_t17_s0`，k=2（34 条示范，samples 5367，k1 的 17 条为其子集），seed 0；850 episode。成功率 **64.7**（k1 48.4，k5 73.6，同 seed）。
+- DP k1 s2 expert_droid（Jubail 18964305，1.4 h；23:33 结束时 watcher 未及时重启，00:20 检查补处理）：训练、评测 exit 0；k=1、seed 2、samples 2697、prior p0，示范与另两臂相同；850 episode 一一对应。成功率 **48.2**；对 none（48.0）76:74（p=0.94），对 scratch（49.6）79:91（p=0.40）。
+  - **DP k1 三臂 3 seed 已齐**：none 48.4 / 46.0 / 48.0（47.5），scratch 47.2 / 40.7 / 49.6（45.8），droid 46.8 / 46.1 / 48.2（47.0）。合并配对（描述性）：droid vs none 245:255（p=0.69），droid vs scratch 269:238（p=0.18）。
+- DP k2 s0 expert_droid（Jubail 18968787，1.4 h）：训练、评测 exit 0；k=2、seed 0、samples 5367、prior p0，示范与 none 相同；850 episode 一一对应。成功率 **58.4**；对 none（64.7）82:136（**p=3e-4，SOPT 更差**）。
+  - 排查：两臂训练正常（loss 曲线平滑、无发散；droid 前期 loss 下降更快：10k 步 0.0128 vs 0.0212）。逐任务看 17 个任务中 droid 更好 7 个、更差 10 个，最大降幅在个别任务（−32、−46 点），不是全局性故障。暂按真实结果记录；s1 / s2 出来后再看是否稳定。
+  - 当前 DP 曲线（droid − none，点）：k1 −0.5（3 seed）、k2 −6.3（s0）、k5 +4.6（3 seed）。与预注册假设"低数据收益最大"方向相反；主检验 P1 / P2 等 k2 3 seed 与 SmolVLA 部分后按 `configs/e39_contrasts.json` 计算。
