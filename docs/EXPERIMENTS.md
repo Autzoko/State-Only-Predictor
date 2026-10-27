@@ -2454,3 +2454,5 @@ dev / new 拆分（agg_split）：
   - 当前 DP 曲线（droid − none，点）：k1 −0.5（3 seed）、k2 −6.3（s0）、k5 +4.6（3 seed）。与预注册假设"低数据收益最大"方向相反；主检验 P1 / P2 等 k2 3 seed 与 SmolVLA 部分后按 `configs/e39_contrasts.json` 计算。
 - DP k2 s1 none（Jubail 18970115，1.3 h）：训练、评测 exit 0；k=2、seed 1、samples 5367，示范与 s0 相同；850 episode。成功率 **57.9**（s0 64.7）。s1 droid（18970628）、s2 none / droid（18970747 / 18971599）运行中。
 - E40 宿主预训练（Jubail 18972066，cn002，00:58 开始，hsteps 100k）：smoke exit 0；init-host 冒烟检查加载 398 个张量、新建 127 个（sopt.*），正常。
+- DP k2 s1 expert_droid（Jubail 18970628，1.4 h）：训练、评测 exit 0；k=2、seed 1、samples 5367、prior p0，示范与 none 相同；850 episode 一一对应。成功率 **60.4**；对 none（57.9）106:85（p=0.15）。即 k2 上 s0 为 −6.3、s1 为 +2.5，seed 间方向不一致。
+- DP k2 s2 none（Jubail 18970747，1.3 h）：训练、评测 exit 0；k=2、seed 2、samples 5367，示范相同；850 episode。成功率 **59.2**（k2 none 3 seed：64.7 / 57.9 / 59.2）。s2 droid（18971599）运行中。
