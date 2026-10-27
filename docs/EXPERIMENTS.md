@@ -2470,3 +2470,4 @@ dev / new 拆分（agg_split）：
 - 解读（暂定）：DP 上 SOPT 的增益在每任务 1–2 条示范时消失，5 条时出现。若 SmolVLA 同样如此，P1 将不通过，按预注册改写为"增益需要最低数据量"，论点 A 以宿主类型为主轴。
 - DP k10 s0 none（Jubail 18972375，1.2 h）：训练、评测 exit 0；k=10（170 条示范，samples 26462，k2 的示范为其子集），seed 0；850 episode。成功率 **82.0**（同 seed：k1 48.4 / k2 64.7 / k5 73.6）。s0 droid（18972439）、s1 none（18972546）运行中。
 - DP k10 s0 expert_droid（Jubail 18972439，1.3 h）：训练、评测 exit 0；k=10、seed 0、samples 26462、prior p0，示范与 none 相同；850 episode 一一对应。成功率 **87.3**；对 none（82.0）93:48（p=2e-4，+5.3）。s0 上 DP 增益：k1 −1.6 / k2 −6.3 / k5 +2.5 / k10 +5.3。
+- DP k10 s1 none（Jubail 18972546，1.3 h）：训练、评测 exit 0；k=10、seed 1、samples 26462，示范与 s0 相同；850 episode。成功率 **79.9**。s1 droid（18973032）、s2 none / droid（18973120 / 18973265）运行中。
