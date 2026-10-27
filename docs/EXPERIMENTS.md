@@ -2404,3 +2404,4 @@ dev / new 拆分（agg_split）：
 - 队列里 39 个多卡作业（2–3 卡，DP / SmolVLA 的 E39 示范数扫描 k1 / k2 / k10 / k25 / kall、E40 `_hpre`、E38 SmolVLA / FastWAM 的 pB1 / pB2）均未提交，拆成 90 个单卡作业（`SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=120G`），队列共 104 行，原有顺序不变（E40 主机预训练仍在 `_hpre` 之前）。
 - 拆分方式：`ARMS=a,b,c` → 每臂一行 `ARM=a`；SmolVLA 的 `PSET` → `ARM=expert_droid PRIOR=<ckpt> PTAG=_pB1/_pB2`（脚本已支持）；FastWAM 的 `PSET` → 每行只含一个先验实例。run 名、训练与评测配方都不变（run 名由 arm / K / TAG / suite / PTAG / seed 决定，与是否同作业无关）。
 - 代价：最多 2 个并行作业的限制下，每个作业只占 1 卡，总 GPU 时不变但墙钟更长；好处是不再出现多卡作业排队数天的情况（SmolVLA `_jr` 拆分后均在数小时内开始）。
+- 16:15 更新：用户允许单卡作业同时最多 4 个（多卡仍为 2 个）。队列 runner 上限改为 4，第一个新作业 E39 DP k1 s0 none 已提交（18961064）。
