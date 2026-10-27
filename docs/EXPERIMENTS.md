@@ -2270,3 +2270,8 @@ dev / new 拆分（agg_split）：
 ## SmolVLA 主表 Jubail 重跑（`_jr`）改为单卡作业（2026-10-26 17:45，用户批准）
 - 原来的两个 3 卡作业 18946722（s0）、18948300（s1）从 11:08 / 13:22 起一直 PENDING，Slurm 预计开始时间为 10-27 11:11 和 11-01 10:22，会把后面整个队列卡住；两个作业都未启动，没有任何输出。
 - 已取消，改为 6 个单卡作业：`SEED ∈ {0,1}` × `ARM ∈ {none, expert_scratch, expert_droid}`，`TAG=_jr`，排在队首。run 名不变（`e23_smolvla_<arm>_k5_jr_t17_s<S>`），训练与评测配方不变。
+
+## SmolVLA `_jr` 重跑进度：s0 none（2026-10-27，Jubail 18951191，cn011，2.4 h）
+- 训练 20k 步 exit 0（1.8 h），评测 n_exec 10 exit 0（34 min）。核验：run 名 `e23_smolvla_none_k5_jr_t17_s0`，commit 0130b58，k=5，suite libero90_17，seed 0，prior p0，samples 13186；850 episode = 17 任务 × 50。
+- 成功率 **60.1**（DGX 原 s0 为 60.6，同平台差 −0.5）。
+- s0 expert_scratch（18951197）训练已完成、评测中；s0 droid 与 s1 三臂由队列自动提交。6 臂齐后按 `configs/smolvla_jubail_manifest.json` 计算。
