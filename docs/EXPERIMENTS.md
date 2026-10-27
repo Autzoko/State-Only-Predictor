@@ -2437,3 +2437,5 @@ dev / new 拆分（agg_split）：
   - 并入后其它宿主 Holm 只有两处变化：FastWAM droid−none 3e-23 → 3.5e-23，DP droid−scratch 1.1e-11 → 1.3e-11。
 - 跨平台复制（原 DGX s0 / s1 + s2）：+4.8（p=3.7e-7）、droid − scratch +6.6。逐 seed 跨平台差：none −0.5 / −2.3，scratch +3.2 / +0.4，droid +0.6 / −0.5。结论不变：SmolVLA 上 SOPT 显著提升，同结构 scratch 无增益。
 - 已更新：表 T1 SmolVLA 行与 Holm 注、T10，大纲 5.1 与摘要数字（+4.8 → +5.7）。
+- DP k1 s1 none（Jubail 18962935，1.3 h）：训练、评测 exit 0；run 名、k=1、seed 1、samples 2697，commit cbbcb2b（相对 b2b2169 只多文档提交）；850 episode。成功率 **46.0**（s0 为 48.4）。
+  - 核对：示范集与 s0 相同、且是 k5 示范集的子集（`select_episodes` 按加盐哈希取前 k 条，不随 seed 变；seed 只改初始化和训练随机性），与主表 k5 的协议一致，符合预注册"嵌套子集"。
