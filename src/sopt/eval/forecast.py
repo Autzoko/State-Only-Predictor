@@ -60,6 +60,19 @@ def energy_score_pos(pred: torch.Tensor, fut: torch.Tensor) -> torch.Tensor:
     return term1 - 0.5 * pair.sum((1, 2)) / (K * (K - 1))
 
 
+def energy_score_pos_by_step(pred: torch.Tensor, fut: torch.Tensor) -> torch.Tensor:
+    """Energy score of the EE position at each horizon step separately (cm), (B, K, H, D) x (B, H, D) -> (B, H).
+
+    Same estimator as `energy_score_pos` with d = Euclidean distance at one step; K == 1 gives the step error.
+    """
+    K = pred.shape[1]
+    term1 = (pred[..., POS] - fut[:, None, :, POS]).norm(dim=-1).mean(1) * 100
+    if K == 1:
+        return term1
+    pair = (pred[:, :, None, :, POS] - pred[:, None, :, :, POS]).norm(dim=-1)  # (B, K, K, H), zero diagonal
+    return term1 - 0.5 * pair.sum((1, 2)) * 100 / (K * (K - 1))
+
+
 class ForecastMeter:
     """Per model: mean error over samples, min over samples (minADE@K), error of the sample mean,
     energy score, and per-step position error curves (lists, `*_by_step`)."""
@@ -79,6 +92,7 @@ class ForecastMeter:
         step_err = (pred[..., POS] - fut[:, None, :, POS]).norm(dim=-1) * 100  # (B, K, H) cm
         self._add_curve(f"{name}/pos_err_cm_by_step", step_err.mean(1))
         self.sums[f"{name}/energy_pos_cm"] += energy_score_pos(pred if stochastic else pred[:, :1], fut).sum().item()
+        self._add_curve(f"{name}/energy_pos_cm_by_step", energy_score_pos_by_step(pred if stochastic else pred[:, :1], fut))
         if stochastic:
             self._add_curve(f"{name}/min{pred.shape[1]}_pos_err_cm_by_step", step_err.min(1).values)
             mean_step = (pred.mean(1)[..., POS] - fut[..., POS]).norm(dim=-1) * 100

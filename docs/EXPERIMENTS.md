@@ -2277,3 +2277,45 @@ dev / new 拆分（agg_split）：
 - s0 expert_scratch（18951197）训练已完成、评测中；s0 droid 与 s1 三臂由队列自动提交。6 臂齐后按 `configs/smolvla_jubail_manifest.json` 计算。
 - s0 expert_scratch（Jubail 18951197，cn017，2.8 h）：训练、评测均 exit 0；run 名、commit 0130b58、k=5、seed 0、samples 13186 与 none 臂一致；850 episode。成功率 **61.9**（DGX 原 s0 为 58.7，跨平台 +3.2）。与 Jubail s0 none 配对：82:67。
   - 注意：DGX 上 scratch < none（58.7 vs 60.6），Jubail 上 scratch > none（61.9 vs 60.1）。单 seed 跨平台波动约 3 点，与之前 none 的 seed 间标准差（约 4.6）同量级；结论等 Jubail 3 seed 齐后再下。
+
+## 【数据验证】DV1–DV3 预注册（2026-10-27，用户批准；任何结果出来之前写定）
+目的：为论文中"历史提供了当前状态之外的未来运动信息"这一论证提供 DROID 上的直接数据证据。全部只用 DROID 本体状态。
+**评测集**：DROID test 站点（UT Austin + Edinburgh + Penn，7,164 条），此前从未用于任何选择或报告。检查点按原配方在 val（UW）上选。
+
+**DV1 历史长度**（`scripts/dv_anchor_eval.py`，`scripts/slurm/dv_forecast.sbatch`）
+- 先验：上下文 4 / 16 / 48 / 96 帧（1 / 4 / 12 / 24 个 token；0.27 / 1.07 / 3.2 / 6.4 s）。
+  - 都用主先验配方（S、ar_flow、100% DROID、40k 步、H=32 = 2.1 s）且 seed 0，只改 `model.ctx_len`。
+  - ctx4 / ctx16 新训（`dv1_ctx4` / `dv1_ctx16`）；ctx48 = `e25j_ctx48`；ctx96 = p0（`e2_ar_flow_f100_s`）。
+  - 另两个 ctx96 实例（pB1 / pB2，seed 1 / 2）用来给出先验实例间的噪声尺度。
+- **固定锚点**：`evaluate.py` 按各模型自己的 ctx_len 取窗口，不同 ctx 的模型会在不同窗口上评分。
+  - 这里每个窗口都要求 96 帧真实历史 + 32 帧真实未来，锚点间隔 32 帧；ctx=C 的模型读最后 C 帧。
+  - 所有模型预测同一批未来，每个 batch 使用相同的 flow 采样噪声，K = 10。
+- **主检验**：test 上 ΔES = ES(ctx4) − ES(ctx96, p0)，95% CI 为按 episode 整簇的 bootstrap，CI > 0 即通过。
+  - 报告相对增幅 X% = ES(ctx4) / ES(ctx96) − 1。
+- **次要**：
+  - 相邻长度差（4→16→48→96）；
+  - 分预测步长的 ES 比值曲线；
+  - 分站点结果；
+  - val 上的复制；
+  - 384 帧历史的锚点集上加入 ctx192 / ctx384（`e25j_ctx192` / `e25j_ctx384`，训练时 left_pad，这里历史全部真实）。
+- **措辞**：
+  - 通过 → "历史从 0.27 s 增加到 6.4 s，留出实验室上未来 2.1 s 末端轨迹的能量分数下降 X%"。
+  - ctx4 已含约 0.27 s 的运动（速度），不是严格的"只看当前状态"。patch = 4 时无法训练 1 帧上下文的同配方模型，论文里如实写成"近乎瞬时的状态"。
+  - 若 ctx48 与 ctx96 的差小于实例间差，则写"信息主要集中在最近约 3 s"。
+- 已在本地核对：在同一窗口上，基线 ES 与 `evaluate_forecast` 完全一致，模型 ES 只差采样噪声；逐步 ES 与暴力计算一致。
+
+**DV2 相邻帧冗余度**（`scripts/dv_redundancy.py`，CPU 作业）
+- 15 Hz，episode 内统计，train 与 test 分别给出，按 episode bootstrap 得 95% CI，纯描述、不做检验：
+  - 恒速外推的 R²：目标 p_{t+h} − p_t，预测 h·v_t，v_t 取 1 帧差分或 3 帧平均（后者即 const-vel 基线）；h = 1, 2, 4, 8, 16, 32, 64；h = 1 即下一帧冗余度。末端位置与关节角各算一次。
+  - 速度自相关：滞后 1–96 帧。
+  - 夹爪状态保持概率。
+- 所有 h / 滞后共用同一锚点集，曲线之间可比。汇总公式已在调试数据上与直接计算逐位核对。
+
+**DV3 "怎么动 / 去哪"分解**（只评测，E3a 检查点）
+- 检查点：`gc_ar_flow_ft`（主）和 `gc_ar_flow_scratch`（复制）。从 127 经本机中转到 Jubail，md5 一致。
+- 在 test 的固定锚点上，比较三种条件下的逐步 ES：不给目标、给 keyframe（下一次夹爪事件，时间未知）、给 endpoint（第 32 步状态）。
+- 描述量："去哪"份额(h) = 1 − ES_h(给目标) / ES_h(不给目标)。endpoint 在最后一步给出答案，末端份额趋近 1 是平凡的，关键看曲线中段；keyframe 是非平凡版本。
+- 检查项：endpoint 的 ES 应明显低于不给目标（E3a 在 val 上为 1.88 vs 3.97），否则说明目标通路加载有误。
+- 定位：Stage 2 的一张图，Stage 1 不需要。
+
+**排队**：DV2（CPU）与 DV1+DV3（1 个 GPU 作业，约 2 h）放到队首。为腾出名额，取消尚未开始的 SmolVLA `_jr` s1 none（18955245），重新排在 DV 之后。
