@@ -2440,3 +2440,6 @@ dev / new 拆分（agg_split）：
 - DP k1 s1 none（Jubail 18962935，1.3 h）：训练、评测 exit 0；run 名、k=1、seed 1、samples 2697，commit cbbcb2b（相对 b2b2169 只多文档提交）；850 episode。成功率 **46.0**（s0 为 48.4）。
   - 核对：示范集与 s0 相同、且是 k5 示范集的子集（`select_episodes` 按加盐哈希取前 k 条，不随 seed 变；seed 只改初始化和训练随机性），与主表 k5 的协议一致，符合预注册"嵌套子集"。
 - DP k1 s1 expert_scratch（Jubail 18963109，1.4 h）：训练、评测 exit 0；run 名、k=1、seed 1、samples 2697 与 none 一致，示范相同；850 episode 一一对应；commit b4ff68a（只多文档提交）。成功率 **40.7**；对 none（46.0）配对 56:101（p=4e-4）。s1 droid（18963657）运行中。
+- DP k1 s1 expert_droid（Jubail 18963657，1.4 h）：训练、评测 exit 0；run 名、k=1、seed 1、samples 2697 与另两臂一致，示范相同；850 episode 一一对应；commit 065db0b（只多文档提交）。成功率 **46.1**。
+  - k1 s1 三臂：none 46.0 / scratch 40.7 / droid 46.1。droid vs none 84:83（p=1），droid vs scratch 101:55（p=3e-4）。
+  - k1 s0+s1 合并（描述性，非预注册检验）：droid vs none 169:181（p=0.56），droid vs scratch 190:147（p=0.022）。即 k1 下 SOPT 相对 none 无增益，但抵消了 scratch 组件的代价。主检验等 s2 与 k2 后按 `configs/e39_contrasts.json` 计算。
