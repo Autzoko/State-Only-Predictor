@@ -2339,3 +2339,6 @@ dev / new 拆分（agg_split）：
   2. 这种冗余衰减得很快：0.5 s 时剩约一半；到 1 s，恒速外推已不比"预测平均位移"好（R² ≈ 0）；2 s 以后明显更差。速度自相关在约 2 s 处降到 0。
   3. 因此 1–2 s 尺度的运动信息不在"当前状态 + 速度"里。若学到的先验在这个尺度上仍能预测（DV1），信息只能来自更长的时间结构。这正好给"信息在长程时间结构中"提供了与模型无关的统计依据。
   4. test 站点的运动比 train 更平滑（各项 R² 更高），正文用 train 的数字，test 列为复制。
+- s0 expert_droid（Jubail 18955126，cn011，2.5 h）：训练、评测均 exit 0；commit 5e3acf3（与 0130b58 只差日志文本）；k=5、seed 0、prior p0、samples 13186 与另两臂一致；850 episode。成功率 **64.6**（DGX 原 s0 为 64.0）。
+  - Jubail s0 三臂：none 60.1 / scratch 61.9 / droid 64.6。droid vs none 115:77（p=0.0074），droid vs scratch 111:88（p=0.12）。
+  - s1 三臂排在 DV 作业之后；3 seed 齐后按 `configs/smolvla_jubail_manifest.json` 计算。
