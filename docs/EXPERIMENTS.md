@@ -2417,4 +2417,4 @@ dev / new 拆分（agg_split）：
 - DP k1 s0 expert_scratch（Jubail 18961094，cn268，1.3 h）：训练、评测 exit 0；run 名、commit b2b2169、k=1、seed 0、samples 2697 与 none 臂一致，17 条示范完全相同；850 episode，(task, init) 与 none 一一对应。成功率 **47.2**；对 none 配对 77:87（p=0.48）。droid 臂（18961518）运行中。
 - DP k1 s0 expert_droid（Jubail 18961518，cn006，1.4 h）：训练、评测 exit 0；run 名、commit、k=1、seed 0、samples 2697 与另两臂一致，17 条示范相同；850 episode 一一对应。成功率 **46.8**。
   - k1 s0 三臂：none 48.4 / scratch 47.2 / droid 46.8。droid vs none 85:98（p=0.38），droid vs scratch 89:92（p=0.88）。
-  - 单 seed 下 k1 没有看到增益（k5 时 DP s0 为 none 72.9 → droid 77.5 的 3 seed 均值）。按预注册不做中途判断，等 s1 / s2 与 k2 后计算 P1 / P2。
+  - 单 seed 下 k1 没有看到增益（对照：k5 时 DP 3 seed 均值为 none 72.9、droid 77.5）。按预注册不做中途判断，等 s1 / s2 与 k2 后计算 P1 / P2。
