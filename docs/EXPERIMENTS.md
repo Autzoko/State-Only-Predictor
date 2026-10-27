@@ -2456,3 +2456,15 @@ dev / new 拆分（agg_split）：
 - E40 宿主预训练（Jubail 18972066，cn002，00:58 开始，hsteps 100k）：smoke exit 0；init-host 冒烟检查加载 398 个张量、新建 127 个（sopt.*），正常。
 - DP k2 s1 expert_droid（Jubail 18970628，1.4 h）：训练、评测 exit 0；k=2、seed 1、samples 5367、prior p0，示范与 none 相同；850 episode 一一对应。成功率 **60.4**；对 none（57.9）106:85（p=0.15）。即 k2 上 s0 为 −6.3、s1 为 +2.5，seed 间方向不一致。
 - DP k2 s2 none（Jubail 18970747，1.3 h）：训练、评测 exit 0；k=2、seed 2、samples 5367，示范相同；850 episode。成功率 **59.2**（k2 none 3 seed：64.7 / 57.9 / 59.2）。s2 droid（18971599）运行中。
+- DP k2 s2 expert_droid（Jubail 18971599，1.4 h）：训练、评测 exit 0；k=2、seed 2、samples 5367、prior p0，示范相同；850 episode 一一对应。成功率 **59.2**；对 none（59.2）95:95（p=1）。
+
+### E39 中期：DP k1 / k2 已齐（2026-10-28 02:05；`contrast_boot.py --spec configs/e39_contrasts.json`，(seed, task) 簇 bootstrap）
+| k | none（3 seed） | droid（3 seed） | 增益 droid − none | 95% CI | p |
+|---|---|---|---|---|---|
+| 1 | 48.4 / 46.0 / 48.0 | 46.8 / 46.1 / 48.2 | −0.4 | [−4.0, +3.3] | 0.84 |
+| 2 | 64.7 / 57.9 / 59.2 | 58.4 / 60.4 / 59.2 | −1.3 | [−5.5, +2.7] | 0.55 |
+| 5（主表） | 73.6 / 71.4 / 73.5 | 76.1 / 77.3 / 79.1 | +4.6 | [+1.8, +7.5] | 0.0018 |
+- 次要：DP 低数据增益（k1、k2 平均）−0.8 [−4.0, +2.2]（p=0.59）；k1 预训练效应（droid − scratch）+1.2 [−3.0, +5.5]（p=0.56）。
+- 自检：同一脚本给出的 DP k5 增益与主表 stats_all 完全一致（+4.6 [+1.8, +7.5]）。
+- 主检验 P1（DP 与 SmolVLA 平均）和 P2 需要 SmolVLA k1 / k2 与 k25 / 全部，尚未计算，不做 Holm。
+- 解读（暂定）：DP 上 SOPT 的增益在每任务 1–2 条示范时消失，5 条时出现。若 SmolVLA 同样如此，P1 将不通过，按预注册改写为"增益需要最低数据量"，论点 A 以宿主类型为主轴。
