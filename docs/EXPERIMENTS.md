@@ -2405,3 +2405,8 @@ dev / new 拆分（agg_split）：
 - 拆分方式：`ARMS=a,b,c` → 每臂一行 `ARM=a`；SmolVLA 的 `PSET` → `ARM=expert_droid PRIOR=<ckpt> PTAG=_pB1/_pB2`（脚本已支持）；FastWAM 的 `PSET` → 每行只含一个先验实例。run 名、训练与评测配方都不变（run 名由 arm / K / TAG / suite / PTAG / seed 决定，与是否同作业无关）。
 - 代价：最多 2 个并行作业的限制下，每个作业只占 1 卡，总 GPU 时不变但墙钟更长；好处是不再出现多卡作业排队数天的情况（SmolVLA `_jr` 拆分后均在数小时内开始）。
 - 16:15 更新：用户允许单卡作业同时最多 4 个（多卡仍为 2 个）。队列 runner 上限改为 4，第一个新作业 E39 DP k1 s0 none 已提交（18961064）。
+
+## SmolVLA `_jr` 重跑进度：s1 expert_scratch（2026-10-27，Jubail 18955948，cn259，2.6 h）
+- 训练 exit 0（2.0 h），评测 n_exec 10 exit 0（39 min）。核验：run 名、commit fe35765、k=5、seed 1、prior p0、samples 13186 与 s1 none 一致，85 条示范与 none 臂完全相同；850 episode，与 none 臂的 (task, init) 一一对应。
+- 成功率 **58.9**（DGX 原 s1 为 58.5，跨平台 +0.4）。与 Jubail s1 none 配对：83:73，p=0.47。
+- s1 expert_droid（18960640）16:39 开始运行。
