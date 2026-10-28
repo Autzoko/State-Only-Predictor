@@ -2478,3 +2478,5 @@ dev / new 拆分（agg_split）：
 - 防泄漏：`vla_train.py` 断言 train 划分任务与 17 个评测任务及 E4b 任务无交集，断言通过（作业未报错）。
 - loss：0.97（第 100 步）→ 0.031（50k）→ 0.026（100k），平稳收敛。
 - 阶段 2（`_hpre`，k5，none / expert_droid × seed 0–2）在队列中按原顺序排在 E39 DP k25 / 全部、E37s、E18r、E41 之后。
+- DP k10 s1 expert_droid（Jubail 18973032，1.3 h）：训练、评测 exit 0；k=10、seed 1、samples 26462、prior p0，示范相同；850 episode 一一对应。成功率 **87.4**；对 none（79.9）104:40（p<1e-6，+7.5）。
+- DP k10 s2 none（Jubail 18973120，1.3 h）：训练、评测 exit 0；k=10、seed 2，示范相同；850 episode。成功率 **82.6**（k10 none 3 seed：82.0 / 79.9 / 82.6）。s2 droid（18973265）运行中。
