@@ -2523,3 +2523,30 @@ dev / new 拆分（agg_split）：
 - E18r f1（`e25_trunk.sbatch VARIANT=f1`，18977035）11:58 开始。
 - SmolVLA-goal s0 scratch（Jubail 18975131，cn256，2.5 h；cn256 上评测作业未受 I/O 问题影响）：5 个扰动均 exit 0，各 500 episode。camera 2 **76.2** / light 3 83.0 / texture 2 71.0 / noise 2 82.6 / robot 2 67.8。
 - DP s0 scratch（Jubail 18975053，cn253，2.9 h）：5 个扰动均 exit 0，各 850 episode。camera 2 **31.3** / light 3 66.0 / texture 2 41.6 / noise 2 29.3 / robot 2 56.1。只剩 DP s1（18975056，最后一项 robot 进行中）。
+- DP s1 scratch（Jubail 18975056，cn255，2.9 h）：5 个扰动均 exit 0，各 850 episode。camera 2 **37.4** / light 3 65.5 / texture 2 39.1 / noise 2 23.9 / robot 2 52.8。
+
+### E37s 结果（2026-10-28 12:45；`contrast_boot.py --spec configs/e37s_contrasts.json`，(seed, task) 簇 bootstrap，宿主分层，seed 0–1）
+输入：12 个 run × (干净 `rollouts_n50.json` + 5 个 `e37_main_*.json`)，共 72 个文件；DP 每文件 850 episode，SmolVLA-goal 500 episode，核对 perturb 字段与档位（camera 2 / light 3 / texture 2 / noise 2 / robot 2）。
+
+成功率（2 seed 平均）：
+| 宿主 | 臂 | 干净 | camera | light | texture | noise | robot |
+|---|---|---|---|---|---|---|---|
+| DP | none | 72.5 | 37.4 | 67.3 | 39.5 | 30.8 | 55.7 |
+| DP | scratch | 68.7 | 34.4 | 65.8 | 40.4 | 26.6 | 54.5 |
+| DP | droid | 76.7 | 51.1 | 71.6 | 46.6 | 42.8 | 65.0 |
+| SmolVLA-goal | none | 77.7 | 60.2 | 77.6 | 67.7 | 76.8 | 63.4 |
+| SmolVLA-goal | scratch | 78.0 | 77.9 | 83.3 | 71.9 | 84.9 | 68.4 |
+| SmolVLA-goal | droid | 81.0 | 68.4 | 83.0 | 73.6 | 81.4 | 66.4 |
+
+主检验（Holm，2 个）：
+- **P1** camera 交互（droid − scratch）两宿主平均：**−1.9 [−7.8, +3.9]**，p=0.52，Holm 0.81 → 不通过。
+- **P2** 视觉 4 项平均：**−1.3 [−4.5, +1.8]**，p=0.41，Holm 0.81 → 不通过。
+次要：
+- scratch vs none 交互（"只有历史"）：camera **+9.1 [+3.1, +15.4]**（p=0.003），视觉 4 项 +5.2 [+2.0, +8.6]。
+- droid vs none 交互（参照，限定两宿主）：camera +7.2 [+0.5, +14.5]，视觉 4 项 +3.9 [+0.6, +7.5]，与预注册时的参照值一致。
+- **宿主间方向相反**（camera）：
+  - DP：droid − scratch **+8.7 [+1.6, +15.7]**，scratch − none +0.8 [−4.2, +6.0] → DP 上相机鲁棒性来自预训练，scratch 历史组件没有带来鲁棒性。noise 同样（+8.2 [+0.1, +17.1]）。
+  - SmolVLA-goal：droid − scratch **−12.5 [−22.2, −3.3]**，scratch − none **+17.4 [+6.6, +28.7]** → 鲁棒性来自历史组件本身，scratch 甚至比 DROID 先验更鲁棒（camera 77.9 vs 68.4）；light / robot 同方向。
+**按预注册判读**：P1 不通过，scratch vs none 的 camera 交互 CI > 0 → 规则 2："本体历史带来视角鲁棒性，预训练的额外贡献未被证实"，论点 B 按此改写。
+- 必须同时报告宿主异质性：DP 上预训练是必要的（scratch 无鲁棒性），SmolVLA-goal 上历史组件本身就够。合并估计接近 0 是两个方向相反的宿主效应相抵，不是"两宿主上都没有预训练效应"。
+- 功效与口径：SmolVLA-goal 只有 10 任务 × 2 seed = 20 簇，CI 宽；它用的是 libero_goal，不是 LIBERO-90-17。GR00T 没有 scratch 臂（无 17 任务 xattn_scratch checkpoint），不在本检验中。
