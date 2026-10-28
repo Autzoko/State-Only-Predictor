@@ -2480,3 +2480,6 @@ dev / new 拆分（agg_split）：
 - 阶段 2（`_hpre`，k5，none / expert_droid × seed 0–2）在队列中按原顺序排在 E39 DP k25 / 全部、E37s、E18r、E41 之后。
 - DP k10 s1 expert_droid（Jubail 18973032，1.3 h）：训练、评测 exit 0；k=10、seed 1、samples 26462、prior p0，示范相同；850 episode 一一对应。成功率 **87.4**；对 none（79.9）104:40（p<1e-6，+7.5）。
 - DP k10 s2 none（Jubail 18973120，1.3 h）：训练、评测 exit 0；k=10、seed 2，示范相同；850 episode。成功率 **82.6**（k10 none 3 seed：82.0 / 79.9 / 82.6）。s2 droid（18973265）运行中。
+- DP k10 s2 expert_droid（Jubail 18973265，1.3 h）：训练、评测 exit 0；k=10、seed 2、samples 26462、prior p0，示范相同；850 episode 一一对应。成功率 **86.0**；对 none（82.6）79:50（p=0.013）。
+  - **DP k10 3 seed 已齐**：none 82.0 / 79.9 / 82.6，droid 87.3 / 87.4 / 86.0。`contrast_boot.py`：增益 **+5.4 [+3.0, +7.8]**（p=1e-4）。
+  - DP 增益曲线（3 seed，簇 bootstrap）：k1 −0.4 [−4.0, +3.3]，k2 −1.3 [−5.5, +2.7]，k5 +4.6 [+1.8, +7.5]，k10 +5.4 [+3.0, +7.8]。增益在 k ≥ 5 出现，k ≤ 2 时为 0。（加入 k10 后 bootstrap 的随机流变化，k1 预训练效应 CI 末位变为 [−3.1, +5.5]，低数据增益 [−3.9, +2.2]。）
