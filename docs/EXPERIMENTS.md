@@ -2490,3 +2490,4 @@ dev / new 拆分（agg_split）：
   - 05:50 scancel；cancelled 作业的 `metrics.jsonl` 与训练日志改名为 `*.cancelled_18973789.*`（JsonlLogger 是追加写，避免与重跑混在一起）；输出目录无 final.pt，重跑从头训练，配方与 run 名不变。
   - 重提行放在队首，加 `SBATCH_EXCLUDE=cn014,cn015,cn270,cn256`。
   - 更正：`SBATCH_EXCLUDE` 环境变量未覆盖脚本内的 `#SBATCH --exclude`，第一次重提（18974314）仍落在 cn256，12 s 后取消（未写出 metrics；日志会被重跑覆盖）。改为在 sbatch 命令行传 `--exclude=cn014,cn015,cn270,cn256`，重提为 **18974318**（cn008，ExcNodeList 已含 cn256）。
+- DP k25 s2 none（Jubail 18974264，1.2 h）/ expert_droid（18974267，1.2 h）：训练、评测均 exit 0；k=25、seed 2、samples 65725、prior p0，示范与 s1 相同；850 episode 一一对应。none **91.2**，droid **93.6**；配对 58:37（p=0.040，+2.4）。k25 只差 s0 none（18974318 重跑中）。
