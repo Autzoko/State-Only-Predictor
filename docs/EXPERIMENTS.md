@@ -2550,3 +2550,10 @@ dev / new 拆分（agg_split）：
 **按预注册判读**：P1 不通过，scratch vs none 的 camera 交互 CI > 0 → 规则 2："本体历史带来视角鲁棒性，预训练的额外贡献未被证实"，论点 B 按此改写。
 - 必须同时报告宿主异质性：DP 上预训练是必要的（scratch 无鲁棒性），SmolVLA-goal 上历史组件本身就够。合并估计接近 0 是两个方向相反的宿主效应相抵，不是"两宿主上都没有预训练效应"。
 - 功效与口径：SmolVLA-goal 只有 10 任务 × 2 seed = 20 簇，CI 宽；它用的是 libero_goal，不是 LIBERO-90-17。GR00T 没有 scratch 臂（无 17 任务 xattn_scratch checkpoint），不在本检验中。
+
+## E18r 进度：libero 变体（2026-10-28，Jubail 18977241，cn009，1.3 h）
+- 先验 `outputs/e25j_libero`：LIBERO-90 train 划分状态，E4a scratch 配方（lr 3e-4，warmup 300，3k 步），`data.holdout_train_tasks=0.1`（按 train 划分内部留出任务选模，不触碰 17 个评测任务；config.yaml 已核对）。预训练 exit 0；第 3000 步留出任务上 pos ADE 10.68 cm（常速 16.17）。
+- TrunkBC 17 任务 × k5 × seed 0–2：训练、评测均 exit 0；init = `outputs/e25j_libero/best.pt`，示范与 `e25j_trunk_ref` 相同，各 850 episode。成功率 **70.1 / 73.3 / 70.4**（均值 71.3）。对照：scratch 68.7 / 67.6 / 67.8（68.0），ref（DROID 100%）74.6 / 71.5 / 74.2（73.4）。
+- E24 探针 exit 0（droid_ee / libero / droid_mt / libero_mt 四组线性探针，结果在作业日志）。
+- commit ed6512c：Jubail 已能连上 GitHub（12:33 的作业 `git pull` 成功）。
+- f1 / f10 运行中；3 个变体齐后按 `configs/e18r_manifest.json` 跑 `stats_all.py`。
