@@ -2522,3 +2522,4 @@ dev / new 拆分（agg_split）：
 - SmolVLA-goal s1 scratch（Jubail 18975172，cn257，2.0 h）：5 个扰动评测均 exit 0，各 50 init × 10 任务 = 500 episode。成功率 camera 2 **79.6** / light 3 83.6 / texture 2 72.8 / noise 2 87.2 / robot 2 69.0。其余 3 个作业（DP s0 / s1、SmolVLA-goal s0）各完成 3 项，运行中。4 个齐后按预注册跑 `contrast_boot.py --spec configs/e37s_contrasts.json`。
 - E18r f1（`e25_trunk.sbatch VARIANT=f1`，18977035）11:58 开始。
 - SmolVLA-goal s0 scratch（Jubail 18975131，cn256，2.5 h；cn256 上评测作业未受 I/O 问题影响）：5 个扰动均 exit 0，各 500 episode。camera 2 **76.2** / light 3 83.0 / texture 2 71.0 / noise 2 82.6 / robot 2 67.8。
+- DP s0 scratch（Jubail 18975053，cn253，2.9 h）：5 个扰动均 exit 0，各 850 episode。camera 2 **31.3** / light 3 66.0 / texture 2 41.6 / noise 2 29.3 / robot 2 56.1。只剩 DP s1（18975056，最后一项 robot 进行中）。
