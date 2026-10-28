@@ -2557,3 +2557,4 @@ dev / new 拆分（agg_split）：
 - E24 探针 exit 0（droid_ee / libero / droid_mt / libero_mt 四组线性探针，结果在作业日志）。
 - commit ed6512c：Jubail 已能连上 GitHub（12:33 的作业 `git pull` 成功）。
 - f1 / f10 运行中；3 个变体齐后按 `configs/e18r_manifest.json` 跑 `stats_all.py`。
+- E18r f1（Jubail 18977035，cn002，1.9 h）：先验 `e25j_f1`（e2 配方，`data.train_fraction=0.01`，40k 步，按 DROID val 选模）。预训练 exit 0；最终步 val pos ADE 8.89 cm 高于常速 7.30，选中的 best.pt 为 7.25（1% 数据 40k 步明显过拟合，按 val 选早期 checkpoint）。TrunkBC 3 seed 训练、评测 exit 0，init = `outputs/e25j_f1/best.pt`，示范与 ref 相同，各 850 episode。成功率 **70.9 / 70.4 / 67.3**（均值 69.5；scratch 68.0，ref 73.4）。探针 exit 0。f10（18977169）运行中。
