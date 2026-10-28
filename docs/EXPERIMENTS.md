@@ -2608,3 +2608,23 @@ dev / new 拆分（agg_split）：
 
 - 遮蔽（SOPT 臂整个 episode 关闭 SOPT 输入）：干净 76.1 → **29.3**（−46.8），20° 45.4 → **22.7**（−22.7）。绝对代价在干净条件更大，与 P2 的预期方向相反；关闭 SOPT 属于分布外（E34），DP 对 SOPT 输入的依赖本身很强。单 seed，按预注册等 DP s1 / GR00T s0–1 / SmolVLA-goal s0–1 齐后计算 P1 / P2。
 - 运维：17:30–18:15 本机 VPN 断开，Jubail 不可达；后台 runner / watcher 只做查询，无误操作。当前 4 个 E41 作业（dp s1、groot s0 / s1、smolvla_goal s0）因集群拥挤（nvidia 分区 360 个排队作业）PENDING，Slurm 估计 10-30 16:38 开始。
+
+## E41 进度：SmolVLA-goal s0、GR00T s0（2026-10-29，新的两两并行脚本 c9ad6c9）
+- 作业 01:49–02:33 开始，比 Slurm 估计（10-30）早。
+- SmolVLA-goal s0（Jubail 18981828，cn016，54 min；串行约需 1.8 h）：4 次剂量评测均 exit 0，各 500 episode。
+- GR00T s0（none = e22，SOPT = e31 xattn；18980890，cn264，1.6 h）：剂量 4 次 + 遮蔽 2 次均 exit 0，各 850 episode。
+- 剂量（s0；干净与 20° 来自 E37 / 主表）：
+
+| 宿主 | 条件 | none | SOPT | 差 |
+|---|---|---|---|---|
+| SmolVLA-goal | 干净 | 75.0 | 80.6 | +5.6 |
+| SmolVLA-goal | 10° | 67.4 | 74.4 | +7.0 |
+| SmolVLA-goal | 20° | 54.8 | 66.6 | +11.8 |
+| SmolVLA-goal | 30° | 48.4 | 70.2 | **+21.8** |
+| GR00T xattn | 干净 | 81.9 | 80.4 | −1.5 |
+| GR00T xattn | 10° | 73.5 | 80.0 | +6.5 |
+| GR00T xattn | 20° | 42.1 | 70.5 | +28.4 |
+| GR00T xattn | 30° | 24.8 | 55.5 | **+30.7** |
+
+- 遮蔽（GR00T s0 SOPT 臂关闭 SOPT 输入）：干净 80.4 → 24.7（−55.7），20° 70.5 → 11.5（−59.0）。
+- s0 小结（描述性）：SmolVLA-goal 与 GR00T 的增益随偏转角单调增大；DP s0 在 20° 最大（+13.3）、30° 略降（+11.4）。三宿主 30° 交互 − 10° 交互（P1 的单 seed 版本）：DP +2.2，SmolVLA-goal +14.8，GR00T +24.2。遮蔽代价 GR00T 在 20° 略大于干净，DP 相反。等 s1（dp 18980876、groot 18980898 运行中，smolvla_goal s1 待提交）。
