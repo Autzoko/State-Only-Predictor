@@ -2485,3 +2485,7 @@ dev / new 拆分（agg_split）：
   - DP 增益曲线（3 seed，簇 bootstrap）：k1 −0.4 [−4.0, +3.3]，k2 −1.3 [−5.5, +2.7]，k5 +4.6 [+1.8, +7.5]，k10 +5.4 [+3.0, +7.8]。增益在 k ≥ 5 出现，k ≤ 2 时为 0。（加入 k10 后 bootstrap 的随机流变化，k1 预训练效应 CI 末位变为 [−3.1, +5.5]，低数据增益 [−3.9, +2.2]。）
 - DP k25 s0 expert_droid（Jubail 18973867，1.3 h）：训练、评测 exit 0；k=25（425 条示范，samples 65725，k10 示范为其子集），seed 0、prior p0；850 episode。成功率 **94.6**。同 seed none（18973789）仍在训练，配对待其完成。
 - DP k25 s1 none（Jubail 18973872，1.2 h）：训练、评测 exit 0；k=25、seed 1，示范与 s0 相同；850 episode。成功率 **89.8**。s1 droid（18974001）评测中。
+- DP k25 s1 expert_droid（Jubail 18974001，cn258，1.2 h）：训练、评测 exit 0；k=25、seed 1、samples 65725、prior p0，示范与 none 相同；850 episode 一一对应。成功率 **94.1**；对 none（89.8）72:35（p=4.5e-4，+4.3）。
+- **运维：取消并重提 DP k25 s0 none**（18973789，cn256）。该作业 03:57 开始，1h53m 只训练到 10k / 30k 步：日志呈"几百步 → 停 5–13 分钟"的阵发模式（瞬时速度 10 it/s 正常），同时段其它 k25 作业在别的节点上 55 min 跑完 30k 步，判断为 cn256 的 I/O 问题。按当前速度还需约 10 h。
+  - 05:50 scancel；cancelled 作业的 `metrics.jsonl` 与训练日志改名为 `*.cancelled_18973789.*`（JsonlLogger 是追加写，避免与重跑混在一起）；输出目录无 final.pt，重跑从头训练，配方与 run 名不变。
+  - 重提行放在队首，加 `SBATCH_EXCLUDE=cn014,cn015,cn270,cn256`。
