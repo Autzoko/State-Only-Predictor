@@ -2491,3 +2491,7 @@ dev / new 拆分（agg_split）：
   - 重提行放在队首，加 `SBATCH_EXCLUDE=cn014,cn015,cn270,cn256`。
   - 更正：`SBATCH_EXCLUDE` 环境变量未覆盖脚本内的 `#SBATCH --exclude`，第一次重提（18974314）仍落在 cn256，12 s 后取消（未写出 metrics；日志会被重跑覆盖）。改为在 sbatch 命令行传 `--exclude=cn014,cn015,cn270,cn256`，重提为 **18974318**（cn008，ExcNodeList 已含 cn256）。
 - DP k25 s2 none（Jubail 18974264，1.2 h）/ expert_droid（18974267，1.2 h）：训练、评测均 exit 0；k=25、seed 2、samples 65725、prior p0，示范与 s1 相同；850 episode 一一对应。none **91.2**，droid **93.6**；配对 58:37（p=0.040，+2.4）。k25 只差 s0 none（18974318 重跑中）。
+- DP k25 s0 none 重跑（Jubail 18974318，cn008，1.2 h）：训练、评测 exit 0；k=25、seed 0、samples 65725，示范与 s1 / s2 相同；850 episode；`metrics.jsonl` 300 行（第 100 → 30000 步，未与取消的那次混合）。成功率 **92.7**；droid（94.6）对 none 45:29（p=0.081，+1.9）。
+  - **DP k25 3 seed 已齐**：none 92.7 / 89.8 / 91.2，droid 94.6 / 94.1 / 93.6。`contrast_boot.py`：增益 **+2.9 [+1.1, +4.7]**（p=2e-4）。
+  - DP 增益曲线（3 seed）：k1 −0.4，k2 −1.3，k5 +4.6，k10 +5.4，k25 +2.9（k25 接近天花板，none 已 91%）。
+- DP kall s0 none（Jubail 18974313，cn005，1.2 h）：训练、评测 exit 0；k=全部（771 条示范，samples 117739，k25 示范为其子集），seed 0；850 episode。成功率 **93.1**。
