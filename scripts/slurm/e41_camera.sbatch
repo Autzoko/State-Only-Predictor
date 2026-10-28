@@ -33,6 +33,11 @@ ev() {  # $1 run, $2 perturb spec or "clean", $3 tag, extra args...
   [ -f $o.json ] || python scripts/vla_eval.py --ckpt outputs/$r/final.pt --n-init 50 \
     $([ $p = clean ] || echo --perturb $p) --out $o.json "$@" > logs/$r.e41_${t}_${p/:/}.log 2>&1
   echo "$r $p $t exit $? $(date -Is) $(python -c "import json;print(json.load(open('$o.json'))['success_rate'])" 2>/dev/null)"; }
-for r in $NONE $SOPT; do for p in camera:1 camera:3; do ev $r $p dose; done; done
-if [ $H != smolvla_goal ]; then for p in clean camera:2; do ev $SOPT $p mask --sopt-mask-grasp -1; done; fi
+todo=()
+for r in $NONE $SOPT; do for p in camera:1 camera:3; do todo+=("$r $p dose"); done; done
+if [ $H != smolvla_goal ]; then for p in clean camera:2; do todo+=("$SOPT $p mask --sopt-mask-grasp -1"); done; fi
+# Evaluations are independent (own simulator processes, episodes seeded by init) and simulation-bound (~15% GPU when
+# run one at a time), so EVAL_PAR of them share the GPU; peak RSS ~70 GB per evaluation, 2 fit in --mem=160G.
+P=${EVAL_PAR:-2}
+for ((i = 0; i < ${#todo[@]}; i += P)); do for x in "${todo[@]:i:P}"; do ev $x & done; wait; done
 echo "end=$(date -Is)"
