@@ -2489,3 +2489,4 @@ dev / new 拆分（agg_split）：
 - **运维：取消并重提 DP k25 s0 none**（18973789，cn256）。该作业 03:57 开始，1h53m 只训练到 10k / 30k 步：日志呈"几百步 → 停 5–13 分钟"的阵发模式（瞬时速度 10 it/s 正常），同时段其它 k25 作业在别的节点上 55 min 跑完 30k 步，判断为 cn256 的 I/O 问题。按当前速度还需约 10 h。
   - 05:50 scancel；cancelled 作业的 `metrics.jsonl` 与训练日志改名为 `*.cancelled_18973789.*`（JsonlLogger 是追加写，避免与重跑混在一起）；输出目录无 final.pt，重跑从头训练，配方与 run 名不变。
   - 重提行放在队首，加 `SBATCH_EXCLUDE=cn014,cn015,cn270,cn256`。
+  - 更正：`SBATCH_EXCLUDE` 环境变量未覆盖脚本内的 `#SBATCH --exclude`，第一次重提（18974314）仍落在 cn256，12 s 后取消（未写出 metrics；日志会被重跑覆盖）。改为在 sbatch 命令行传 `--exclude=cn014,cn015,cn270,cn256`，重提为 **18974318**（cn008，ExcNodeList 已含 cn256）。
