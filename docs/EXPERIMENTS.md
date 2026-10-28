@@ -2517,3 +2517,7 @@ dev / new 拆分（agg_split）：
 - DP 的两个预注册分量：低数据增益（k1、k2 平均）**−0.8 [−3.9, +2.3]**（p=0.59）；增益下降（k1、k2、k5 平均 − k25、全部平均）**−1.2 [−3.5, +1.1]**（p=0.31）。DP 上两者方向都与假设相反或为 0。
 - 注：k5 的 CI 与主表（stats_all，[+1.8, +7.5]）末位不同，来自两个脚本不同的 bootstrap 随机流；点估计一致。论文 k5 引主表口径。
 - **解读**：DP 上 SOPT 增益对示范数呈倒 U 形——k ≤ 2 时为 0，k5–k10 最大（+4.6 / +5.4），k ≥ 25 随天花板回落。"低数据收益最大"在 DP 上不成立；更准确的说法是"SOPT 需要每任务约 5 条以上示范才能被宿主利用，收益在中等数据量最大"。P1 / P2 的最终判定（两宿主平均，Holm）待 SmolVLA 部分（队列中 36 个作业）。
+
+## E37s 进度（2026-10-28）
+- SmolVLA-goal s1 scratch（Jubail 18975172，cn257，2.0 h）：5 个扰动评测均 exit 0，各 50 init × 10 任务 = 500 episode。成功率 camera 2 **79.6** / light 3 83.6 / texture 2 72.8 / noise 2 87.2 / robot 2 69.0。其余 3 个作业（DP s0 / s1、SmolVLA-goal s0）各完成 3 项，运行中。4 个齐后按预注册跑 `contrast_boot.py --spec configs/e37s_contrasts.json`。
+- E18r f1（`e25_trunk.sbatch VARIANT=f1`，18977035）11:58 开始。
