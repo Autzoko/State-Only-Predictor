@@ -2495,3 +2495,4 @@ dev / new 拆分（agg_split）：
   - **DP k25 3 seed 已齐**：none 92.7 / 89.8 / 91.2，droid 94.6 / 94.1 / 93.6。`contrast_boot.py`：增益 **+2.9 [+1.1, +4.7]**（p=2e-4）。
   - DP 增益曲线（3 seed）：k1 −0.4，k2 −1.3，k5 +4.6，k10 +5.4，k25 +2.9（k25 接近天花板，none 已 91%）。
 - DP kall s0 none（Jubail 18974313，cn005，1.2 h）：训练、评测 exit 0；k=全部（771 条示范，samples 117739，k25 示范为其子集），seed 0；850 episode。成功率 **93.1**。
+- DP kall s0 expert_scratch（Jubail 18974482，cn259，1.2 h）：训练、评测 exit 0；k=全部、seed 0、samples 117739，示范与 none 相同；850 episode 一一对应。成功率 **95.2**；对 none（93.1）50:32（p=0.060）。
