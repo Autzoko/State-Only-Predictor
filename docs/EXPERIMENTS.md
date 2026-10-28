@@ -2498,3 +2498,4 @@ dev / new 拆分（agg_split）：
 - DP kall s0 expert_scratch（Jubail 18974482，cn259，1.2 h）：训练、评测 exit 0；k=全部、seed 0、samples 117739，示范与 none 相同；850 episode 一一对应。成功率 **95.2**；对 none（93.1）50:32（p=0.060）。
 - DP kall s0 expert_droid（Jubail 18974502，cn258，1.2 h）：训练、评测 exit 0；k=全部、seed 0、samples 117739、prior p0，示范相同；850 episode 一一对应。成功率 **94.6**。kall s0 三臂：none 93.1 / scratch 95.2 / droid 94.6；droid vs none 53:40（p=0.21），droid vs scratch 33:38（p=0.64）。
 - DP kall s1 none（Jubail 18974530，cn003，1.2 h）：训练、评测 exit 0；k=全部、seed 1、samples 117739，示范与 s0 相同；850 episode。成功率 **93.9**。
+- DP kall s1 expert_scratch（Jubail 18974535，cn004，1.3 h）：训练、评测 exit 0；k=全部、seed 1、samples 117739，示范与 none 相同；850 episode 一一对应。成功率 **94.8**；对 none（93.9）46:38（p=0.45）。
