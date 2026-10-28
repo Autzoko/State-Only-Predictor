@@ -2471,3 +2471,10 @@ dev / new 拆分（agg_split）：
 - DP k10 s0 none（Jubail 18972375，1.2 h）：训练、评测 exit 0；k=10（170 条示范，samples 26462，k2 的示范为其子集），seed 0；850 episode。成功率 **82.0**（同 seed：k1 48.4 / k2 64.7 / k5 73.6）。s0 droid（18972439）、s1 none（18972546）运行中。
 - DP k10 s0 expert_droid（Jubail 18972439，1.3 h）：训练、评测 exit 0；k=10、seed 0、samples 26462、prior p0，示范与 none 相同；850 episode 一一对应。成功率 **87.3**；对 none（82.0）93:48（p=2e-4，+5.3）。s0 上 DP 增益：k1 −1.6 / k2 −6.3 / k5 +2.5 / k10 +5.3。
 - DP k10 s1 none（Jubail 18972546，1.3 h）：训练、评测 exit 0；k=10、seed 1、samples 26462，示范与 s0 相同；850 episode。成功率 **79.9**。s1 droid（18973032）、s2 none / droid（18973120 / 18973265）运行中。
+
+## E40 阶段 1 完成：DP 宿主动作预训练（2026-10-28，Jubail 18972066，cn002，3.0 h）
+- smoke（预训练 → 从宿主初始化接 expert_droid → 1 init 评测）exit 0；init-host 加载 398 个张量，新建 127 个（sopt.*）。
+- 宿主预训练 exit 0：`e40_dp_host_train`，suite libero90_train（LIBERO-90 train 划分 52 个任务的全部示范，2725 条，samples 388710），task_vocab all，100k 步，bs 64，seed 0，commit 6159595。
+- 防泄漏：`vla_train.py` 断言 train 划分任务与 17 个评测任务及 E4b 任务无交集，断言通过（作业未报错）。
+- loss：0.97（第 100 步）→ 0.031（50k）→ 0.026（100k），平稳收敛。
+- 阶段 2（`_hpre`，k5，none / expert_droid × seed 0–2）在队列中按原顺序排在 E39 DP k25 / 全部、E37s、E18r、E41 之后。
