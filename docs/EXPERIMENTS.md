@@ -2706,3 +2706,4 @@ dev / new 拆分（agg_split）：
 - SmolVLA k2 s0 expert_droid（Jubail 18994898，cn256，2.6 h；cn256 上训练速度正常）：训练、评测 exit 0；k=2、seed 0、samples 5367、prior p0，示范相同；850 episode 一一对应。成功率 **61.5**；对 none（55.9）123:75（**+5.6**，p=8e-4）。
 - SmolVLA k2 s1 none（Jubail 18995301，cn254，2.5 h）：训练、评测 exit 0；k=2、seed 1、samples 5367，示范与 s0 相同；850 episode。成功率 **54.5**（s0 55.9）。
 - SmolVLA k2 s1 expert_droid（Jubail 18996264，cn255，2.7 h）：训练、评测 exit 0；k=2、seed 1、samples 5367、prior p0，示范相同；850 episode 一一对应。成功率 **64.8**；对 none（54.5）150:62（**+10.3**，p=1.3e-9）。SmolVLA k2 两 seed 增益 +5.6 / +10.3。
+- SmolVLA k2 s2 none（Jubail 18996762，cn016，2.5 h）：训练、评测 exit 0；k=2、seed 2、samples 5367，示范相同；850 episode。成功率 **57.1**（k2 none 3 seed：55.9 / 54.5 / 57.1）。s2 droid（18997147）运行中。
