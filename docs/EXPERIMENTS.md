@@ -2688,3 +2688,4 @@ dev / new 拆分（agg_split）：
   - k1 s0 三臂：none 45.3 / scratch 47.9 / droid 53.4。droid vs none 134:65（**+8.1**，p=1.1e-6），droid vs scratch 103:56（p=2e-4）。
   - 与 DP 相反：DP 在 k1 无增益（−0.4），SmolVLA 在 k1 s0 有大增益。单 seed，等 s1 / s2。
 - SmolVLA k1 s1 none（Jubail 18989650，cn254，2.6 h）：训练、评测 exit 0；k=1、seed 1、samples 2697，示范与 s0 相同；850 episode。成功率 **44.1**（s0 45.3）。
+- SmolVLA k1 s1 expert_scratch（Jubail 18990106，cn262，2.6 h）：训练、评测 exit 0；k=1、seed 1、samples 2697，示范相同；850 episode 一一对应。成功率 **47.4**；对 none（44.1）70:42（p=0.010）。
