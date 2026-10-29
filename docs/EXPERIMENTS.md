@@ -2689,3 +2689,4 @@ dev / new 拆分（agg_split）：
   - 与 DP 相反：DP 在 k1 无增益（−0.4），SmolVLA 在 k1 s0 有大增益。单 seed，等 s1 / s2。
 - SmolVLA k1 s1 none（Jubail 18989650，cn254，2.6 h）：训练、评测 exit 0；k=1、seed 1、samples 2697，示范与 s0 相同；850 episode。成功率 **44.1**（s0 45.3）。
 - SmolVLA k1 s1 expert_scratch（Jubail 18990106，cn262，2.6 h）：训练、评测 exit 0；k=1、seed 1、samples 2697，示范相同；850 episode 一一对应。成功率 **47.4**；对 none（44.1）70:42（p=0.010）。
+- SmolVLA k1 s1 expert_droid（Jubail 18990411，cn016，2.7 h）：训练、评测 exit 0；k=1、seed 1、samples 2697、prior p0，示范相同；850 episode 一一对应。成功率 **52.0**；对 none（44.1）122:55（**+7.9**，p=5.2e-7），对 scratch（47.4）97:58（p=0.0022）。SmolVLA k1 两 seed 增益 +8.1 / +7.9，与 DP k1（−0.4）方向相反。
