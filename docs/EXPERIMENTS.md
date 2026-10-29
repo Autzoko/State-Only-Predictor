@@ -2691,3 +2691,4 @@ dev / new 拆分（agg_split）：
 - SmolVLA k1 s1 expert_scratch（Jubail 18990106，cn262，2.6 h）：训练、评测 exit 0；k=1、seed 1、samples 2697，示范相同；850 episode 一一对应。成功率 **47.4**；对 none（44.1）70:42（p=0.010）。
 - SmolVLA k1 s1 expert_droid（Jubail 18990411，cn016，2.7 h）：训练、评测 exit 0；k=1、seed 1、samples 2697、prior p0，示范相同；850 episode 一一对应。成功率 **52.0**；对 none（44.1）122:55（**+7.9**，p=5.2e-7），对 scratch（47.4）97:58（p=0.0022）。SmolVLA k1 两 seed 增益 +8.1 / +7.9，与 DP k1（−0.4）方向相反。
 - SmolVLA k1 s2 none（Jubail 18990538，cn255，2.6 h）：训练、评测 exit 0；k=1、seed 2，示范相同；850 episode。成功率 **43.9**（k1 none 3 seed：45.3 / 44.1 / 43.9）。
+- 运维：剩余 37 个排队作业的 sbatch 命令行加 `--exclude=cn014,cn015,cn270,cn256`（cn256 曾出现阵发 I/O 停顿；只改资源申请，不影响结果）。已在 cn256 上运行的 SmolVLA k2 s0 droid（18994898）保留，监视其训练速度。
