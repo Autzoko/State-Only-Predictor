@@ -2694,3 +2694,11 @@ dev / new 拆分（agg_split）：
 - 运维：剩余 37 个排队作业的 sbatch 命令行加 `--exclude=cn014,cn015,cn270,cn256`（cn256 曾出现阵发 I/O 停顿；只改资源申请，不影响结果）。已在 cn256 上运行的 SmolVLA k2 s0 droid（18994898）保留，监视其训练速度。
 - SmolVLA k1 s2 expert_scratch（Jubail 18990630，cn254，2.7 h）：训练、评测 exit 0；k=1、seed 2，示范相同；850 episode 一一对应。成功率 **49.4**；对 none（43.9）86:39（p=3e-5）。SmolVLA k1 scratch 3 seed：47.9 / 47.4 / 49.4，三个 seed 都高于 none（与 DP 相反：DP k1 scratch 低于 none）。
 - 新提交作业的 ExcNodeList 已含 cn256（18995301 核对）。
+- SmolVLA k1 s2 expert_droid（Jubail 18992016，cn262，2.6 h）：训练、评测 exit 0；k=1、seed 2、samples 2697、prior p0，示范相同；850 episode 一一对应。成功率 **50.8**；对 none（43.9）99:40（p=6e-7），对 scratch（49.4）73:61（p=0.34）。
+
+### E39 中期：SmolVLA k1 已齐（2026-10-29 22:55；`contrast_boot.py`，3 seed）
+| 宿主 | none | scratch | droid | 增益 droid − none | 预训练 droid − scratch |
+|---|---|---|---|---|---|
+| SmolVLA k1 | 45.3 / 44.1 / 43.9（44.4） | 47.9 / 47.4 / 49.4（48.2） | 53.4 / 52.0 / 50.8（52.1） | **+7.6 [+4.1, +11.5]**（p=1e-4） | **+3.8 [+1.3, +6.5]**（p=0.003） |
+| DP k1（对照） | 47.5 | 45.8 | 47.0 | −0.4 [−4.0, +3.3] | +1.2 [−3.0, +5.6] |
+- SmolVLA 的 k1 增益（+7.6）大于其 k5 增益（+5.7 [+3.2, +8.3]），符合"低数据收益更大"；DP 相反。两宿主在低数据端方向相反，P1（两宿主平均）的结果取决于 SmolVLA k2；按预注册等齐后计算。
