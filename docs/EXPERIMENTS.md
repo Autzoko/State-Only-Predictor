@@ -2703,3 +2703,4 @@ dev / new 拆分（agg_split）：
 | DP k1（对照） | 47.5 | 45.8 | 47.0 | −0.4 [−4.0, +3.3] | +1.2 [−3.0, +5.6] |
 - SmolVLA 的 k1 增益（+7.6）大于其 k5 增益（+5.7 [+3.2, +8.3]），符合"低数据收益更大"；DP 相反。两宿主在低数据端方向相反，P1（两宿主平均）的结果取决于 SmolVLA k2；按预注册等齐后计算。
 - SmolVLA k2 s0 none（Jubail 18994196，cn016，2.5 h）：训练、评测 exit 0；k=2（34 条示范，samples 5367，k1 示范为其子集），seed 0；850 episode。成功率 **55.9**。
+- SmolVLA k2 s0 expert_droid（Jubail 18994898，cn256，2.6 h；cn256 上训练速度正常）：训练、评测 exit 0；k=2、seed 0、samples 5367、prior p0，示范相同；850 episode 一一对应。成功率 **61.5**；对 none（55.9）123:75（**+5.6**，p=8e-4）。
