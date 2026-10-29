@@ -2665,3 +2665,4 @@ dev / new 拆分（agg_split）：
 - 队列推进到 E39 SmolVLA：k1 s0 none（18988181）已提交。
 - DP `_hpre` s1 expert_droid（Jubail 18987274，cn264，1.2 h）：训练、评测 exit 0；init_host 加载 398 / 新建 127（sopt.*），prior p0，示范与 `_hpre` none 相同；850 episode 一一对应。成功率 **83.6**；对 `_hpre` none（81.5）69:51（p=0.12，+2.1）。s1 对照（从头训练宿主）：77.3 − 71.4 = +5.9。
   - 两 seed 增益：从头宿主 +2.5 / +5.9，预训练宿主 +3.7 / +2.1。s2 none（18987453）运行中，s2 droid（18988110）排队；齐后按 `configs/e40_contrasts.json` 计算主检验。
+- DP `_hpre` s2 none（Jubail 18987453，cn004，1.2 h）：训练、评测 exit 0；init_host 加载 398 / 新建 0，task_vocab all，seed 2，示范相同；850 episode。成功率 **81.8**（从头训练的同臂 73.5）。`_hpre` none 3 seed：82.2 / 81.5 / 81.8。只剩 s2 droid（18988110，排队）。
