@@ -2684,3 +2684,6 @@ dev / new 拆分（agg_split）：
 - SmolVLA k1 s0 none（Jubail 18988181，cn010，2.5 h）：训练 20k 步、评测均 exit 0；run 名 `e23_smolvla_none_k1_t17_s0`，k=1（17 条示范，samples 2697，与 DP k1 示范相同），seed 0；850 episode。成功率 **45.3**（SmolVLA k5 none 3 seed 均值 60.7）。
 - 运行中：k1 s0 scratch（18988861）、k1 s0 droid（18989081）、k1 s1 none（18989650）。
 - SmolVLA k1 s0 expert_scratch（Jubail 18988861，cn016，2.7 h）：训练、评测 exit 0；k=1、seed 0、samples 2697，示范与 none 相同；850 episode 一一对应。成功率 **47.9**；对 none（45.3）80:58（p=0.074）。
+- SmolVLA k1 s0 expert_droid（Jubail 18989081，cn255，2.7 h）：训练、评测 exit 0；k=1、seed 0、samples 2697、prior p0，示范相同；850 episode 一一对应。成功率 **53.4**。
+  - k1 s0 三臂：none 45.3 / scratch 47.9 / droid 53.4。droid vs none 134:65（**+8.1**，p<1e-6），droid vs scratch 103:56（p=2e-4）。
+  - 与 DP 相反：DP 在 k1 无增益（−0.4），SmolVLA 在 k1 s0 有大增益。单 seed，等 s1 / s2。
