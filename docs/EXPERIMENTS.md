@@ -2758,3 +2758,6 @@ dev / new 拆分（agg_split）：
 - 两个主检验都由 SmolVLA 驱动；DP 的两个分量都为负或 0。DP 的增益曲线是倒 U 形（k ≤ 2 为 0，k5–k10 最大，k ≥ 25 回落），SmolVLA 是"平台后消失"（k1–k10 约 +6–8，k ≥ 25 约 0）。
 - 两宿主共同点：示范充足（k ≥ 25，none ≥ 82%）时增益都基本消失。
 - 正文措辞建议："SOPT 的收益集中在中低数据量；示范充足时消失。最低数据端是否受益取决于宿主——冻结 VLM、只训动作专家的 SmolVLA 在每任务 1 条示范时收益最大，从头训练的 DP 需要约 5 条示范才能利用 SOPT。"
+
+## E38b 进度：SmolVLA 先验实例（2026-10-30）
+- SmolVLA pB1 s0（`e23_smolvla_expert_droid_k5_t17_pB1_s0`，Jubail 19003354，cn252，2.7 h）：训练、评测 exit 0；prior = `outputs/e25j_base/best.pt`（pB1），k=5、seed 0、samples 13186，示范与 Jubail 主表 none（`_jr` s0）相同；850 episode 一一对应。成功率 **65.2**；对 none（60.1）113:70（**+5.1**，p=0.0018）。同 seed p0 为 64.6（+4.5）。
