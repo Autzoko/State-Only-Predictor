@@ -2761,4 +2761,4 @@ dev / new 拆分（agg_split）：
 
 ## E38b 进度：SmolVLA 先验实例（2026-10-30）
 - SmolVLA pB1 s0（`e23_smolvla_expert_droid_k5_t17_pB1_s0`，Jubail 19003354，cn252，2.7 h）：训练、评测 exit 0；prior = `outputs/e25j_base/best.pt`（pB1），k=5、seed 0、samples 13186，示范与 Jubail 主表 none（`_jr` s0）相同；850 episode 一一对应。成功率 **65.2**；对 none（60.1）113:70（**+5.1**，p=0.0018）。同 seed p0 为 64.6（+4.5）。
-- SmolVLA pB2 s0（Jubail 19003743，cn013，2.6 h）：训练、评测 exit 0；prior = `outputs/e25j_base2/best.pt`（pB2），k=5、seed 0、samples 13186，示范与 none 相同；850 episode 一一对应。成功率 **67.5**；对 none（60.1）118:55（**+7.4**，p=1.6e-6）。s0 三个先验实例：p0 64.6 / pB1 65.2 / pB2 67.5。
+- SmolVLA pB2 s0（Jubail 19003743，cn013，2.6 h）：训练、评测 exit 0；prior = `outputs/e25j_base2/best.pt`（pB2），k=5、seed 0、samples 13186，示范与 none 相同；850 episode 一一对应。成功率 **67.5**；对 none（60.1）118:55（**+7.4**，p=1.9e-6）。s0 三个先验实例：p0 64.6 / pB1 65.2 / pB2 67.5。
