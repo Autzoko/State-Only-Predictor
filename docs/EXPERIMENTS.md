@@ -2764,3 +2764,14 @@ dev / new 拆分（agg_split）：
 - SmolVLA pB2 s0（Jubail 19003743，cn013，2.6 h）：训练、评测 exit 0；prior = `outputs/e25j_base2/best.pt`（pB2），k=5、seed 0、samples 13186，示范与 none 相同；850 episode 一一对应。成功率 **67.5**；对 none（60.1）118:55（**+7.4**，p=1.9e-6）。s0 三个先验实例：p0 64.6 / pB1 65.2 / pB2 67.5。
 - SmolVLA pB1 s1（Jubail 19004513，cn017，2.5 h）/ pB2 s1（19004518，cn255，2.6 h）：训练、评测均 exit 0；prior 分别为 e25j_base / e25j_base2，k=5、seed 1、samples 13186，示范与 `_jr` s1 none 相同；各 850 episode 一一对应。成功率 **66.9** / **68.4**；对 none（57.8）142:64（+9.1，p=5.7e-8）/ 150:60（+10.6，p=4.4e-10）。s1 三个先验实例：p0 66.9 / pB1 66.9 / pB2 68.4。
 - 队列推进到 E38b FastWAM（`sopt-e12`，19005566）。
+- SmolVLA pB1 s2（Jubail 19005375，cn016，2.5 h）/ pB2 s2（19005385，cn013，2.6 h）：训练、评测均 exit 0；prior 分别为 e25j_base / e25j_base2，k=5、seed 2、samples 13186，示范与 s2 none 相同；各 850 episode。成功率 **67.5** / **68.4**。
+
+### E38b SmolVLA 部分完成（2026-10-30 22:20；`stats_all.py`，`configs/e38b_manifest.json` 的 SmolVLA 比较，(seed, task) 簇 bootstrap）
+| 先验实例 | s0 / s1 / s2 | 均值 ± sd | vs none | 95% CI | McNemar p |
+|---|---|---|---|---|---|
+| none | 60.1 / 57.8 / 64.2 | 60.7 ± 3.3 | | | |
+| p0（主表） | 64.6 / 66.9 / 67.8 | 66.4 ± 1.6 | +5.7 | [+3.1, +8.3] | 1.3e-9 |
+| pB1 | 65.2 / 66.9 / 67.5 | 66.5 ± 1.2 | **+5.8** | [+2.9, +8.6] | 2.6e-10 |
+| pB2 | 67.5 / 68.4 / 68.4 | 68.1 ± 0.5 | **+7.4** | [+4.7, +10.0] | 4.9e-16 |
+- 两个 SmolVLA 主检验（pB1 / pB2 vs none）都通过；预注册的 Holm 是对 4 个主检验（含 FastWAM 2 个）一起校正，FastWAM 齐后给出最终 Holm（当前 p 值量级下不会改变结论）。
+- 三个先验实例的增益：+5.7 / +5.8 / +7.4，均值 +6.3 ± 0.9。pB1 − p0 +0.1 [−1.3, +1.5]，pB2 − p0 +1.6 [+0.2, +3.1]。
