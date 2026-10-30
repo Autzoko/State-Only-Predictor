@@ -2726,3 +2726,4 @@ dev / new 拆分（agg_split）：
   - **SmolVLA k10 3 seed 已齐**：none 67.3 / 69.1 / 71.6（69.3），droid 75.6 / 74.8 / 77.6（76.0）；增益 **+6.7 [+4.1, +9.3]**（p=1e-4）。SmolVLA 增益曲线：k1 +7.6，k2 +6.2，k5 +5.7，k10 +6.7——在 1–10 条示范间基本持平。
 - SmolVLA k25 s0 expert_droid（Jubail 19001070，cn255，2.6 h）：训练、评测 exit 0；k=25、seed 0、samples 65725、prior p0，示范相同；850 episode 一一对应。成功率 **82.0**；对 none（81.3）91:85（p=0.71，+0.7）。k25 s0 上增益基本消失。
 - SmolVLA k25 s1 expert_droid（Jubail 19001819，cn266，2.0 h）：训练、评测 exit 0；k=25、seed 1、samples 65725、prior p0，示范相同；850 episode 一一对应。成功率 **83.8**；对 none（83.6）85:84（p=1，+0.2）。k25 两 seed 增益 +0.7 / +0.2。
+- SmolVLA k25 s2 none（Jubail 19001871，cn263，2.0 h）：训练、评测 exit 0；k=25、seed 2、samples 65725，示范相同；850 episode。成功率 **82.0**（k25 none 3 seed：81.3 / 83.6 / 82.0）。只剩 k25 s2 droid（19002022 运行中）。
