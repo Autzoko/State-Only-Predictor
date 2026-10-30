@@ -2718,3 +2718,4 @@ dev / new 拆分（agg_split）：
 - **P1**（低数据增益，两宿主平均）：**+3.0 [+0.9, +5.3]**，bootstrap p=0.007。P2 尚缺（需 SmolVLA k25 / 全部），Holm 按 2 个主检验校正后 P1 的 p ≤ 2 × 0.007 = 0.014 < 0.05，**无论 P2 结果如何 P1 都通过**。
 - 但 P1 的通过完全由 SmolVLA 驱动：DP 低数据增益 −0.8（CI 含 0），SmolVLA +6.9。写作必须报告宿主异质性，不能写成"SOPT 在低数据时普遍收益最大"。
 - SmolVLA k10 s0 none（Jubail 18997450，cn263，2.0 h）：训练、评测 exit 0；k=10（170 条示范，samples 26462，k2 示范为其子集），seed 0；850 episode。成功率 **67.3**（同 seed k1 45.3 / k2 55.9 / k5 60.1）。
+- SmolVLA k10 s0 expert_droid（Jubail 18999047，cn016，2.6 h）/ k10 s1 expert_droid（18999929，cn268，2.1 h）：训练、评测均 exit 0；k=10、samples 26462、prior p0，示范与 none 相同；各 850 episode。成功率 **75.6** / **74.8**。s0 对 none（67.3）133:62（**+8.3**，p=4e-7）。s1 none（18999515）运行中。
