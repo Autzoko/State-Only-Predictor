@@ -2734,3 +2734,4 @@ dev / new 拆分（agg_split）：
 - SmolVLA kall s0 expert_droid（Jubail 19002310，cn253，2.5 h）：训练、评测 exit 0；k=全部、seed 0、samples 117739、prior p0，示范相同；850 episode 一一对应。成功率 **84.2**。kall s0 三臂：none 84.1 / scratch 86.7 / droid 84.2；droid vs none 83:82（p=1），droid vs scratch 64:85（p=0.10）。
 - SmolVLA kall s1 none（Jubail 19002561，cn266，2.1 h）：训练、评测 exit 0；k=全部、seed 1、samples 117739，示范与 s0 相同；850 episode。成功率 **84.7**。
 - SmolVLA kall s1 expert_scratch（Jubail 19002565，cn264，2.0 h）：训练、评测 exit 0；k=全部、seed 1、samples 117739，示范与 none 相同；850 episode 一一对应。成功率 **87.1**；对 none（84.7）69:49（p=0.080）。
+- SmolVLA kall s1 expert_droid（Jubail 19002891，cn268，2.0 h）：训练、评测 exit 0；k=全部、seed 1、samples 117739、prior p0，示范相同；850 episode 一一对应。成功率 **85.6**；对 none（84.7）77:69（p=0.56），对 scratch（87.1）64:76（p=0.35）。剩 kall s2 三臂（排队 / 运行中）。
