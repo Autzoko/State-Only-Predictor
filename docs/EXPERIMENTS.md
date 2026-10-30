@@ -2731,3 +2731,4 @@ dev / new 拆分（agg_split）：
   - **SmolVLA k25 3 seed 已齐**：none 81.3 / 83.6 / 82.0（82.3），droid 82.0 / 83.8 / 82.8（82.9）；增益 **+0.5 [−1.8, +2.7]**（p=0.62）。SmolVLA 曲线：k1 +7.6 → k2 +6.2 → k5 +5.7 → k10 +6.7 → k25 +0.5。
 - SmolVLA kall s0 none（Jubail 19002088，cn011，2.3 h）：训练、评测 exit 0；k=全部（771 条示范，samples 117739，k25 示范为其子集），seed 0；850 episode。成功率 **84.1**。
 - SmolVLA kall s0 expert_scratch（Jubail 19002276，cn016，2.5 h）：训练、评测 exit 0；k=全部、seed 0、samples 117739，示范与 none 相同；850 episode 一一对应。成功率 **86.7**；对 none（84.1）87:65（p=0.088）。
+- SmolVLA kall s0 expert_droid（Jubail 19002310，cn253，2.5 h）：训练、评测 exit 0；k=全部、seed 0、samples 117739、prior p0，示范相同；850 episode 一一对应。成功率 **84.2**。kall s0 三臂：none 84.1 / scratch 86.7 / droid 84.2；droid vs none 83:82（p=1），droid vs scratch 64:85（p=0.10）。
