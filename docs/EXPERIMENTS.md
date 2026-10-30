@@ -2775,3 +2775,4 @@ dev / new 拆分（agg_split）：
 | pB2 | 67.5 / 68.4 / 68.4 | 68.1 ± 0.5 | **+7.4** | [+4.7, +10.0] | 4.9e-16 |
 - 两个 SmolVLA 主检验（pB1 / pB2 vs none）都通过；预注册的 Holm 是对 4 个主检验（含 FastWAM 2 个）一起校正，FastWAM 齐后给出最终 Holm（当前 p 值量级下不会改变结论）。
 - 三个先验实例的增益：+5.7 / +5.8 / +7.4，均值 +6.3 ± 0.9。pB1 − p0 +0.1 [−1.3, +1.5]，pB2 − p0 +1.6 [+0.2, +3.1]。
+- FastWAM pB2 s0（`e12_wam_expert_droid_k5_t17_pB2_s0`，Jubail 19005634，cn263，7.0 h：训练 2.4 h + 评测 4.6 h）：exit 0；prior = `outputs/e25j_base2/best.pt`，k=5、seed 0、10k 步、bs 16、samples 13186，示范与主表 FastWAM none 相同；850 episode 一一对应。成功率 **56.2**；对 none（41.6）191:67（**+14.6**，p=5.6e-15）。同 seed p0 为 54.4。
