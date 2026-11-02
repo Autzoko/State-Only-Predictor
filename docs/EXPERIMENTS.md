@@ -2776,3 +2776,14 @@ dev / new 拆分（agg_split）：
 - 两个 SmolVLA 主检验（pB1 / pB2 vs none）都通过；预注册的 Holm 是对 4 个主检验（含 FastWAM 2 个）一起校正，FastWAM 齐后给出最终 Holm（当前 p 值量级下不会改变结论）。
 - 三个先验实例的增益：+5.7 / +5.8 / +7.4，均值 +6.3 ± 0.9。pB1 − p0 +0.1 [−1.3, +1.5]，pB2 − p0 +1.6 [+0.2, +3.1]。
 - FastWAM pB2 s0（`e12_wam_expert_droid_k5_t17_pB2_s0`，Jubail 19005634，cn263，7.0 h：训练 2.4 h + 评测 4.6 h）：exit 0；prior = `outputs/e25j_base2/best.pt`，k=5、seed 0、10k 步、bs 16、samples 13186，示范与主表 FastWAM none 相同；850 episode 一一对应。成功率 **56.2**；对 none（41.6）191:67（**+14.6**，p=5.6e-15）。同 seed p0 为 54.4。
+- FastWAM 其余 5 个（pB1 s0 19005566、pB1 s1 19006065、pB2 s1 19006074、pB1 s2 19006588、pB2 s2 19007140；10-31 05:16–14:37 完成，各 9.2–9.4 h）：训练、评测均 exit 0；prior 分别为 e25j_base / e25j_base2，k=5、10k 步、samples 13186，示范与主表 FastWAM none 相同；各 850 episode。成功率 pB1 56.1 / 54.0 / 54.9，pB2 56.2 / 54.7 / 55.2。
+- 运维说明：10-31 至 11-02 期间本会话中断，作业在 Jubail 上照常完成；本地 scratchpad 中较早取回的结果文件被 macOS /tmp 清理清空，E38b 统计所需文件已从 Jubail 重新取回（原始结果均在 `/scratch/ll5582/SOPT/outputs`）。
+
+### E38b 结果（2026-11-02；`stats_all.py --manifest configs/e38b_manifest.json`，(seed, task) 簇 bootstrap，合并 McNemar，Holm 对 4 个主检验）
+| 宿主 | none | p0（主表） | pB1 | pB2 |
+|---|---|---|---|---|
+| SmolVLA | 60.7 | 66.4（+5.7 [+3.1, +8.3]） | 66.5（**+5.8** [+2.9, +8.6]，Holm 2.6e-10） | 68.1（**+7.4** [+4.7, +10.0]，Holm 9.8e-16） |
+| FastWAM | 43.5 | 54.5（+11.0 [+7.8, +14.2]） | 55.0（**+11.5** [+8.4, +14.6]，Holm 8.5e-26） | 55.4（**+11.8** [+8.6, +15.0]，Holm 3.8e-27） |
+- **4 个主检验全部通过** → 按预注册：表 3 写"先验实例复制在 4 个宿主上成立"（DP、TrunkBC 来自 E38，SmolVLA、FastWAM 来自 E38b）。
+- 3 实例增益均值 ± sd：SmolVLA +6.3 ± 0.9，FastWAM +11.4 ± 0.4（DP +3.8 ± 0.7，TrunkBC +4.9 ± 0.5）。实例间差（pB − p0）：SmolVLA +0.1 / +1.6，FastWAM +0.5 / +0.9，均在 ±2 点内。
+- 至此所有已批准、已排队的实验全部完成（队列为空）。
