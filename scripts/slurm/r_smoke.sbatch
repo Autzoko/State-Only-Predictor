@@ -32,7 +32,7 @@ for v in diffusion:64 smolvla:32; do n=${v%%:*}; bs=${v#*:}; r=r_smoke_${n}_kin
     --workers 8 > logs/$r.log 2>&1 && grep "kinematic features" logs/$r.log && \
   python scripts/vla_eval.py --ckpt outputs/$r/final.pt --out outputs/$r/rollouts.json --n-init 1 --max-steps 40 \
     > logs/$r.eval.log 2>&1
-  rc=$?; echo "smoke $n exit $rc $(date -Is)"; [ $rc = 0 ] || { tail -5 logs/$r.log logs/$r.eval.log; fail=1; }
+  rc=$?; echo "smoke $n exit $rc $(date -Is)"; [ $rc = 0 ] || { tail -n 5 logs/$r.log logs/$r.eval.log; fail=1; }
   python - <<PY || fail=1
 import torch
 ck = torch.load("outputs/$r/final.pt", map_location="cpu", weights_only=False)

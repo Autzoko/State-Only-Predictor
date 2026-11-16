@@ -27,17 +27,26 @@ def setup_env_vars(sopt_data: str | os.PathLike) -> None:
     os.environ.setdefault("HF_HOME", str(sopt_data / "hf_cache"))
     cfg_dir = sopt_data / "libero_cfg"
     os.environ["LIBERO_CONFIG_PATH"] = str(cfg_dir)
-    if not (cfg_dir / "config.yaml").exists():
-        import importlib.util
+    import importlib.util
 
-        import yaml
+    import yaml
 
-        root = Path(importlib.util.find_spec("libero").submodule_search_locations[0]) / "libero"
+    root = Path(importlib.util.find_spec("libero").submodule_search_locations[0]) / "libero"
+    f = cfg_dir / "config.yaml"
+    cfg = {"benchmark_root": str(root), "bddl_files": str(root / "bddl_files"),
+           "init_states": str(root / "init_files"), "datasets": str(sopt_data / "libero_datasets"),
+           "assets": str(root / "assets")}
+    try:
+        cur = yaml.safe_load(f.read_text())
+    except (OSError, yaml.YAMLError):
+        cur = None
+    # (re)written when missing or when it points at another libero install (e.g. a rebuilt environment); atomically,
+    # since the simulator workers call this concurrently
+    if cur != cfg:
         cfg_dir.mkdir(parents=True, exist_ok=True)
-        cfg = {"benchmark_root": str(root), "bddl_files": str(root / "bddl_files"),
-               "init_states": str(root / "init_files"), "datasets": str(sopt_data / "libero_datasets"),
-               "assets": str(root / "assets")}
-        (cfg_dir / "config.yaml").write_text(yaml.dump(cfg))
+        tmp = cfg_dir / f".config.{os.getpid()}.yaml"
+        tmp.write_text(yaml.dump(cfg))
+        os.replace(tmp, f)
 
 
 def dataset_to_sim_gripper(a: np.ndarray) -> np.ndarray:

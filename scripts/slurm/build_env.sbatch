@@ -35,10 +35,16 @@ $UV pip install --python $E/bin/python torch==2.7.1 torchvision==0.22.1 \
   hf-libero==0.1.4 robosuite==1.4.0 mujoco==3.8.1 PyOpenGL==3.1.10 egl-probe==1.0.2 \
   numpy==2.2.6 pandas==2.3.3 pyarrow==25.0.1 scipy==1.18.1 omegaconf==2.3.1 einops==0.8.2 av==15.1.0 \
   safetensors==0.8.0 huggingface_hub==1.33.0 pyyaml pillow
+# LIBERO assets (meshes / scenes) are not in the hf-libero wheel; hf-libero uses <package>/assets when present, as the
+# former environment did. lerobot/libero-assets is pinned (unchanged since 2025-11-03).
+A=$E/lib/python3.12/site-packages/libero/libero/assets
+[ -d $A/scenes ] || HF_HUB_OFFLINE=0 $E/bin/python -c "from huggingface_hub import snapshot_download as s; \
+s('lerobot/libero-assets', repo_type='dataset', revision='0b3ea86be5fe169d0fd036ae63d1070ec09e90f6', local_dir='$A')"
+echo "libero assets: $(find $A -type f | wc -l) files"
 $UV pip freeze --python $E/bin/python > logs/sopt-env-freeze.txt
 echo "installed $(wc -l < logs/sopt-env-freeze.txt) packages $(date -Is)"
 export PYTHONPATH=/scratch/ll5582/SOPT/pydeps:$PWD/src HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache HF_HUB_OFFLINE=1
-export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl LIBERO_CONFIG_PATH=/scratch/ll5582/SOPT_DATA/libero_cfg
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SOPT_DATA=/scratch/ll5582/SOPT_DATA LIBERO_CONFIG_PATH=/scratch/ll5582/SOPT_DATA/libero_cfg
 $E/bin/python - <<'PY'
 import importlib
 mods = ["torch", "torchvision", "numpy", "pandas", "pyarrow", "scipy", "omegaconf", "einops", "av", "PIL", "yaml",
@@ -60,6 +66,14 @@ import torch
 if torch.__version__ != "2.7.1+cu118":
     bad.append(f"torch {torch.__version__}")
 x = torch.randn(256, 256, device="cuda"); print("cuda", torch.cuda.get_device_name(0), float((x @ x).sum()) != 0)
+import os
+from sopt.sim.libero_env import setup_env_vars
+setup_env_vars(os.environ["SOPT_DATA"])  # before libero.libero reads its config (never the shared ~/.libero)
+from libero.libero import get_assets_path
+for sub in ("articulated_objects", "stable_scanned_objects", "turbosquid_objects", "stable_hope_objects", "scenes"):
+    if not os.path.isdir(os.path.join(get_assets_path(), sub)):
+        bad.append(f"assets/{sub}")
+print("assets", get_assets_path())
 print("ENV", "PASS" if not bad else f"FAIL {bad}")
 PY
 echo "end=$(date -Is)"
