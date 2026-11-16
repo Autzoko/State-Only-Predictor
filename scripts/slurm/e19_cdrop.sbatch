@@ -16,7 +16,7 @@
 source /etc/profile
 set -uo pipefail
 cd /scratch/ll5582/SOPT
-export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=$PWD/src
+export PATH=/scratch/ll5582/SOPT/env/bin:$PATH PYTHONPATH=$PWD/src
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache HF_HUB_OFFLINE=1
 export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS_NUM_THREADS=4
 SUITE=${SUITE:-libero90}; CD=${CDROP:-0.5}; CDT=cd${CD/./}

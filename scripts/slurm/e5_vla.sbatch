@@ -1,6 +1,6 @@
 #!/bin/bash
 # E5 on Jubail: SmolVLA (none / scratch / DROID motion tokens) x (k=5, all), one GPU per arm, then closed-loop eval.
-# Uses the RoboticsNAS python env read-only (same lerobot commit 3f2c29e + hf-libero); code via PYTHONPATH.
+# Uses the project env /scratch/ll5582/SOPT/env (lerobot commit 3f2c29e + hf-libero; build_env.sbatch); code via PYTHONPATH.
 #   sbatch scripts/slurm/e5_vla.sbatch
 #SBATCH --job-name=sopt-e5-vla
 #SBATCH --partition=nvidia
@@ -13,7 +13,7 @@
 source /etc/profile
 set -uo pipefail
 cd /scratch/ll5582/SOPT
-export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=$PWD/src
+export PATH=/scratch/ll5582/SOPT/env/bin:$PATH PYTHONPATH=$PWD/src
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache
 export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) start=$(date -Is)"; nvidia-smi --query-gpu=name --format=csv,noheader

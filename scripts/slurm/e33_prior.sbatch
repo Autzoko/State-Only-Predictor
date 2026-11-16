@@ -18,7 +18,7 @@
 source /etc/profile
 set -uo pipefail
 cd /scratch/ll5582/SOPT
-export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=/scratch/ll5582/SOPT/pydeps:$PWD/src
+export PATH=/scratch/ll5582/SOPT/env/bin:$PATH PYTHONPATH=/scratch/ll5582/SOPT/pydeps:$PWD/src
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA OPENBLAS_NUM_THREADS=4
 D=$SOPT_DATA/processed/droid
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) start=$(date -Is)"
