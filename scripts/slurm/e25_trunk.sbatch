@@ -9,6 +9,7 @@
 #   speed   data.speed_aug=[0.5,2.0] data.speed_aug_prob=0.8
 #   ctx48 / ctx192 / ctx384   history 3.2 / 12.8 / 25.6 s; left_pad = ctx - 96 as in E33 (same anchors as ctx96)
 #   scratch random-init trunk (the E23 scratch arm)
+#   reg / reg1  R3 (2026-11-16): model.objective=ar_regression, pretraining seed 0 / 1 (e2 recipe otherwise)
 #   f1 / f10 DROID 1% / 10% (nested train_fraction; E11 on 17 tasks, E18r/E11r 2026-10-26)
 #   libero  SOPT trained only on LIBERO-90 train-split states (E18 libero_only on 17 tasks). E4a scratch recipe
 #           (s + e2 + libero90 + e4a, lr 3e-4, warmup 300, 3k steps) but checkpoint selection on 10% of the
@@ -34,6 +35,8 @@ case $V in
   ref|scratch) OV="" ;;
   base) OV="seed=1" ;;
   base2) OV="seed=2" ;;
+  reg) OV="model.objective=ar_regression" ;;
+  reg1) OV="model.objective=ar_regression seed=1" ;;
   speed) OV="data.speed_aug=[0.5,2.0] data.speed_aug_prob=0.8" ;;
   f1) OV="data.train_fraction=0.01" ;;
   f10) OV="data.train_fraction=0.1" ;;

@@ -4,6 +4,9 @@
 # Arms in parallel: none / expert_scratch / expert_droid (EE-only SOPT pretrained on DROID only, e13_ar_flow_f100_s_ee).
 # 20k steps (bs 32), then 50 init states x 10 tasks = 500 episodes per arm (OpenVLA step limits).
 #   SUITE=libero_spatial sbatch scripts/slurm/e13_libero_std.sbatch
+# ARMS=<comma-separated, one GPU each; set SBATCH_GRES to match>; CAM=1 adds camera 10 / 20 / 30 deg evaluations
+# (scripts/slurm/cam_evals.sh). R2 (2026-11-16), one GPU:
+#   SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=160G SUITE=libero_goal K=5 SEED=0 ARMS=expert_kin CAM=1 sbatch ...
 #SBATCH --job-name=sopt-e13
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3
@@ -19,7 +22,7 @@ export PATH=/scratch/ll5582/RoboticsNAS/env/bin:$PATH PYTHONPATH=$PWD/src
 export SOPT_DATA=/scratch/ll5582/SOPT_DATA HF_HOME=/scratch/ll5582/SOPT_DATA/hf_cache
 export TOKENIZERS_PARALLELISM=false MUJOCO_GL=egl PYOPENGL_PLATFORM=egl OPENBLAS_NUM_THREADS=4
 S=${SEED:-0}; K=${K:-0}; KS=$([ "$K" -gt 0 ] && echo _k$K); PRIOR=outputs/e13_ar_flow_f100_s_ee/best.pt
-echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE k=$K seed=$S start=$(date -Is)"
+echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE k=$K seed=$S arms=${ARMS:-all} cam=${CAM:-} start=$(date -Is)"
 python scripts/prepare_libero_std.py --suite $SUITE --sopt-data $SOPT_DATA --workers 24 > logs/prep_$SUITE.log 2>&1
 rc=$?; echo "prep exit $rc $(date -Is)"; tail -n 1 logs/prep_$SUITE.log; [ $rc = 0 ] || exit 1
 export HF_HUB_OFFLINE=1
@@ -29,6 +32,8 @@ run() { local name=e13_${SUITE}_$1${KS}_s$S
   echo "$name train exit $? $(date -Is)"
   [ -f outputs/$name/rollouts_n50.json ] || CUDA_VISIBLE_DEVICES=$2 python scripts/vla_eval.py \
     --ckpt outputs/$name/final.pt --out outputs/$name/rollouts_n50.json --n-init 50 > logs/$name.eval_n50.log 2>&1
-  echo "$name eval exit $? $(date -Is)"; }
-run none 0 & run expert_scratch 1 & run expert_droid 2 & wait
+  echo "$name eval exit $? $(date -Is)"
+  [ -z "${CAM:-}" ] || cam_evals $name $2; }
+source scripts/slurm/cam_evals.sh
+g=0; for a in $(echo ${ARMS:-none,expert_scratch,expert_droid} | tr , ' '); do run $a $g & g=$((g+1)); done; wait
 echo "end=$(date -Is)"

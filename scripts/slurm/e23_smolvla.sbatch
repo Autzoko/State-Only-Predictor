@@ -6,6 +6,7 @@
 # SBATCH_GRES to match), PSET=_pB1=<prior>,_pB2=<prior> (E38: expert_droid per prior instance, run names get the tag).
 # One arm on one GPU (1-GPU jobs start much sooner; idle GPUs get jobs cancelled):
 #   SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=120G SUITE=libero90_17 SEED=2 ARM=none sbatch scripts/slurm/e23_smolvla.sbatch
+# R2 (2026-11-16): ARM=expert_kin (explicit kinematics, same injection). R3: PRIOR=outputs/e25j_reg/best.pt PTAG=_reg.
 #SBATCH --job-name=sopt-e23
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3

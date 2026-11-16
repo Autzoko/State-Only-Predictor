@@ -70,6 +70,8 @@ def main():
     policy, pre, post = V.build_policy(prior, arm, ck["action_stats"], chunk=ck["meta"].get("chunk", vt.CHUNK), **extra)
     V.load_trainable(policy, args.ckpt)
     policy.eval()
+    if hasattr(prior, "kin_ready"):  # R2: the fitted standardization must come from the checkpoint
+        assert prior.kin_ready.item() == 1.0, "kinematic arm checkpoint without fitted constants"
     if suite in ("libero90", "libero90_17"):
         venv, feat = TaskVecEnv(args.sopt_data, tasks, perturb=args.perturb), features_20hz
         args.max_steps = args.max_steps or 400

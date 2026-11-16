@@ -9,7 +9,8 @@ betas (0.95, 0.999), weight decay 1e-6, grad clip 10. Actions MIN_MAX (DDPM clip
 (current 17-d SOPT feature) MEAN_STD; images ImageNet MEAN_STD. Diffusion Policy has no language input, so the
 task is given as a one-hot `observation.environment_state` (task order = the training task list).
 Arms: `none`; `expert_scratch` / `expert_droid` add the SOPT last-token feature of the 96-frame history to the
-U-Net's global conditioning vector through a zero-initialized MLP (at init they equal `none`).
+U-Net's global conditioning vector through a zero-initialized MLP (at init they equal `none`). `expert_kin` (R2)
+feeds explicit finite-difference kinematics of the history (sopt.models.kinematic) through the same MLP instead.
 """
 
 from __future__ import annotations
@@ -23,7 +24,7 @@ from torch import nn
 from sopt.models.state_prior import StatePrior
 
 IMAGE_KEYS = ("observation.images.image", "observation.images.image2")
-ARMS = ("none", "expert_scratch", "expert_droid")
+ARMS = ("none", "expert_scratch", "expert_droid", "expert_kin")
 OPT = {"lr": 1e-4, "weight_decay": 1e-6, "clip": 10.0, "betas": (0.95, 0.999)}
 CHUNK = 16
 NEEDS_TASKS = True

@@ -8,6 +8,9 @@
 # with the existing none arm of the same seed / demos / inits):
 #   SBATCH_GRES=gpu:a100:1 SBATCH_MEM_PER_NODE=120G SUITE=libero90_17 SEED=0 ARM=expert_droid \
 #     PRIOR=outputs/e25j_base/best.pt PTAG=_pB1 sbatch scripts/slurm/e21_dp.sbatch
+# R2 (2026-11-16): ARM=expert_kin = explicit finite-difference kinematics through the same injection; CAM=1 adds the
+# camera 10 / 20 / 30 deg evaluations after the clean one (scripts/slurm/cam_evals.sh; request --mem=160G).
+# R3: PRIOR=outputs/e25j_reg/best.pt PTAG=_reg (regression-pretrained prior, e2 recipe otherwise).
 #SBATCH --job-name=sopt-e21
 #SBATCH --partition=nvidia
 #SBATCH --gres=gpu:a100:3
@@ -28,7 +31,7 @@ PRIOR=${PRIOR:-outputs/e2_ar_flow_f100_s/best.pt}; PT=${PTAG:-}
 HOSTARG=""  # E40: INIT_HOST=<host ckpt pretrained on the train-split tasks> (one-hot over all LIBERO-90 tasks)
 if [ -n "${INIT_HOST:-}" ]; then [ -f "$INIT_HOST" ] || { echo "missing host $INIT_HOST"; exit 1; }
   [ -n "$TAG" ] || { echo "INIT_HOST needs a TAG"; exit 1; }; HOSTARG="--init-host $INIT_HOST --task-vocab all"; fi
-echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE seed=$S k=$K steps=$STEPS prior=$PRIOR arms=${ARMS:-${ARM:-all}} pset=${PSET:-} init_host=${INIT_HOST:-} start=$(date -Is)"
+echo "host=$(hostname) commit=$(git rev-parse --short HEAD) suite=$SUITE seed=$S k=$K steps=$STEPS prior=$PRIOR arms=${ARMS:-${ARM:-all}} pset=${PSET:-} init_host=${INIT_HOST:-} cam=${CAM:-} start=$(date -Is)"
 if [ "$S" = 0 ] && [ ! -f outputs/e21_smoke/rollouts.json ] && [ -z "${EVAL_ONLY:-}" ]; then
   python scripts/vla_train.py --vla diffusion --arm expert_droid --k 5 --seed 0 --run e21_smoke --steps 30 --bs 64 \
     --workers 8 > logs/e21_smoke.log 2>&1 && \
@@ -45,7 +48,9 @@ run() { local name=e21_dp_$1_${KN}${TAG}${ST}${PT}_s$S
     [ -f outputs/$name/rollouts_n50$x.json ] || CUDA_VISIBLE_DEVICES=$2 python scripts/vla_eval.py --n-exec $n \
       --ckpt outputs/$name/final.pt --out outputs/$name/rollouts_n50$x.json --n-init 50 > logs/$name.eval_n50$x.log 2>&1
     echo "$name eval n_exec $n exit $? $(date -Is)"
-  done; }
+  done
+  [ -z "${CAM:-}" ] || cam_evals $name $2; }
+source scripts/slurm/cam_evals.sh
 if [ -n "${PSET:-}" ]; then  # expert_droid with several prior instances in parallel, one GPU each (E38)
   g=0; for x in ${PSET//,/ }; do (PT=${x%%=*}; PRIOR=${x#*=}; [ -f "$PRIOR" ] || { echo "missing prior $PRIOR"; exit 1; }
     run expert_droid $g) & g=$((g+1)); done; wait

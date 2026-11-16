@@ -19,8 +19,10 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+from sopt.models.kinematic import KinematicPrior
 from sopt.models.state_prior import StatePrior
-from sopt.policy.data import PolicyDataset, Raw20, build_frame_cache, select_episodes
+from sopt.policy.data import (PolicyDataset, Raw20, build_frame_cache, context_indices, interp_frames,
+                              select_episodes)
 from sopt.train.pretrain import load_checkpoint
 from sopt.utils.config import REPO_ROOT
 from sopt.utils.misc import JsonlLogger, git_rev, seed_everything
@@ -51,10 +53,12 @@ def lr_at(step, total, peak, warmup=1000, final=2.5e-6):
     return final + (peak - final) * 0.5 * (1 + math.cos(math.pi * p))
 
 
-def make_prior(arm: str, prior: str = DROID_PRIOR) -> StatePrior:
+def make_prior(arm: str, prior: str = DROID_PRIOR) -> StatePrior | KinematicPrior:
     ref, _ = load_checkpoint(REPO_ROOT / prior)  # same config + normalization for every arm
     if arm == "droid" or arm.endswith("_droid"):  # expert_droid / adaln_droid / xattn_droid (E31)
         return ref
+    if arm.endswith("_kin"):  # R2: explicit finite-difference kinematics instead of the SOPT encoder (no weights)
+        return KinematicPrior(ref)
     return StatePrior(ref.cfg, {k: v.numpy() for k, v in ref.normalizer.state_dict().items()})
 
 
@@ -151,6 +155,13 @@ def main():
         del host
     ctx_len = prior.cfg.ctx_len  # history length = the prior's (E33: 96 default; longer-context priors see more)
     ds = PolicyDataset(raw, sel, frames, ctx_len, 32, act_chunk=chunk, shift=0)
+    if isinstance(prior, KinematicPrior):  # R2: standardization over every training sample's history (training demos only)
+        ctx_all = np.stack([interp_frames(ds.F[e], context_indices(a, ctx_len)) for e, a in ds.items]).astype(np.float32)
+        prior.fit(torch.from_numpy(ctx_all))
+        assert prior.kin_ready.item() == 1.0 and len(ctx_all) == len(ds)
+        print(f"kinematic features fitted on {len(ctx_all)} samples; std range "
+              f"{prior.kin_std.min().item():.3g}..{prior.kin_std.max().item():.3g}", flush=True)
+        del ctx_all
     V.set_cond_drop(policy, args.cond_drop)
     params = [q for q in policy.parameters() if q.requires_grad]
     groups = V.param_groups(policy, args.lr) if hasattr(V, "param_groups") else [{"params": params, "scale": 1.0}]

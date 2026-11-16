@@ -1,0 +1,2211 @@
+{
+ "name": "R1 / R2 camera shift (DP 17 tasks, SmolVLA libero_goal, GR00T xattn 17 tasks; seeds 0-1)",
+ "contrasts": [
+  {
+   "name": "RR1 GR00T camera 20 deg: interaction(xattn droid - xattn scratch)",
+   "groups": {
+    "groot": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "RR2 camera 20 deg: interaction(kin - none), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T camera 10 deg: interaction(droid - scratch)",
+   "groups": {
+    "groot": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T camera 30 deg: interaction(droid - scratch)",
+   "groups": {
+    "groot": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T camera 10 deg: interaction(scratch - none)",
+   "groups": {
+    "groot": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 10 deg: interaction(droid - scratch), mean of 3 hosts",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 10 deg: interaction(scratch - none), mean of 3 hosts",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 10 deg: interaction(expert_kin - none), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 10 deg: interaction(expert_scratch - expert_kin), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 10 deg: interaction(expert_droid - expert_kin), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T camera 20 deg: interaction(scratch - none)",
+   "groups": {
+    "groot": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 20 deg: interaction(droid - scratch), mean of 3 hosts",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 20 deg: interaction(scratch - none), mean of 3 hosts",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 20 deg: interaction(expert_kin - none), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 20 deg: interaction(expert_scratch - expert_kin), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 20 deg: interaction(expert_droid - expert_kin), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T camera 30 deg: interaction(scratch - none)",
+   "groups": {
+    "groot": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 30 deg: interaction(droid - scratch), mean of 3 hosts",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 30 deg: interaction(scratch - none), mean of 3 hosts",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 30 deg: interaction(expert_kin - none), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 30 deg: interaction(expert_scratch - expert_kin), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "camera 30 deg: interaction(expert_droid - expert_kin), mean of DP, SmolVLA-goal",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp camera 20 deg: interaction(expert_kin - none)",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp camera 20 deg: interaction(expert_scratch - expert_kin)",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp camera 20 deg: interaction(expert_droid - expert_kin)",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal camera 20 deg: interaction(expert_kin - none)",
+   "groups": {
+    "smolvla_goal": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal camera 20 deg: interaction(expert_scratch - expert_kin)",
+   "groups": {
+    "smolvla_goal": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla_goal camera 20 deg: interaction(expert_droid - expert_kin)",
+   "groups": {
+    "smolvla_goal": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_droid_k5_s0",
+        "e13_libero_goal_expert_droid_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_kin_k5_s0",
+        "e13_libero_goal_expert_kin_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dose of scratch - none (30 - 10 deg), mean of 3 hosts",
+   "groups": {
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla_goal": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_expert_scratch_k5_s0",
+        "e13_libero_goal_expert_scratch_k5_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e13_libero_goal_none_k5_s0",
+        "e13_libero_goal_none_k5_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "groot": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_scratch_k5_t17_s0",
+        "e31_groot_xattn_scratch_k5_t17_s1"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "primary": [
+  "RR1 GR00T camera 20 deg: interaction(xattn droid - xattn scratch)",
+  "RR2 camera 20 deg: interaction(kin - none), mean of DP, SmolVLA-goal"
+ ]
+}

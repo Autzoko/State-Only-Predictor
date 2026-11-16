@@ -3,6 +3,8 @@
 # (paired with e22_groot_{none,expert_droid}_k5_t17_s<seed>: same seed, demos, init states).
 #   SET=screen  adaln_droid | xattn_droid + modality dropout 0.3 + SOPT lr x0.1 | xattn_droid plain
 #   SET=scratch adaln_scratch | xattn_scratch (+ the SET=screen regularizers) | (idle)   [controls, after screening]
+#   SET=xscratch R1 (2026-11-16): xattn_scratch plain (no regularizers), the same-structure control of the plain
+#               xattn_droid arm used in E37 / E41; one GPU; CAM=1 adds camera 10 / 20 / 30 deg evaluations
 #   SET=history E33 history length on the host: expert_droid | xattn_droid (+ regularizers) with a longer-context prior
 #               (PRIOR=<ckpt> PTAG=_ctx192 ...; the policy's history = the prior's ctx_len, paired with the ctx96 runs)
 # First: a fresh adaln / xattn policy must equal `none` exactly (zero init) and a 30-step smoke run + 1-init eval of
@@ -51,10 +53,13 @@ run() { local arm=$1 gpu=$2 extra=$3 tag=$4 name=e31_groot_$1_k5$4${PT}_t17_s$S
   echo "$name train exit $? $(date -Is)"
   [ -f outputs/$name/rollouts_n50.json ] || CUDA_VISIBLE_DEVICES=$gpu python scripts/vla_eval.py --ckpt outputs/$name/final.pt \
     --out outputs/$name/rollouts_n50.json --n-init 50 > logs/$name.eval_n50.log 2>&1
-  echo "$name eval exit $? $(date -Is)"; }
+  echo "$name eval exit $? $(date -Is)"
+  [ -z "${CAM:-}" ] || cam_evals $name $gpu; }
+source scripts/slurm/cam_evals.sh
 case $SET in
   screen) run adaln_droid 0 "" "" & run xattn_droid 1 "$REG" _cd03_plr01 & run xattn_droid 2 "" "" & wait ;;
   scratch) run adaln_scratch 0 "" "" & run xattn_scratch 1 "$REG" _cd03_plr01 & wait ;;
+  xscratch) run xattn_scratch 0 "" "" ;;
   history) run expert_droid 0 "" "" & run xattn_droid 1 "$REG" _cd03_plr01 & wait ;;
   *) echo "unknown SET $SET"; exit 1 ;;
 esac

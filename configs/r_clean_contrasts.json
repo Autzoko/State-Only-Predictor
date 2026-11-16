@@ -1,0 +1,1057 @@
+{
+ "name": "R2 / R3 clean (LIBERO-90-17, k5, seeds 0-2): explicit kinematics and regression pretraining",
+ "contrasts": [
+  {
+   "name": "RC1 droid (mean of 3 flow-prior instances) - kin, mean of DP, SmolVLA",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_pB1_s0",
+        "e21_dp_expert_droid_k5_t17_pB1_s1",
+        "e21_dp_expert_droid_k5_t17_pB1_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_pB2_s0",
+        "e21_dp_expert_droid_k5_t17_pB2_s1",
+        "e21_dp_expert_droid_k5_t17_pB2_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1",
+        "e21_dp_expert_kin_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1",
+        "e23_smolvla_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_pB1_s0",
+        "e23_smolvla_expert_droid_k5_t17_pB1_s1",
+        "e23_smolvla_expert_droid_k5_t17_pB1_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_pB2_s0",
+        "e23_smolvla_expert_droid_k5_t17_pB2_s1",
+        "e23_smolvla_expert_droid_k5_t17_pB2_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1",
+        "e23_smolvla_expert_kin_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "RC2 flow (mean of 3 instances) - regression (mean of 2 instances), mean of TrunkBC, DP, SmolVLA",
+   "groups": {
+    "trunkbc": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e25j_trunk_ref_k5_t17_s0",
+        "e25j_trunk_ref_k5_t17_s1",
+        "e25j_trunk_ref_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_base_k5_t17_s0",
+        "e25j_trunk_base_k5_t17_s1",
+        "e25j_trunk_base_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_base2_k5_t17_s0",
+        "e25j_trunk_base2_k5_t17_s1",
+        "e25j_trunk_base2_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_reg_k5_t17_s0",
+        "e25j_trunk_reg_k5_t17_s1",
+        "e25j_trunk_reg_k5_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_reg1_k5_t17_s0",
+        "e25j_trunk_reg1_k5_t17_s1",
+        "e25j_trunk_reg1_k5_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_pB1_s0",
+        "e21_dp_expert_droid_k5_t17_pB1_s1",
+        "e21_dp_expert_droid_k5_t17_pB1_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_pB2_s0",
+        "e21_dp_expert_droid_k5_t17_pB2_s1",
+        "e21_dp_expert_droid_k5_t17_pB2_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg_s0",
+        "e21_dp_expert_droid_k5_t17_reg_s1",
+        "e21_dp_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg1_s0",
+        "e21_dp_expert_droid_k5_t17_reg1_s1",
+        "e21_dp_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1",
+        "e23_smolvla_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_pB1_s0",
+        "e23_smolvla_expert_droid_k5_t17_pB1_s1",
+        "e23_smolvla_expert_droid_k5_t17_pB1_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_pB2_s0",
+        "e23_smolvla_expert_droid_k5_t17_pB2_s1",
+        "e23_smolvla_expert_droid_k5_t17_pB2_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg1_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "kin - none, mean of DP, SmolVLA",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1",
+        "e21_dp_expert_kin_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1",
+        "e23_smolvla_expert_kin_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1",
+        "e23_smolvla_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "kin - scratch, mean of DP, SmolVLA",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1",
+        "e21_dp_expert_kin_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1",
+        "e21_dp_expert_scratch_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1",
+        "e23_smolvla_expert_kin_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_scratch_k5_jr_t17_s0",
+        "e23_smolvla_expert_scratch_k5_jr_t17_s1",
+        "e23_smolvla_expert_scratch_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "regression - none, mean of DP, SmolVLA",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg_s0",
+        "e21_dp_expert_droid_k5_t17_reg_s1",
+        "e21_dp_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg1_s0",
+        "e21_dp_expert_droid_k5_t17_reg1_s1",
+        "e21_dp_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg1_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1",
+        "e23_smolvla_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "regression - scratch, mean of TrunkBC, DP, SmolVLA",
+   "groups": {
+    "trunkbc": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e25j_trunk_reg_k5_t17_s0",
+        "e25j_trunk_reg_k5_t17_s1",
+        "e25j_trunk_reg_k5_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_reg1_k5_t17_s0",
+        "e25j_trunk_reg1_k5_t17_s1",
+        "e25j_trunk_reg1_k5_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_scratch_k5_t17_s0",
+        "e25j_trunk_scratch_k5_t17_s1",
+        "e25j_trunk_scratch_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "dp": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg_s0",
+        "e21_dp_expert_droid_k5_t17_reg_s1",
+        "e21_dp_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg1_s0",
+        "e21_dp_expert_droid_k5_t17_reg1_s1",
+        "e21_dp_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1",
+        "e21_dp_expert_scratch_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.3333333333333333,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg1_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_scratch_k5_jr_t17_s0",
+        "e23_smolvla_expert_scratch_k5_jr_t17_s1",
+        "e23_smolvla_expert_scratch_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp: flow - kin",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_pB1_s0",
+        "e21_dp_expert_droid_k5_t17_pB1_s1",
+        "e21_dp_expert_droid_k5_t17_pB1_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_pB2_s0",
+        "e21_dp_expert_droid_k5_t17_pB2_s1",
+        "e21_dp_expert_droid_k5_t17_pB2_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1",
+        "e21_dp_expert_kin_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp: kin - none",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1",
+        "e21_dp_expert_kin_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp: kin - scratch",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1",
+        "e21_dp_expert_kin_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_scratch_k5_t17_s0",
+        "e21_dp_expert_scratch_k5_t17_s1",
+        "e21_dp_expert_scratch_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp: flow - reg",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_pB1_s0",
+        "e21_dp_expert_droid_k5_t17_pB1_s1",
+        "e21_dp_expert_droid_k5_t17_pB1_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_pB2_s0",
+        "e21_dp_expert_droid_k5_t17_pB2_s1",
+        "e21_dp_expert_droid_k5_t17_pB2_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg_s0",
+        "e21_dp_expert_droid_k5_t17_reg_s1",
+        "e21_dp_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg1_s0",
+        "e21_dp_expert_droid_k5_t17_reg1_s1",
+        "e21_dp_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp: reg - none",
+   "groups": {
+    "dp": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg_s0",
+        "e21_dp_expert_droid_k5_t17_reg_s1",
+        "e21_dp_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_reg1_s0",
+        "e21_dp_expert_droid_k5_t17_reg1_s1",
+        "e21_dp_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1",
+        "e21_dp_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla: flow - kin",
+   "groups": {
+    "smolvla": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1",
+        "e23_smolvla_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_pB1_s0",
+        "e23_smolvla_expert_droid_k5_t17_pB1_s1",
+        "e23_smolvla_expert_droid_k5_t17_pB1_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_pB2_s0",
+        "e23_smolvla_expert_droid_k5_t17_pB2_s1",
+        "e23_smolvla_expert_droid_k5_t17_pB2_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1",
+        "e23_smolvla_expert_kin_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla: kin - none",
+   "groups": {
+    "smolvla": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1",
+        "e23_smolvla_expert_kin_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1",
+        "e23_smolvla_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla: kin - scratch",
+   "groups": {
+    "smolvla": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1",
+        "e23_smolvla_expert_kin_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_scratch_k5_jr_t17_s0",
+        "e23_smolvla_expert_scratch_k5_jr_t17_s1",
+        "e23_smolvla_expert_scratch_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla: flow - reg",
+   "groups": {
+    "smolvla": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1",
+        "e23_smolvla_expert_droid_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_pB1_s0",
+        "e23_smolvla_expert_droid_k5_t17_pB1_s1",
+        "e23_smolvla_expert_droid_k5_t17_pB1_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_pB2_s0",
+        "e23_smolvla_expert_droid_k5_t17_pB2_s1",
+        "e23_smolvla_expert_droid_k5_t17_pB2_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg1_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla: reg - none",
+   "groups": {
+    "smolvla": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_t17_reg1_s0",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s1",
+        "e23_smolvla_expert_droid_k5_t17_reg1_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1",
+        "e23_smolvla_none_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "trunkbc: flow - reg",
+   "groups": {
+    "trunkbc": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e25j_trunk_ref_k5_t17_s0",
+        "e25j_trunk_ref_k5_t17_s1",
+        "e25j_trunk_ref_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_base_k5_t17_s0",
+        "e25j_trunk_base_k5_t17_s1",
+        "e25j_trunk_base_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_base2_k5_t17_s0",
+        "e25j_trunk_base2_k5_t17_s1",
+        "e25j_trunk_base2_k5_t17_s2"
+       ],
+       "w": 0.3333333333333333,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_reg_k5_t17_s0",
+        "e25j_trunk_reg_k5_t17_s1",
+        "e25j_trunk_reg_k5_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_reg1_k5_t17_s0",
+        "e25j_trunk_reg1_k5_t17_s1",
+        "e25j_trunk_reg1_k5_t17_s2"
+       ],
+       "w": -0.5,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "trunkbc: reg - scratch",
+   "groups": {
+    "trunkbc": {
+     "weight": 1.0,
+     "terms": [
+      {
+       "runs": [
+        "e25j_trunk_reg_k5_t17_s0",
+        "e25j_trunk_reg_k5_t17_s1",
+        "e25j_trunk_reg_k5_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_reg1_k5_t17_s0",
+        "e25j_trunk_reg1_k5_t17_s1",
+        "e25j_trunk_reg1_k5_t17_s2"
+       ],
+       "w": 0.5,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e25j_trunk_scratch_k5_t17_s0",
+        "e25j_trunk_scratch_k5_t17_s1",
+        "e25j_trunk_scratch_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp: droid p0 - kin",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1",
+        "e21_dp_expert_droid_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1",
+        "e21_dp_expert_kin_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla: droid p0 - kin",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1",
+        "e23_smolvla_expert_droid_k5_t17_s2"
+       ],
+       "w": 1.0,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1",
+        "e23_smolvla_expert_kin_k5_t17_s2"
+       ],
+       "w": -1.0,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "primary": [
+  "RC1 droid (mean of 3 flow-prior instances) - kin, mean of DP, SmolVLA",
+  "RC2 flow (mean of 3 instances) - regression (mean of 2 instances), mean of TrunkBC, DP, SmolVLA"
+ ]
+}

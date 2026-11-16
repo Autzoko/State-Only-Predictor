@@ -17,7 +17,8 @@ E7 arms `expert_scratch` / `expert_droid` (E5 found prefix motion tokens are not
 exactly the `none` arm's (one current-state token); SOPT's last-token feature conditions the *action expert*
 instead, added to every action token after SmolVLA's action-time MLP through a zero-initialized projection, so
 at initialization the policy equals `none`. This mirrors TrunkBC / MotionDecoder (E4b / E6), where the motion
-feature sits next to the action output and pretraining helps significantly.
+feature sits next to the action output and pretraining helps significantly. `expert_kin` (R2): the same injection fed
+with explicit finite-difference kinematics of the history (sopt.models.kinematic) instead of the SOPT encoder.
 """
 
 from __future__ import annotations
@@ -37,7 +38,7 @@ PINS = {
 IMAGE_KEYS = ("observation.images.image", "observation.images.image2")
 
 
-ARMS = ("none", "scratch", "droid", "expert_scratch", "expert_droid")
+ARMS = ("none", "scratch", "droid", "expert_scratch", "expert_droid", "expert_kin")
 OPT = {"lr": 1e-4, "weight_decay": 1e-10, "clip": 10.0}  # E5 / E7 recipe
 
 

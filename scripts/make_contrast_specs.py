@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Writes the pre-registered contrast specs (scripts/contrast_boot.py) and stats_all manifests of E38b / E39 / E40 /
-E41 (docs/EXPERIMENTS.md, 2026-10-26). Run names follow scripts/slurm/{e21_dp,e23_smolvla,e12_wam,e41_camera}.sbatch.
+E41 (docs/EXPERIMENTS.md, 2026-10-26) and R1-R3 (2026-11-16). Run names follow scripts/slurm/{e21_dp,e23_smolvla,e12_wam,e41_camera}.sbatch.
 
   python scripts/make_contrast_specs.py   # -> configs/e39_contrasts.json, ...
 """
@@ -188,9 +188,96 @@ def smolvla_main():  # stats_all manifest: SmolVLA main table, all three seeds o
                                        ["expert_scratch", "none"]]}]}
 
 
+# R1-R3 (reviewer controls, preregistered 2026-11-16 in docs/EXPERIMENTS.md before any of these runs started)
+FLOW = {"dp": [lambda s: dp("expert_droid", "k5", s), lambda s: f"e21_dp_expert_droid_k5_t17_pB1_s{s}",
+               lambda s: f"e21_dp_expert_droid_k5_t17_pB2_s{s}"],
+        "smolvla": [lambda s: smolvla("expert_droid", "k5", s), lambda s: f"e23_smolvla_expert_droid_k5_t17_pB1_s{s}",
+                    lambda s: f"e23_smolvla_expert_droid_k5_t17_pB2_s{s}"],
+        "trunkbc": [lambda s: f"e25j_trunk_ref_k5_t17_s{s}", lambda s: f"e25j_trunk_base_k5_t17_s{s}",
+                    lambda s: f"e25j_trunk_base2_k5_t17_s{s}"]}
+REG = {"dp": [lambda s, t=t: f"e21_dp_expert_droid_k5_t17_{t}_s{s}" for t in ("reg", "reg1")],
+       "smolvla": [lambda s, t=t: f"e23_smolvla_expert_droid_k5_t17_{t}_s{s}" for t in ("reg", "reg1")],
+       "trunkbc": [lambda s, t=t: f"e25j_trunk_{t}_k5_t17_s{s}" for t in ("reg", "reg1")]}
+ONE = {"none": {"dp": lambda s: dp("none", "k5", s), "smolvla": lambda s: smolvla("none", "k5", s)},
+       "scratch": {"dp": lambda s: dp("expert_scratch", "k5", s), "smolvla": lambda s: smolvla("expert_scratch", "k5", s),
+                   "trunkbc": lambda s: f"e25j_trunk_scratch_k5_t17_s{s}"},
+       "kin": {"dp": lambda s: dp("expert_kin", "k5", s), "smolvla": lambda s: f"e23_smolvla_expert_kin_k5_t17_s{s}"}}
+
+
+def _arm(fns, w, seeds=SEEDS, file="rollouts_n50.json"):  # mean over instances (list) or one run (callable), weight w
+    fns = fns if isinstance(fns, list) else [fns]
+    return [{"runs": [f(s) for s in seeds], "w": w / len(fns), "file": file} for f in fns]
+
+
+def _arm_of(name, h):
+    return {"flow": FLOW, "reg": REG}[name][h] if name in ("flow", "reg") else ONE[name][h]
+
+
+def r_clean():
+    def diff(a, b, hosts):
+        return {h: {"weight": 1 / len(hosts), "terms": _arm(_arm_of(a, h), 1.0) + _arm(_arm_of(b, h), -1.0)} for h in hosts}
+
+    DS, ALL = ("dp", "smolvla"), ("trunkbc", "dp", "smolvla")
+    cs = [{"name": "RC1 droid (mean of 3 flow-prior instances) - kin, mean of DP, SmolVLA", "groups": diff("flow", "kin", DS)},
+          {"name": "RC2 flow (mean of 3 instances) - regression (mean of 2 instances), mean of TrunkBC, DP, SmolVLA",
+           "groups": diff("flow", "reg", ALL)},
+          {"name": "kin - none, mean of DP, SmolVLA", "groups": diff("kin", "none", DS)},
+          {"name": "kin - scratch, mean of DP, SmolVLA", "groups": diff("kin", "scratch", DS)},
+          {"name": "regression - none, mean of DP, SmolVLA", "groups": diff("reg", "none", DS)},
+          {"name": "regression - scratch, mean of TrunkBC, DP, SmolVLA", "groups": diff("reg", "scratch", ALL)}]
+    for h in DS:
+        for a, b in (("flow", "kin"), ("kin", "none"), ("kin", "scratch"), ("flow", "reg"), ("reg", "none")):
+            cs.append({"name": f"{h}: {a} - {b}", "groups": diff(a, b, (h,))})
+    for a, b in (("flow", "reg"), ("reg", "scratch")):
+        cs.append({"name": f"trunkbc: {a} - {b}", "groups": diff(a, b, ("trunkbc",))})
+    for h in DS:  # main-table droid arm (p0 only) for reference
+        cs.append({"name": f"{h}: droid p0 - kin", "groups": {h: {"terms": _arm(FLOW[h][0], 1.0) + _arm(ONE['kin'][h], -1.0)}}})
+    return {"name": "R2 / R3 clean (LIBERO-90-17, k5, seeds 0-2): explicit kinematics and regression pretraining",
+            "contrasts": cs, "primary": [cs[0]["name"], cs[1]["name"]]}
+
+
+RR = {"dp": {a: f"e21_dp_{a}_k5_t17_s{{}}" for a in ("none", "expert_scratch", "expert_droid", "expert_kin")},
+      "smolvla_goal": {a: f"e13_libero_goal_{a}_k5_s{{}}" for a in ("none", "expert_scratch", "expert_droid", "expert_kin")},
+      "groot": {"none": "e22_groot_none_k5_t17_s{}", "expert_scratch": "e31_groot_xattn_scratch_k5_t17_s{}",
+                "expert_droid": "e31_groot_xattn_droid_k5_t17_s{}"}}
+
+
+def r_robust():
+    def t(pat, lvl, w):
+        return {"runs": [pat.format(s) for s in (0, 1)], "w": w, "file": COND[lvl]}
+
+    def inter(h, a, b, lvl, w=1.0):  # (a - b)_lvl - (a - b)_clean
+        A, B = RR[h][a], RR[h][b]
+        return [t(A, lvl, w), t(B, lvl, -w), t(A, "clean", -w), t(B, "clean", w)]
+
+    def pooled(a, b, lvl, hosts):
+        return {h: {"weight": 1 / len(hosts), "terms": inter(h, a, b, lvl)} for h in hosts}
+
+    D, S, N, K = "expert_droid", "expert_scratch", "none", "expert_kin"
+    DS, ALL = ("dp", "smolvla_goal"), ("dp", "smolvla_goal", "groot")
+    cs = [{"name": "RR1 GR00T camera 20 deg: interaction(xattn droid - xattn scratch)", "groups": pooled(D, S, "20", ("groot",))},
+          {"name": "RR2 camera 20 deg: interaction(kin - none), mean of DP, SmolVLA-goal", "groups": pooled(K, N, "20", DS)}]
+    for lvl in ("10", "30"):
+        cs.append({"name": f"GR00T camera {lvl} deg: interaction(droid - scratch)", "groups": pooled(D, S, lvl, ("groot",))})
+    for lvl in ("10", "20", "30"):
+        cs.append({"name": f"GR00T camera {lvl} deg: interaction(scratch - none)", "groups": pooled(S, N, lvl, ("groot",))})
+        cs.append({"name": f"camera {lvl} deg: interaction(droid - scratch), mean of 3 hosts", "groups": pooled(D, S, lvl, ALL)})
+        cs.append({"name": f"camera {lvl} deg: interaction(scratch - none), mean of 3 hosts", "groups": pooled(S, N, lvl, ALL)})
+        for a, b in ((K, N), (S, K), (D, K)):
+            cs.append({"name": f"camera {lvl} deg: interaction({a} - {b}), mean of DP, SmolVLA-goal", "groups": pooled(a, b, lvl, DS)})
+    for h in DS:
+        for a, b in ((K, N), (S, K), (D, K)):
+            cs.append({"name": f"{h} camera 20 deg: interaction({a} - {b})", "groups": pooled(a, b, "20", (h,))})
+    dose = {h: {"weight": 1 / 3, "terms": inter(h, S, N, "30") + inter(h, S, N, "10", -1.0)} for h in ALL}
+    cs.append({"name": "dose of scratch - none (30 - 10 deg), mean of 3 hosts", "groups": dose})
+    return {"name": "R1 / R2 camera shift (DP 17 tasks, SmolVLA libero_goal, GR00T xattn 17 tasks; seeds 0-1)",
+            "contrasts": cs, "primary": [cs[0]["name"], cs[1]["name"]]}
+
+
 if __name__ == "__main__":
     for name, obj in (("e39_contrasts", e39()), ("e40_contrasts", e40()), ("e41_contrasts", e41()),
                       ("e38b_manifest", e38b()), ("smolvla_jubail_manifest", smolvla_main()),
-                      ("e37s_contrasts", e37s()), ("e18r_manifest", e18r())):
+                      ("e37s_contrasts", e37s()), ("e18r_manifest", e18r()), ("r_clean_contrasts", r_clean()),
+                      ("r_robust_contrasts", r_robust())):
         (C / f"{name}.json").write_text(json.dumps(obj, indent=1))
         print("wrote", C / f"{name}.json")
