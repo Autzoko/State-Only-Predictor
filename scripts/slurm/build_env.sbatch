@@ -21,7 +21,8 @@ export UV_CACHE_DIR=/scratch/ll5582/cache/uv UV_PYTHON_INSTALL_DIR=/scratch/ll55
 UV=/home/ll5582/.local/bin/uv
 LEROBOT=3f2c29ef7e44b1ddccbcda3b6a63939e53639e9e  # the pinned LeRobot commit (version 0.6.2, 2026-09-03; not on PyPI)
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) start=$(date -Is)"
-module load cmake/3.18.4  # hf-egl-probe / egl-probe (via hf-libero) build from source with CMake
+module load cmake/3.18.4 gcc/11.5.0  # hf-egl-probe / egl-probe (via hf-libero) build from source
+export CC=gcc CXX=g++
 echo "$($UV --version) $(ldd --version | head -1)"
 [ -x $E/bin/python ] || $UV venv --python 3.12 $E
 # torch first, from the CUDA 11.8 index alone (refreshed: the cached index page may predate the wheel); the second
