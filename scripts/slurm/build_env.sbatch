@@ -21,10 +21,13 @@ export UV_CACHE_DIR=/scratch/ll5582/cache/uv UV_PYTHON_INSTALL_DIR=/scratch/ll55
 UV=/home/ll5582/.local/bin/uv
 LEROBOT=3f2c29ef7e44b1ddccbcda3b6a63939e53639e9e  # the pinned LeRobot commit (version 0.6.2, 2026-09-03; not on PyPI)
 echo "host=$(hostname) commit=$(git rev-parse --short HEAD) start=$(date -Is)"
+echo "$($UV --version) $(ldd --version | head -1)"
 [ -x $E/bin/python ] || $UV venv --python 3.12 $E
-$UV pip install --python $E/bin/python --index-strategy unsafe-best-match \
-  --extra-index-url https://download.pytorch.org/whl/cu118 \
-  torch==2.7.1+cu118 torchvision==0.22.1+cu118 \
+# torch first, from the CUDA 11.8 index alone (refreshed: the cached index page may predate the wheel); the second
+# step's torch==2.7.1 is then already satisfied by 2.7.1+cu118 and left in place
+$UV pip install --python $E/bin/python --refresh-package torch --refresh-package torchvision \
+  --index-url https://download.pytorch.org/whl/cu118 torch==2.7.1+cu118 torchvision==0.22.1+cu118
+$UV pip install --python $E/bin/python torch==2.7.1 torchvision==0.22.1 \
   "lerobot[smolvla,groot,xvla,fastwam,pi,diffusion,libero] @ git+https://github.com/huggingface/lerobot@$LEROBOT" \
   transformers==5.5.4 accelerate==1.15.0 diffusers==0.39.0 \
   hf-libero==0.1.4 robosuite==1.4.0 mujoco==3.8.1 PyOpenGL==3.1.10 egl-probe==1.0.2 \
@@ -52,6 +55,8 @@ for m in mods:
     except Exception as e:  # noqa: BLE001
         bad.append(m); print("FAIL", m, type(e).__name__, e)
 import torch
+if torch.__version__ != "2.7.1+cu118":
+    bad.append(f"torch {torch.__version__}")
 x = torch.randn(256, 256, device="cuda"); print("cuda", torch.cuda.get_device_name(0), float((x @ x).sum()) != 0)
 print("ENV", "PASS" if not bad else f"FAIL {bad}")
 PY
