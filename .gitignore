@@ -11,4 +11,9 @@ __pycache__/
 /logs/*
 !/logs/.gitkeep
 
+# Local only (not published): experiment log / notes and the paper draft
+/docs/
 /paper/
+# Extra pip deps installed next to the repo on the cluster
+/pydeps/
+/pydeps_tools/

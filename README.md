@@ -1,25 +1,29 @@
 # SOPT: State-Only Pretraining of Robot Motion Priors
 
-只用机械臂本体状态序列（不用视觉、语言）进行自监督预训练，得到可迁移的动作/运动先验。
-研究设计见 [`docs/DESIGN.md`](docs/DESIGN.md)，实验计划与记录见 [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md)，服务器说明见 [`docs/SERVERS.md`](docs/SERVERS.md)。
+只用机械臂本体状态序列（不用视觉、语言）进行自监督预训练，得到可迁移的动作/运动先验，并以零初始化的方式接入下游策略。
 
 ## 结构
 
 ```
 configs/           default.yaml + model/{s,b,l}.yaml + experiment/*.yaml（按顺序叠加，可再加 key=value）
-docs/              DESIGN / EXPERIMENTS（实验日志）/ SERVERS
 scripts/           prepare_droid.py（流式只取 state）, train.py, evaluate.py, setup_env.sh
+                   vla_train.py / vla_eval.py（宿主策略训练与 LIBERO 闭环评测）, wam_*.py（FastWAM）
+                   stats_all.py / contrast_boot.py（配对 McNemar、(seed, task) 簇 bootstrap、Holm）
   remote/          sync.sh（push + 服务器 git pull）, env.sh, run_bg.sh（tmux 后台训练）
-  slurm/           train.sbatch（Jubail）
+  slurm/           Jubail 作业脚本（每个实验一个 sbatch）
+  paper/           build_results_xlsx.py（结果汇总表）
 src/sopt/
   data/            droid.py（parquet→数组）, features.py（17 维特征）, splits.py（按 building 切分）,
                    dataset.py（窗口采样 + 速度增广）, augment.py（运动学精确的 yaw 增广）, normalize.py
   models/          transformer.py（RoPE, pre-LN）, heads.py（回归 / rectified flow）, state_prior.py
   eval/            forecast.py（ADE/FDE、minADE@K，zero-vel / const-vel 基线）
+  policy/          BC 类宿主（TrunkBC 等）与闭环 rollout
+  vla/             SmolVLA、π0.5、GR00T、X-VLA、FastWAM、Diffusion Policy 的 SOPT 接口
+  sim/             LIBERO 环境、并行仿真、视觉扰动（perturb.py）
   train/           pretrain.py
   utils/           rotation.py, franka_fk.py, config.py, misc.py
 tests/             运动学/增广正确性、数据集、三种目标函数的 shape 测试
-data/, outputs/    不进 git
+data/, outputs/, logs/   不进 git
 ```
 
 ## 快速开始
