@@ -79,7 +79,9 @@ def run(cfg) -> Path:
         init_ckpt = torch.load(init, map_location="cpu", weights_only=False)
         stats = init_ckpt["stats"]
     else:
-        stats = compute_stats(np.asarray(store.features), train_eps, cfg.model.horizon, seed=cfg.seed)
+        # np.array: read the memory-mapped features once, sequentially; 2M random row reads straight from the mmap
+        # page-fault one by one on network storage and took hours on Jubail (2026-11-17). Same values either way.
+        stats = compute_stats(np.array(store.features), train_eps, cfg.model.horizon, seed=cfg.seed)
     model = build_model(cfg.model, stats).to(device)
     if init:
         missing, unexpected = model.load_state_dict(init_ckpt["model"], strict=False)
