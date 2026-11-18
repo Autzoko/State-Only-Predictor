@@ -5,6 +5,9 @@
 #   SET=scratch adaln_scratch | xattn_scratch (+ the SET=screen regularizers) | (idle)   [controls, after screening]
 #   SET=xscratch R1 (2026-11-16): xattn_scratch plain (no regularizers), the same-structure control of the plain
 #               xattn_droid arm used in E37 / E41; one GPU; CAM=1 adds camera 10 / 20 / 30 deg evaluations
+#   SET=xkin    R2 for GR00T (2026-11-18, reviewer item 1): xattn_kin = the plain xattn branch fed with explicit
+#               kinematics; one GPU; CAM=1 adds the camera evaluations. Before training: zero-init + liveness check
+#               against e22 none s0 (scripts/r_init_check.py) and a 30-step smoke run + 1-init eval, else abort.
 #   SET=history E33 history length on the host: expert_droid | xattn_droid (+ regularizers) with a longer-context prior
 #               (PRIOR=<ckpt> PTAG=_ctx192 ...; the policy's history = the prior's ctx_len, paired with the ctx96 runs)
 # First: a fresh adaln / xattn policy must equal `none` exactly (zero init) and a 30-step smoke run + 1-init eval of
@@ -56,10 +59,27 @@ run() { local arm=$1 gpu=$2 extra=$3 tag=$4 name=e31_groot_$1_k5$4${PT}_t17_s$S
   echo "$name eval exit $? $(date -Is)"
   [ -z "${CAM:-}" ] || cam_evals $name $gpu; }
 source scripts/slurm/cam_evals.sh
+if [ "$SET" = xkin ]; then
+  if ! grep -q '"pass": true' outputs/r_init_groot_s$S.json 2>/dev/null; then
+    python scripts/r_init_check.py --ckpt outputs/e22_groot_none_k5_t17_s0/final.pt --arms xattn_kin xattn_droid \
+      --out outputs/r_init_groot_s$S.json > logs/r_init_groot_s$S.log 2>&1
+    echo "init check groot exit $? $(date -Is)"; tail -n 3 logs/r_init_groot_s$S.log
+    grep -q "init check PASS" logs/r_init_groot_s$S.log || exit 1
+  fi
+  r=r_smoke_groot_kin_s$S  # per job: two seeds may run at the same time
+  if [ ! -f outputs/$r/rollouts.json ]; then
+    python scripts/vla_train.py --vla groot --arm xattn_kin --k 5 --suite libero90_17 --seed 0 --run $r --steps 30 --bs 32 \
+      --workers 8 > logs/$r.log 2>&1 && grep "kinematic features" logs/$r.log && \
+    python scripts/vla_eval.py --ckpt outputs/$r/final.pt --out outputs/$r/rollouts.json --n-init 1 --max-steps 40 \
+      > logs/$r.eval.log 2>&1
+    rc=$?; echo "smoke groot kin exit $rc $(date -Is)"; [ $rc = 0 ] || { tail -n 5 logs/$r.log logs/$r.eval.log; exit 1; }
+  fi
+fi
 case $SET in
   screen) run adaln_droid 0 "" "" & run xattn_droid 1 "$REG" _cd03_plr01 & run xattn_droid 2 "" "" & wait ;;
   scratch) run adaln_scratch 0 "" "" & run xattn_scratch 1 "$REG" _cd03_plr01 & wait ;;
   xscratch) run xattn_scratch 0 "" "" ;;
+  xkin) run xattn_kin 0 "" "" ;;
   history) run expert_droid 0 "" "" & run xattn_droid 1 "$REG" _cd03_plr01 & wait ;;
   *) echo "unknown SET $SET"; exit 1 ;;
 esac

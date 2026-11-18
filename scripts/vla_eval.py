@@ -15,6 +15,8 @@ import torch
 
 from sopt.data.libero import features_20hz
 from sopt.policy.data import context_indices, interp_frames
+from sopt.policy.hist import MODES as HIST_MODES
+from sopt.policy.hist import demo_history, intervene
 from sopt.policy.rollout import trace_row
 from sopt.sim.libero_env import dataset_to_sim_gripper
 from sopt.sim.vec_env import TaskVecEnv
@@ -48,6 +50,8 @@ def main():
     p.add_argument("--perturb", default=None, help="E37: <kind>:<level>, kinds in sopt/sim/perturb.py (default: none)")
     p.add_argument("--log-npz", default=None,
                    help="E36: per-step raw proprio (q, fingers), executed actions and every predicted chunk -> .npz")
+    p.add_argument("--hist", default="own", choices=HIST_MODES,
+                   help="reviewer item 3: intervene on the history before the current frame (sopt/policy/hist.py)")
     p.add_argument("--sopt-data", default=os.environ.get("SOPT_DATA"))
     args = p.parse_args()
     import importlib.util
@@ -82,6 +86,16 @@ def main():
         feat = lambda q, f: hide_joints(features_20hz(q, f))  # noqa: E731
         args.max_steps = args.max_steps or MAX_STEPS[suite]
     C = ck["meta"].get("ctx", CTX)  # history length the policy was trained with (E33)
+    swap_demos = {}
+    if args.hist == "swap":  # the checkpoint's own training demos, per task in episode order (17-task protocol only)
+        from sopt.policy.data import Raw20
+
+        assert suite == "libero90_17", "--hist swap: 17-task LIBERO-90 checkpoints only"
+        raw = Raw20(Path(args.sopt_data) / "processed/libero90_raw20")
+        sel = raw.eps[raw.eps["episode_index"].isin(ck["meta"]["episodes"])].sort_values("episode_index")
+        assert len(sel) == len(ck["meta"]["episodes"])
+        swap_demos = {t: [raw.episode(r)[0] for r in sel[sel["task"] == t].itertuples()] for t in tasks}
+        assert all(swap_demos[t] for t in tasks), "a task without training demos"
     rows, t0 = [], time.time()
     log = []  # E36: one dict of arrays per finished episode, in the order of `rows`
     for init in range(args.n_init):
@@ -110,6 +124,10 @@ def main():
                 break
             if t % args.n_exec == 0:
                 ctx = np.stack([interp_frames(np.stack(hist[i]), context_indices(len(hist[i]) - 1, C)) for i in live])
+                if args.hist != "own":  # same demo for the whole episode: init-th of the task's training demos
+                    ctx = np.stack([intervene(c, args.hist, demo_history(
+                        swap_demos[tasks[i]][init % len(swap_demos[tasks[i]])], t, C) if args.hist == "swap" else None)
+                        for c, i in zip(ctx, live)])
                 imgs = [np.stack([obs[i]["agent"], obs[i]["wrist"]]) for i in live]
                 img = torch.from_numpy(np.stack(imgs)).permute(0, 1, 4, 2, 3).float().div(255).to(device)
                 with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
@@ -153,7 +171,7 @@ def main():
     per_task = {t: float(np.mean([r["success"] for r in rows if r["task"] == t])) for t in tasks}
     summary = {"ckpt": args.ckpt, "arm": arm, "vla": ck["meta"].get("vla", "smolvla"), "suite": suite, "max_steps": args.max_steps, "success_rate": float(np.mean([r["success"] for r in rows])),
                "per_task": per_task, "n_episodes": len(rows), "n_exec": args.n_exec, "trace_every": args.trace, "sopt_mask_grasp": args.sopt_mask_grasp,
-               "perturb": args.perturb, "ctx": C, "wall_s": time.time() - t0,
+               "perturb": args.perturb, "hist": args.hist, "ctx": C, "wall_s": time.time() - t0,
                "episodes": rows}
     Path(args.out).write_text(json.dumps(summary, indent=2))
     if args.log_npz:  # flat arrays + per-episode offsets (row k of `episodes` <-> episode k here)

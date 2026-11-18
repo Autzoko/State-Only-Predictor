@@ -16,6 +16,9 @@ E31 interfaces (docs/HOST_ANALYSIS.md section 10), same zero-init guarantee:
             output projection zero-initialized, mixed in by a learned per-token gate sigma(W [h, temb]) that sees the
             token's VL-informed state and the denoising time -> the policy learns when to rely on the motion prior.
             --cond-drop drops the whole branch per training sample (modality dropout: the VL path must stay competent).
+  xattn_kin R2 for GR00T (reviewer item 1, 2026-11-18): the same branch with the explicit finite-difference kinematics
+            of sopt.models.kinematic (85 values at the current frame, as for DP / SmolVLA expert_kin) as its single
+            memory token instead of the SOPT history tokens.
 """
 
 from __future__ import annotations
@@ -32,7 +35,8 @@ BASE, REVISION = "nvidia/GR00T-N1.7-3B", "2fc962b973bccdd5d8ce4f67cc63b264d68864
 # processor (tokenizer / image + video processors) of the backbone; gated repo, cached with the account's token
 BACKBONE_PROCESSOR = ("nvidia/Cosmos-Reason2-2B", "9ce19a195e423419c349abfc86fd07178b230561")
 IMAGE_KEYS = ("observation.images.image", "observation.images.image2")
-ARMS = ("none", "expert_scratch", "expert_droid", "adaln_scratch", "adaln_droid", "xattn_scratch", "xattn_droid")
+ARMS = ("none", "expert_scratch", "expert_droid", "adaln_scratch", "adaln_droid", "xattn_scratch", "xattn_droid",
+        "xattn_kin")
 XATTN_EVERY = 4
 OPT = {"lr": 1e-4, "weight_decay": 1e-5, "clip": 1.0, "betas": (0.95, 0.999)}
 CHUNK = 16

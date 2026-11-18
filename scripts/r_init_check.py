@@ -32,6 +32,8 @@ def load_vt():
 
 
 def last_layer(policy) -> torch.nn.Linear:
+    if hasattr(policy, "sopt") and hasattr(policy.sopt, "branches"):  # GR00T xattn: first motion cross-attention branch
+        return policy.sopt.branches[0].out
     if hasattr(policy, "sopt"):  # Diffusion Policy (and the other global-conditioning hosts)
         return policy.sopt.mlp[-1]
     return policy.model.state_proj.expert_cond[-1]  # SmolVLA

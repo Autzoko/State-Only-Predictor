@@ -1,0 +1,304 @@
+{
+ "name": "R2-G GR00T explicit kinematics under camera shift (reviewer item 1; LIBERO-90-17, k5, seeds 0-1)",
+ "primary": [
+  "RG1 GR00T 20deg interaction xattn_droid - xattn_kin"
+ ],
+ "contrasts": [
+  {
+   "name": "RG1 GR00T 20deg interaction xattn_droid - xattn_kin",
+   "groups": {
+    "g": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T 10deg interaction droid - kin",
+   "groups": {
+    "g": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T 30deg interaction droid - kin",
+   "groups": {
+    "g": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T 10deg interaction kin - none",
+   "groups": {
+    "g": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e41_dose_camera1.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T 20deg interaction kin - none",
+   "groups": {
+    "g": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e37_main_camera2.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T 30deg interaction kin - none",
+   "groups": {
+    "g": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "e41_dose_camera3.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T clean droid - kin",
+   "groups": {
+    "g": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_droid_k5_t17_s0",
+        "e31_groot_xattn_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "GR00T clean kin - none",
+   "groups": {
+    "g": {
+     "terms": [
+      {
+       "runs": [
+        "e31_groot_xattn_kin_k5_t17_s0",
+        "e31_groot_xattn_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e22_groot_none_k5_t17_s0",
+        "e22_groot_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

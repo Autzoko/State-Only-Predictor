@@ -1,0 +1,629 @@
+{
+ "name": "R4 history interventions (reviewer item 3; DP + SmolVLA, LIBERO-90-17, k5, seeds 0-1)",
+ "primary": [
+  "RH1 droid own - static (DP, SmolVLA)",
+  "RH2 droid swap - static: share of the motion effect kept by a same-task, same-phase motion"
+ ],
+ "contrasts": [
+  {
+   "name": "RH1 droid own - static (DP, SmolVLA)",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_static.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_static.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "RH2 droid swap - static: share of the motion effect kept by a same-task, same-phase motion",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50_hist_swap.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_static.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50_hist_swap.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_static.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "droid own - swap",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_swap.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_swap.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "droid own - reverse",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_reverse.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_reverse.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "droid static - none",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50_hist_static.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50_hist_static.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "droid reverse - none",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50_hist_reverse.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50_hist_reverse.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "reference: droid own - none",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_none_k5_t17_s0",
+        "e21_dp_none_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_none_k5_jr_t17_s0",
+        "e23_smolvla_none_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "kin own - static",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_static.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_static.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "kin own - swap",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_swap.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_swap.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "kin own - reverse",
+   "groups": {
+    "dp": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_kin_k5_t17_s0",
+        "e21_dp_expert_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_reverse.json"
+      }
+     ]
+    },
+    "smolvla": {
+     "weight": 0.5,
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_kin_k5_t17_s0",
+        "e23_smolvla_expert_kin_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_reverse.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp droid own - static",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_static.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp droid own - swap",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_swap.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "dp droid own - reverse",
+   "groups": {
+    "dp": {
+     "terms": [
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e21_dp_expert_droid_k5_t17_s0",
+        "e21_dp_expert_droid_k5_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_reverse.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla droid own - static",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_static.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla droid own - swap",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_swap.json"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "smolvla droid own - reverse",
+   "groups": {
+    "smolvla": {
+     "terms": [
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": 1,
+       "file": "rollouts_n50.json"
+      },
+      {
+       "runs": [
+        "e23_smolvla_expert_droid_k5_jr_t17_s0",
+        "e23_smolvla_expert_droid_k5_jr_t17_s1"
+       ],
+       "w": -1,
+       "file": "rollouts_n50_hist_reverse.json"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}
